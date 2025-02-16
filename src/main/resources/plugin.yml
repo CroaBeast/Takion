@@ -1,0 +1,4 @@
+name: Takion
+version: '1.0'
+main: me.croabeast.takion.TakionPlugin
+api-version: '1.13'
