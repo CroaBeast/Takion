@@ -1,8 +1,7 @@
 package me.croabeast.lib.file;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Predicate;
 
 /**
  * Represents a mapping of configurable units, organized by integer keys.
@@ -13,6 +12,31 @@ import java.util.Set;
  * @param <U> The type of ConfigurableUnit.
  */
 public interface UnitMappable<U extends ConfigurableUnit> extends Map<Integer, Set<U>> {
+
+    default UnitMappable<U> order(boolean ascendant) {
+        final Comparator<Integer> comparator = ascendant ?
+                Comparator.naturalOrder() :
+                Comparator.reverseOrder();
+
+        Map<Integer, Set<U>> units = new TreeMap<>(comparator);
+        units.putAll(this);
+
+        return UnitMappable.of(units);
+    }
+
+    default UnitMappable<U> filter(Predicate<U> predicate) {
+        UnitMappable<U> units = UnitMappable.empty();
+
+        forEach(((integer, set) -> {
+            final Set<U> results = new HashSet<>();
+            for (U unit : set)
+                if (predicate.test(unit)) results.add(unit);
+
+            units.put(integer, results);
+        }));
+
+        return units;
+    }
 
     /**
      * Creates an empty UnitMappable instance.

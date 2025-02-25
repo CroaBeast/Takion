@@ -65,12 +65,21 @@
                         </configuration>
                     </execution>
                 </executions>
+
                 <configuration>
+                    <relocations>
+                        <relocation>
+                            <pattern>com.github.stefvanschie.inventoryframework</pattern>
+                            <shadedPattern>me.croabeast.gui</shadedPattern>
+                        </relocation>
+                    </relocations>
+
                     <filters>
                         <filter>
                             <artifact>*:*</artifact>
                             <excludes>
                                 <exclude>META-INF/*.*</exclude>
+                                <exclude>fonts/**</exclude>
                             </excludes>
                         </filter>
                     </filters>

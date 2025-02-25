@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.experimental.UtilityClass;
+import me.croabeast.lib.file.Configurable;
 import me.croabeast.takion.TakionLib;
 import me.croabeast.lib.util.ArrayUtils;
 import me.croabeast.lib.util.TextUtils;
@@ -78,12 +79,12 @@ public class AnimatedBossbar {
         this(plugin);
         Objects.requireNonNull(section);
 
-        setMessages(TextUtils.toList(section, "messages"));
-        setColors(TextUtils.toList(section, "colors"));
-        setStyles(TextUtils.toList(section, "styles"));
+        setMessages(Configurable.toStringList(section, "messages"));
+        setColors(Configurable.toStringList(section, "colors"));
+        setStyles(Configurable.toStringList(section, "styles"));
 
-        setRandomElements(TextUtils.toList(section, "randomize"));
-        setSynchronizeElements(TextUtils.toList(section, "synchronize"));
+        setRandomElements(Configurable.toStringList(section, "randomize"));
+        setSynchronizeElements(Configurable.toStringList(section, "synchronize"));
 
         setProgressType(section.getString("progress-type", ""));
         setStaleProgress(section.getDouble("stale-progress"));
@@ -229,7 +230,6 @@ public class AnimatedBossbar {
 
     public AnimatedBossbar removeViewers(Collection<? extends Player> players) {
         Objects.requireNonNull(players).forEach(this::removeViewer);
-
         return this;
     }
 
@@ -346,6 +346,7 @@ public class AnimatedBossbar {
 
     public static void unregisterAll() {
         CACHE.values().forEach(AnimatedBossbar::deleteBossBar);
+        CACHE.clear();
     }
 
     @UtilityClass

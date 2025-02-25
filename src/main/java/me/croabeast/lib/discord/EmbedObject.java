@@ -3,7 +3,6 @@ package me.croabeast.lib.discord;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.var;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -136,7 +135,7 @@ public class EmbedObject {
             try {
                 c = Color.decode(color);
             } catch (Exception e) {
-                var clazz = Class.forName("java.awt.Color");
+                Class<?> clazz = Class.forName("java.awt.Color");
                 c = (Color) clazz.getField(color).get(null);
             }
         } catch (Exception ignored) {}

@@ -190,14 +190,10 @@ public class TakionLogger {
     }
 
     static final RawLogger BUKKIT_DEFAULT_LOGGER = (l, s) -> Bukkit.getLogger().log(l != null ? l.toJava() : Level.INFO, s);
-    private static RawLogger paperServerLogger = null;
+    private static final RawLogger PAPER_SERVER_LOGGER = new PaperLogger(null);
 
     private static RawLogger getServerLogger() {
-        if (!USE_PAPER_LOGGER) return BUKKIT_DEFAULT_LOGGER;
-
-        return paperServerLogger != null ?
-                paperServerLogger :
-                (paperServerLogger = new PaperLogger(null));
+        return USE_PAPER_LOGGER ? PAPER_SERVER_LOGGER : BUKKIT_DEFAULT_LOGGER;
     }
 
     public static void doLog(LogLevel level, List<String> messages) {
@@ -208,15 +204,6 @@ public class TakionLogger {
 
         boolean strip = lib.getLogger().isStripPrefix();
         boolean colored = lib.getLogger().isColored();
-
-        if (messages != null && messages.size() == 1) {
-            String message = messages.get(0);
-            if (message != null)
-                message = FORMATTER.get(message, lib, strip, colored);
-
-            logger.log(level, message);
-            return;
-        }
 
         for (String message : CollectionBuilder.of(messages)
                 .filter(Objects::nonNull)

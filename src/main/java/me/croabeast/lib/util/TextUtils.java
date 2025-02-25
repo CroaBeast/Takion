@@ -7,11 +7,7 @@ import me.clip.placeholderapi.PlaceholderAPI;
 import me.croabeast.lib.PlayerFormatter;
 import net.md_5.bungee.api.chat.ClickEvent;
 import org.apache.commons.lang.StringUtils;
-import org.bukkit.configuration.ConfigurationSection;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
@@ -162,44 +158,5 @@ public class TextUtils {
 
         final String p = "(.[^|]*?):\"(.[^|]*?)\"";
         FORMAT_CHAT_PATTERN = Pattern.compile("<(" + p + "([|]" + p + ")?)>(.+?)</text>");
-    }
-
-    /**
-     * Converts a {@link String} to a {@link List} from a configuration section if it's not a list.
-     *
-     * @param section a config file or section, can be null
-     * @param path the path to locate the string or list
-     * @param def a default string list if value is not found
-     *
-     * @return the converted string list or default value if section is null
-     */
-    public List<String> toList(ConfigurationSection section, String path, List<String> def) {
-        if (section == null) return def;
-
-        if (section.isList(path)) {
-            List<?> raw = section.getList(path, def);
-            if (raw == null || raw.isEmpty()) return def;
-
-            List<String> list = new ArrayList<>();
-            for (Object o : raw) list.add(o.toString());
-
-            return list;
-        }
-
-        Object temp = section.get(path);
-        return temp == null ? def : ArrayUtils.toList(temp.toString());
-    }
-
-    /**
-     * Converts a {@link String} to a {@link List} from a configuration section if it's not a list.
-     *
-     * @param section a config file or section, can be null
-     * @param path the path to locate the string or list
-     *
-     * @return the converted string list or an empty list if section is null
-     */
-    @NotNull
-    public List<String> toList(ConfigurationSection section, String path) {
-        return toList(section, path, new ArrayList<>());
     }
 }

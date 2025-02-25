@@ -1,7 +1,6 @@
 package me.croabeast.lib.util;
 
 import lombok.experimental.UtilityClass;
-import lombok.var;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -52,13 +51,11 @@ public class Exceptions {
     public boolean arePluginsEnabled(boolean isInclusive, Collection<String> names) {
         if (names.isEmpty()) return false;
 
-        if (names.size() == 1) {
-            var s = names.toArray(new String[0])[0];
-            return isPluginEnabled(s);
-        }
+        if (names.size() == 1)
+            return isPluginEnabled(names.toArray(new String[0])[0]);
 
-        for (var name : names) {
-            var isEnabled = isPluginEnabled(name);
+        for (String name : names) {
+            boolean isEnabled = isPluginEnabled(name);
 
             if (!isInclusive) {
                 if (isEnabled) return true;

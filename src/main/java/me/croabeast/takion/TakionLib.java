@@ -54,7 +54,7 @@ public class TakionLib {
     private static final Map<Plugin, TakionLib> LIB_MAP = new HashMap<>();
 
     @Getter(AccessLevel.NONE)
-    private Plugin plugin;
+    private final Plugin plugin;
     private TakionLogger logger;
 
     private final ChannelManager channelManager;

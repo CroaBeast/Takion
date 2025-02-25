@@ -24,6 +24,7 @@ import java.util.function.Supplier;
  * of a specified class.
  */
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+@SuppressWarnings("unchecked")
 public final class Reflector {
 
     private static final String API = ServerInfoUtils.BUKKIT_API_VERSION;
@@ -290,6 +291,11 @@ public final class Reflector {
                 classes[i] = objects[i].getClass();
 
         return (T) getConstructor(classes).newInstance(objects);
+    }
+
+    @SneakyThrows
+    public Reflector asReflector(Object... objects) {
+        return Reflector.from(() -> create(objects));
     }
 
     /**

@@ -71,6 +71,14 @@ public interface Configurable {
         getConfiguration().set(path, value);
     }
 
+    default boolean contains(String path, boolean ignoresDefault) {
+        return getConfiguration().contains(path, ignoresDefault);
+    }
+
+    default boolean contains(String path) {
+        return getConfiguration().contains(path, true);
+    }
+
     /**
      * Retrieves a configuration section at the specified path.
      *

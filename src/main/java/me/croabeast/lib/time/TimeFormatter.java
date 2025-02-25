@@ -1,6 +1,5 @@
 package me.croabeast.lib.time;
 
-import lombok.var;
 import me.croabeast.takion.TakionLib;
 import org.bukkit.entity.Player;
 
@@ -79,7 +78,7 @@ public class TimeFormatter {
         if (result <= 0)
             return colorize(target, parser, isPlural(0, values.getSecondsFormat()));
 
-        var formattedTime = new StringBuilder();
+        StringBuilder formattedTime = new StringBuilder();
         long years, months, weeks, days, hours, mins;
 
         years = getFixedTime(result, YEAR);

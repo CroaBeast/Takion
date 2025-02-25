@@ -88,6 +88,19 @@ public class MapBuilder<K, V> implements Iterable<Entry<K, V>> {
         return put(Entry.of(entry));
     }
 
+    public MapBuilder<K, V> putIfAbsent(K key, V value) {
+        map.putIfAbsent(key, value);
+        return this;
+    }
+
+    public MapBuilder<K, V> putIfAbsent(Entry<? extends K, ? extends V> entry) {
+        return putIfAbsent(entry.getKey(), entry.getValue());
+    }
+
+    public MapBuilder<K, V> putIfAbsent(Map.Entry<? extends K, ? extends V> entry) {
+        return putIfAbsent(Entry.of(entry));
+    }
+
     /**
      * Puts all the key-value pairs from the given map into the map builder.
      *
