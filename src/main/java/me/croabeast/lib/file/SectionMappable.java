@@ -4,6 +4,7 @@ import org.bukkit.configuration.ConfigurationSection;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * Represents a mapping of configuration sections, organized by integer keys.
@@ -12,7 +13,17 @@ import java.util.function.Function;
  * and convert these mappings into other forms, particularly into mappings of
  * configurable units.
  */
-public interface SectionMappable extends Map<Integer, Set<ConfigurationSection>> {
+public interface SectionMappable extends Mappable<ConfigurationSection> {
+
+    @Override
+    default SectionMappable filter(Predicate<ConfigurationSection> predicate) {
+        return SectionMappable.of(Mappable.super.filter(predicate));
+    }
+
+    @Override
+    default SectionMappable order(boolean ascendant) {
+        return SectionMappable.of(Mappable.super.order(ascendant));
+    }
 
     /**
      * Converts this mapping of configuration sections to a mapping of configurable units.
@@ -57,6 +68,6 @@ public interface SectionMappable extends Map<Integer, Set<ConfigurationSection>>
      * @return A SectionMappable instance.
      */
     static SectionMappable of(Map<Integer, Set<ConfigurationSection>> map) {
-        return ConfigMapUtils.simple(map);
+        return new MapUtils.SectionMapImpl(map);
     }
 }

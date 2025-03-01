@@ -143,6 +143,20 @@ public class ArrayUtils {
     }
 
     /**
+     * Converts an array to a list without applying any function.
+     *
+     * @param array the array to convert.
+     * @param <T> the type of elements in the array.
+     *
+     * @return a list containing the elements of the array.
+     */
+    @SafeVarargs
+    @NotNull
+    public <T> Set<T> toSet(T... array) {
+        return toCollection(new HashSet<>(), array);
+    }
+
+    /**
      * Applies a series of functions to each element in an array.
      *
      * @param array the array to transform.

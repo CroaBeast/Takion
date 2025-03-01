@@ -1,6 +1,8 @@
 package me.croabeast.lib.file;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
 
 /**
@@ -11,31 +13,16 @@ import java.util.function.Predicate;
  *
  * @param <U> The type of ConfigurableUnit.
  */
-public interface UnitMappable<U extends ConfigurableUnit> extends Map<Integer, Set<U>> {
+public interface UnitMappable<U extends ConfigurableUnit> extends Mappable<U> {
 
-    default UnitMappable<U> order(boolean ascendant) {
-        final Comparator<Integer> comparator = ascendant ?
-                Comparator.naturalOrder() :
-                Comparator.reverseOrder();
-
-        Map<Integer, Set<U>> units = new TreeMap<>(comparator);
-        units.putAll(this);
-
-        return UnitMappable.of(units);
+    @Override
+    default UnitMappable<U> filter(Predicate<U> predicate) {
+        return UnitMappable.of(Mappable.super.filter(predicate));
     }
 
-    default UnitMappable<U> filter(Predicate<U> predicate) {
-        UnitMappable<U> units = UnitMappable.empty();
-
-        forEach(((integer, set) -> {
-            final Set<U> results = new HashSet<>();
-            for (U unit : set)
-                if (predicate.test(unit)) results.add(unit);
-
-            units.put(integer, results);
-        }));
-
-        return units;
+    @Override
+    default UnitMappable<U> order(boolean ascendant) {
+        return UnitMappable.of(Mappable.super.order(ascendant));
     }
 
     /**
@@ -60,6 +47,6 @@ public interface UnitMappable<U extends ConfigurableUnit> extends Map<Integer, S
      * @return A UnitMappable instance.
      */
     static <U extends ConfigurableUnit> UnitMappable<U> of(Map<Integer, Set<U>> map) {
-        return ConfigMapUtils.unit(map);
+        return new MapUtils.UnitMapImpl<>(map);
     }
 }

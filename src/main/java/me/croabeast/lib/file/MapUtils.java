@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -20,25 +21,16 @@ import java.util.function.Function;
  * configuration sections or units, organized by integer keys.
  */
 @UtilityClass
-final class ConfigMapUtils {
+final class MapUtils {
 
     /**
-     * Base interface representing a map of integer keys to sets of values.
-     * This interface extends the Map interface and is used as a base for more specific
-     * mappings, such as SectionMappable and UnitMappable.
-     *
-     * @param <S> The type of the values in the sets.
-     */
-    interface BaseMappable<S> extends Map<Integer, Set<S>> {}
-
-    /**
-     * Implementation of the BaseMappable interface for generic values.
+     * Implementation of the Mappable interface for generic values.
      * This class wraps a standard map and provides additional methods to handle
      * sets of values.
      *
      * @param <U> The type of the values in the sets.
      */
-    private static class BaseMapImpl<U> implements BaseMappable<U> {
+    static class BaseMapImpl<U> implements Mappable<U> {
 
         final Map<Integer, Set<U>> map;
 
@@ -93,19 +85,16 @@ final class ConfigMapUtils {
         }
 
         @NotNull
-        @Override
         public Set<Integer> keySet() {
             return map.keySet();
         }
 
         @NotNull
-        @Override
         public Collection<Set<U>> values() {
             return map.values();
         }
 
         @NotNull
-        @Override
         public Set<Entry<Integer, Set<U>>> entrySet() {
             return map.entrySet();
         }
@@ -166,49 +155,15 @@ final class ConfigMapUtils {
         }
     }
 
-    /**
-     * Implementation of the BaseMappable interface specifically for ConfigurationSection values.
-     * This class wraps a standard map and provides additional methods to handle sets of configuration sections.
-     */
-    private static class SectionMapImpl extends BaseMapImpl<ConfigurationSection> implements SectionMappable {
+    static class SectionMapImpl extends BaseMapImpl<ConfigurationSection> implements SectionMappable {
         SectionMapImpl(Map<Integer, Set<ConfigurationSection>> map) {
             super(map);
         }
     }
 
-    /**
-     * Implementation of the BaseMappable interface specifically for ConfigurableUnit values.
-     * This class wraps a standard map and provides additional methods to handle sets of configurable units.
-     *
-     * @param <U> The type of the ConfigurableUnit.
-     */
-    private static class UnitMapImpl<U extends ConfigurableUnit> extends BaseMapImpl<U> implements UnitMappable<U> {
+    static class UnitMapImpl<U extends ConfigurableUnit> extends BaseMapImpl<U> implements UnitMappable<U> {
         UnitMapImpl(Map<Integer, Set<U>> map) {
             super(map);
         }
-    }
-
-    /**
-     * Creates a SectionMappable instance from the provided map.
-     * This method is used to wrap a standard map into a SectionMappable interface.
-     *
-     * @param map The map to create the SectionMappable from.
-     * @return A SectionMappable instance.
-     */
-    SectionMappable simple(Map<Integer, Set<ConfigurationSection>> map) {
-        return new SectionMapImpl(map);
-    }
-
-    /**
-     * Creates a UnitMappable instance from the provided map.
-     * This method is used to wrap a standard map into a UnitMappable interface,
-     * allowing for more specialized handling of configurable units.
-     *
-     * @param map The map to create the UnitMappable from.
-     * @param <U> The type of the ConfigurableUnit.
-     * @return A UnitMappable instance.
-     */
-    <U extends ConfigurableUnit> UnitMappable<U> unit(Map<Integer, Set<U>> map) {
-        return new UnitMapImpl<>(map);
     }
 }
