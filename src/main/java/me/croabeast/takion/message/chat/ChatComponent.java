@@ -20,6 +20,8 @@ import java.util.regex.Pattern;
 
 public final class ChatComponent {
 
+    private final TakionLib lib;
+
     private final Map<Integer, Component> map = new LinkedHashMap<>();
     private int index = -1;
 
@@ -40,7 +42,7 @@ public final class ChatComponent {
                 final String url = urlMatcher.group();
 
                 ChatClick.Action a = ChatClick.Action.OPEN_URL;
-                ChatClick c = new ChatClick(a, url);
+                ChatClick c = new ChatClick(lib, a, url);
 
                 map.put(++index, new Component(url).setClick(c));
             }
@@ -62,7 +64,7 @@ public final class ChatComponent {
 
         String line = StringApplier.simplified(string).
                 apply(TextUtils.CONVERT_OLD_JSON).
-                apply(TakionLib.getLib().getSmallCapsAction()::act).
+                apply(lib.getSmallCapsAction()::act).
                 apply(StringAligner::align).toString();
 
         Matcher match = TextUtils.FORMAT_CHAT_PATTERN.matcher(line);
@@ -89,12 +91,15 @@ public final class ChatComponent {
         if (last <= (line.length() - 1)) parseURLs(line.substring(last));
     }
 
-    private ChatComponent(String message) {
+    private ChatComponent(TakionLib lib, String message) {
+        this.lib = Objects.requireNonNull(lib);
         updateMessageMapping(message);
     }
 
     private ChatComponent(ChatComponent builder) {
         Objects.requireNonNull(builder);
+
+        lib = builder.lib;
         parseURLs = builder.parseURLs;
 
         if (builder.map.isEmpty()) return;
@@ -114,7 +119,7 @@ public final class ChatComponent {
     public ChatComponent setHover(int index, List<String> hover) {
         return hover == null || hover.isEmpty() ?
                 this :
-                setHover(index, new ChatHover(hover));
+                setHover(index, new ChatHover(lib, hover));
     }
 
     public ChatComponent setHover(int index, String... hover) {
@@ -144,7 +149,7 @@ public final class ChatComponent {
     }
 
     public ChatComponent setHoverToAll(List<String> hover) {
-        return setHoverToAll(new ChatHover(hover));
+        return setHoverToAll(new ChatHover(lib, hover));
     }
 
     public ChatComponent setHoverToAll(String... hover) {
@@ -160,7 +165,7 @@ public final class ChatComponent {
     }
 
     public ChatComponent setClick(int index, String string) {
-        return setClick(index, new ChatClick(string));
+        return setClick(index, new ChatClick(lib, string));
     }
 
     public ChatComponent setClick(ChatClick click) {
@@ -182,7 +187,7 @@ public final class ChatComponent {
     }
 
     public ChatComponent setClickToAll(String string) {
-        return setClickToAll(new ChatClick(string));
+        return setClickToAll(new ChatClick(lib, string));
     }
 
     public <T> ChatComponent append(T object) {
@@ -231,7 +236,7 @@ public final class ChatComponent {
         if (index == -1) return "";
 
         final StringBuilder builder = new StringBuilder();
-        String split = TakionLib.getLib().getLineSeparator();
+        String split = lib.getLineSeparator();
 
         for (Component message : map.values()) {
             FormattingHandler handler = message.handler;
@@ -276,18 +281,28 @@ public final class ChatComponent {
     }
 
     @NotNull
-    public static ChatComponent create(@Nullable String message) {
-        return new ChatComponent(message);
+    public static ChatComponent create(TakionLib lib, @Nullable String message) {
+        return new ChatComponent(lib, message);
+    }
+
+    @NotNull
+    public static BaseComponent[] fromText(TakionLib lib, Player parser, String message) {
+        return create(lib, message).compile(parser);
+    }
+
+    @NotNull
+    public static BaseComponent[] fromText(TakionLib lib, String message) {
+        return fromText(lib, null, message);
     }
 
     @NotNull
     public static BaseComponent[] fromText(Player parser, String message) {
-        return create(message).compile(parser);
+        return create(TakionLib.getLib(), message).compile(parser);
     }
 
     @NotNull
     public static BaseComponent[] fromText(String message) {
-        return fromText(null, message);
+        return fromText(TakionLib.getLib(), null, message);
     }
 
     private static class FormattingHandler {
@@ -339,15 +354,15 @@ public final class ChatComponent {
         Component setHandler(String click, String hover) {
             if (click != null)
                 try {
-                    setClick(new ChatClick(click));
+                    setClick(new ChatClick(lib, click));
                 } catch (Exception ignored) {}
 
             if (hover != null) {
                 String h = hover.split(":\"", 2)[1];
                 h = h.substring(0, h.length() - 1);
 
-                String[] array = TakionLib.getLib().splitString(h);
-                setHover(new ChatHover(array));
+                String[] array = lib.splitString(h);
+                setHover(new ChatHover(lib, array));
             }
 
             return this;
@@ -356,7 +371,7 @@ public final class ChatComponent {
         private BaseComponent compile(Player parser) {
             Matcher urlMatch = TextUtils.URL_PATTERN.matcher(string);
             if (parseURLs && urlMatch.find())
-                setClick(new ChatClick(ChatClick.Action.OPEN_URL, string));
+                setClick(new ChatClick(lib, ChatClick.Action.OPEN_URL, string));
 
             BaseComponent[] array = TextComponent.fromLegacyText(string);
             TextComponent comp = new TextComponent(array);

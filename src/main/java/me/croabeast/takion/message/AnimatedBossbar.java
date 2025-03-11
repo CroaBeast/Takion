@@ -291,7 +291,7 @@ public class AnimatedBossbar {
                                                 tick % messages.size()
                                 );
 
-                        bossBar.setTitle(TakionLib.getLib().colorize(player, message));
+                        bossBar.setTitle(TakionLib.fromPlugin(plugin).colorize(player, message));
                     }
 
                     if (colors != null && !colors.isEmpty()) {

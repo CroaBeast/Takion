@@ -3,36 +3,27 @@ package me.croabeast.takion;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-import me.croabeast.takion.channel.Channel;
+import me.croabeast.lib.util.Exceptions;
 import me.croabeast.takion.channel.ChannelManager;
 import me.croabeast.takion.character.CharacterInfo;
 import me.croabeast.takion.character.CharacterManager;
 import me.croabeast.takion.character.DefaultCharacter;
 import me.croabeast.takion.character.SmallCaps;
 import me.croabeast.takion.logger.TakionLogger;
-import me.croabeast.takion.message.AnimatedBossbar;
 import me.croabeast.takion.message.MessageSender;
-import me.croabeast.takion.message.MessageUtils;
 import me.croabeast.takion.message.TitleManager;
-import me.croabeast.takion.message.chat.ChatComponent;
 import me.croabeast.takion.misc.PatternAction;
-import me.croabeast.takion.misc.StringAligner;
 import me.croabeast.takion.placeholder.Placeholder;
 import me.croabeast.takion.placeholder.PlaceholderManager;
 import me.croabeast.lib.PlayerFormatter;
 import me.croabeast.lib.Regex;
 import me.croabeast.lib.Rounder;
 import me.croabeast.lib.applier.StringApplier;
-import me.croabeast.lib.discord.Webhook;
 import me.croabeast.lib.util.ArrayUtils;
 import me.croabeast.lib.util.TextUtils;
 import me.croabeast.prismatic.PrismaticAPI;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.chat.ComponentSerializer;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Location;
-import org.bukkit.boss.BarColor;
-import org.bukkit.boss.BarStyle;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
@@ -46,16 +37,13 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@Getter
-@Setter
+@Getter @Setter
 public class TakionLib {
-
-    private static final TakionLib NO_PLUGIN_INSTANCE = new TakionLib(null);
-    private static final Map<Plugin, TakionLib> LIB_MAP = new HashMap<>();
 
     @Getter(AccessLevel.NONE)
     private final Plugin plugin;
-    private TakionLogger logger;
+
+    private TakionLogger serverLogger, logger;
 
     private final ChannelManager channelManager;
     private final TitleManager titleManager;
@@ -74,321 +62,28 @@ public class TakionLib {
     private final PatternAction<String> characterAction, smallCapsAction;
 
     @Getter(AccessLevel.NONE)
-    private MessageSender loadedSender = new MessageSender();
+    private MessageSender loadedSender = new MessageSender(this);
 
     public TakionLib(Plugin plugin) {
         this.plugin = plugin;
+
+        this.serverLogger = new TakionLogger(this, false);
         this.logger = new TakionLogger(this);
 
         titleManager = new TitleManager() {
             @Setter @Getter
             private int fadeInTicks = 8, stayTicks = 50, fadeOutTicks = 8;
-        };
-
-        channelManager = new ChannelManager() {
-
-            private final Map<String, Channel> channels = new HashMap<>();
-            private final Map<String, Channel> defaults = new HashMap<>();
-
-            @Getter @Setter
-            private String startDelimiter = "[", endDelimiter = "]";
-
-            {
-                channels.put("action_bar", new ChannelImpl("action_bar") {
-                    @Override
-                    public String formatString(Player target, Player parser, String string) {
-                        return colorize(target, parser, string);
-                    }
-
-                    @Override
-                    public boolean send(Collection<? extends Player> targets, Player parser, String message) {
-                        if (StringUtils.isBlank(message)) return false;
-
-                        if (targets == null || targets.isEmpty())
-                            return false;
-
-                        Matcher matcher = matcher(message);
-                        if (matcher.find())
-                            message = message.replace(matcher.group(), "");
-
-                        boolean atLeastOneIsSent = false;
-
-                        for (final Player p : targets) {
-                            final Player ps = parser == null ? p : parser;
-                            String s = formatString(p, ps, message);
-
-                            if (MessageUtils.sendActionBar(p, s) && !atLeastOneIsSent)
-                                atLeastOneIsSent = true;
-                        }
-
-                        return atLeastOneIsSent;
-                    }
-                });
-
-                channels.put("chat", new ChannelImpl("chat") {
-
-                    @Override
-                    public String formatString(Player target, Player parser, String string) {
-                        return colorize(target, parser, TextUtils.PARSE_INTERACTIVE_CHAT.apply(parser, string));
-                    }
-
-                    @Override
-                    public boolean send(Collection<? extends Player> targets, Player parser, String message) {
-                        if (targets == null || targets.isEmpty())
-                            return false;
-
-                        if (StringUtils.isBlank(message)) {
-                            targets.forEach(p -> p.sendMessage(message));
-                            return false;
-                        }
-
-                        String temp = StringAligner.align(message);
-                        Matcher matcher = matcher(message);
-                        if (matcher.find())
-                            temp = message.replace(matcher.group(), "");
-
-                        boolean atLeastOneIsSent = false;
-
-                        for (final Player p : targets) {
-                            if (p == null) continue;
-
-                            Player ps = parser == null ? p : parser;
-                            String s = formatString(p, ps, temp);
-
-                            if (!TextUtils.IS_JSON.test(temp)) {
-                                p.sendMessage(s);
-                                if (!atLeastOneIsSent)
-                                    atLeastOneIsSent = true;
-                                continue;
-                            }
-
-                            BaseComponent[] components;
-                            try {
-                                components = ChatComponent.fromText(ps, s);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                                continue;
-                            }
-
-                            p.spigot().sendMessage(components);
-                            if (!atLeastOneIsSent)
-                                atLeastOneIsSent = true;
-                        }
-
-                        return atLeastOneIsSent;
-                    }
-                });
-
-                channels.put("title", new ChannelImpl("title", "(:\\d+)?") {
-                    @Override
-                    public String formatString(Player target, Player parser, String string) {
-                        return colorize(target, parser, string);
-                    }
-
-                    @Override
-                    public boolean send(Collection<? extends Player> targets, Player parser, String message) {
-                        if (StringUtils.isBlank(message)) return false;
-
-                        if (targets == null || targets.isEmpty())
-                            return false;
-
-                        Matcher matcher = matcher(message);
-                        String tempTime = null;
-
-                        boolean modify = matcher.find();
-
-                        try {
-                            if (modify) tempTime = matcher.group(1).substring(1);
-                        } catch (Exception ignored) {}
-
-                        if (modify)
-                            message = message.replace(matcher.group(), "");
-
-                        int time = titleManager.getStayTicks();
-                        try {
-                            if (tempTime != null)
-                                time = Integer.parseInt(tempTime) * 20;
-                        } catch (Exception ignored) {}
-
-                        boolean atLeastOneIsSent = false;
-
-                        for (final Player p : targets) {
-                            TitleManager.Builder b = titleManager
-                                    .builder(formatString(
-                                            p,
-                                            parser == null ? p : parser,
-                                            message
-                                    ))
-                                    .setStay(time);
-
-                            if (b.send(p) && !atLeastOneIsSent)
-                                atLeastOneIsSent = true;
-                        }
-
-                        return atLeastOneIsSent;
-                    }
-                });
-
-                channels.put("bossbar", new ChannelImpl("bossbar", "(:.+)?") {
-                    @Override
-                    public String formatString(Player target, Player parser, String string) {
-                        return string;
-                    }
-
-                    @Override
-                    public boolean send(Collection<? extends Player> targets, Player parser, String message) {
-                        if (StringUtils.isBlank(message)) return false;
-
-                        if (targets == null || targets.isEmpty())
-                            return false;
-
-                        AnimatedBossbar bossbar;
-
-                        final Matcher matcher = matcher(message);
-                        if (matcher.find()) {
-                            String arguments = matcher.group(1).substring(1);
-
-                            String[] array = arguments.split(":");
-                            message = message.replace(matcher.group(), "");
-
-                            TreeMap<String, ConfigurationSection> bossbars = getLoadedBossbars();
-                            ConfigurationSection c = null;
-                            try {
-                                c = bossbars.get(bossbars.firstKey());
-                            } catch (Exception ignored) {}
-
-                            if (c == null && !(array.length == 1 && (c = bossbars.get(array[0])) == null))
-                            {
-                                bossbar = new AnimatedBossbar(plugin, message);
-
-                                for (String arg : array) {
-                                    try {
-                                        bossbar.setDuration(Double.parseDouble(arg));
-                                        continue;
-                                    } catch (Exception ignored) {}
-
-                                    try {
-                                        bossbar.setColors(BarColor.valueOf(arg));
-                                        continue;
-                                    } catch (Exception ignored) {}
-
-                                    try {
-                                        bossbar.setStyles(BarStyle.valueOf(arg));
-                                    } catch (Exception ignored) {}
-                                }
-                            }
-                            else bossbar = new AnimatedBossbar(plugin, c);
-                        }
-                        else bossbar = new AnimatedBossbar(plugin, message);
-
-                        try {
-                            bossbar.addViewers(targets).startAnimation();
-                            return true;
-                        } catch (Exception e) {
-                            return false;
-                        }
-                    }
-                });
-
-                channels.put("json", new ChannelImpl("json") {
-                    @Override
-                    public String formatString(Player target, Player parser, String string) {
-                        return colorize(target, parser, string);
-                    }
-
-                    @Override
-                    public boolean send(Collection<? extends Player> targets, Player parser, String message) {
-                        if (StringUtils.isBlank(message)) return false;
-
-                        if (targets == null || targets.isEmpty())
-                            return false;
-
-                        Matcher matcher = matcher(message);
-                        if (matcher.find())
-                            message = message.replace(matcher.group(), "");
-
-                        boolean atLeastOneIsSent = false;
-
-                        for (final Player p : targets) {
-                            if (p == null) continue;
-
-                            final Player ps = parser == null ? p : parser;
-                            String s = formatString(p, ps, message);
-
-                            BaseComponent[] components;
-                            try {
-                                components = ComponentSerializer.parse(s);
-                            } catch (Exception e) {
-                                continue;
-                            }
-
-                            p.spigot().sendMessage(components);
-                            if (!atLeastOneIsSent)
-                                atLeastOneIsSent = true;
-                        }
-
-                        return atLeastOneIsSent;
-                    }
-                });
-
-                channels.put("webhook", new ChannelImpl("webhook", "(:.+)?") {
-                    @Override
-                    public String formatString(Player target, Player parser, String string) {
-                        return replace(parser, string);
-                    }
-
-                    @Override
-                    public boolean send(Collection<? extends Player> targets, Player parser, String message) {
-                        String path = getLoadedWebhooks().firstKey();
-
-                        Matcher matcher = matcher(message);
-                        if (matcher.find()) {
-                            message = message.replace(matcher.group(), "");
-
-                            String[] array = matcher
-                                    .group()
-                                    .replace(getStartDelimiter(), "")
-                                    .replace(getEndDelimiter(), "")
-                                    .split(":", 2);
-
-                            String s = array.length == 2 ? array[1] : null;
-                            if (s != null) path = s;
-                        }
-
-                        message = formatString(parser, parser, message);
-                        if (path == null) return false;
-
-                        ConfigurationSection id = getLoadedWebhooks().get(path);
-                        return id != null && new Webhook(id, message).send();
-                    }
-                });
-
-                defaults.putAll(channels);
-            }
 
             @Override
-            public void setDefaults() {
-                channels.clear();
-                channels.putAll(defaults);
-            }
+            public Builder builder(String message) {
+                Exceptions.validate(StringUtils::isNotBlank, message);
 
-            @NotNull
-            public Channel identify(@NotNull String string) {
-                Channel chat = channels.get("chat");
-                if (StringUtils.isBlank(string)) return chat;
-
-                Channel before;
-                if ((before = channels.get(string)) != null)
-                    return before;
-
-                for (Channel channel : defaults.values()) {
-                    Matcher matcher = channel.matcher(string);
-                    if (matcher.find()) return channel;
-                }
-
-                return chat;
+                String[] array = splitString(message, 2);
+                return builder(array[0], array.length == 2 ? array[1] : null);
             }
         };
+
+        channelManager = new ChannelManagerImpl(this);
 
         placeholderManager = new PlaceholderManager() {
 
@@ -589,19 +284,28 @@ public class TakionLib {
             }
         };
 
-        LIB_MAP.put(this.plugin, this);
+        TakionPlugin.libs.put(plugin, this);
     }
 
     static Plugin getProvidingPlugin() {
         try {
-            return JavaPlugin.getProvidingPlugin(TakionLib.class);
+            StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+            Class<?> thisClass = TakionLib.class, result = TakionLib.class;
+
+            for (int i = 2; i < stackTrace.length; i++) {
+                final StackTraceElement stack = stackTrace[i];
+                if (stack.getClassName().equals(thisClass.getName()))
+                    continue;
+
+                try {
+                    result = Class.forName(stack.getClassName());
+                } catch (Exception ignored) {}
+            }
+
+            return JavaPlugin.getProvidingPlugin(result);
         } catch (Exception e) {
             return null;
         }
-    }
-
-    public TakionLib() {
-        this(getProvidingPlugin());
     }
 
     private static abstract class StringAction extends PatternAction<String> {
@@ -624,40 +328,7 @@ public class TakionLib {
         public abstract String act(String string);
     }
 
-    @Getter @Setter
-    private abstract class ChannelImpl implements Channel {
-
-        private final String name;
-        private String prefix;
-        @Regex
-        private String pattern;
-
-        ChannelImpl(String prefix, @Regex String pattern) {
-            this.name = this.prefix = prefix;
-            this.pattern = pattern;
-        }
-
-        ChannelImpl(String prefix) {
-            this(prefix, null);
-        }
-
-        @Override
-        public MessageSender.Flag getFlag() {
-            return MessageSender.Flag.valueOf(name.toUpperCase(Locale.ENGLISH));
-        }
-
-        @NotNull
-        public Matcher matcher(String string) {
-            @Regex String regex = StringUtils.isBlank(pattern) ? "" : pattern;
-
-            String start = channelManager.getStartDelimiter();
-            String end = channelManager.getEndDelimiter();
-
-            Pattern pattern = Pattern.compile(start + prefix + regex + end);
-            return pattern.matcher(start);
-        }
-    }
-
+    @NotNull
     public final Plugin getPlugin() {
         return Objects.requireNonNull(plugin);
     }
@@ -727,15 +398,17 @@ public class TakionLib {
     }
 
     public static void setLibFromSource(Plugin source, Plugin target) {
-        LIB_MAP.put(target, LIB_MAP.get(source));
+        TakionPlugin.libs.put(target, TakionPlugin.libs.get(source));
     }
 
     public static void setLibAsDefault(Plugin plugin) {
-        LIB_MAP.put(plugin, NO_PLUGIN_INSTANCE);
+        TakionPlugin.libs.put(plugin, TakionPlugin.noPluginInstance);
     }
 
     public static TakionLib fromPlugin(Plugin plugin) {
-        return plugin == null ? NO_PLUGIN_INSTANCE : LIB_MAP.get(plugin);
+        return plugin != null ?
+                TakionPlugin.libs.getOrDefault(plugin, TakionPlugin.noPluginInstance) :
+                TakionPlugin.noPluginInstance;
     }
 
     @NotNull

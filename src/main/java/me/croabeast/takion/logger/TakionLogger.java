@@ -17,9 +17,8 @@ import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Method;
-import java.util.List;
+import java.util.Collection;
 import java.util.Objects;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Accessors(chain = true)
@@ -44,7 +43,7 @@ public class TakionLogger {
             if (ServerInfoUtils.PAPER_ENABLED) {
                 String name = plugin != null ? plugin.getName() : "";
 
-                logger = from("logger.slf4j.ComponentLogger")
+                logger = Class.forName("net.kyori.adventure.text.logger.slf4j.ComponentLogger")
                         .getMethod("logger", String.class).invoke(null, name);
 
                 clazz = logger.getClass();
@@ -54,14 +53,13 @@ public class TakionLogger {
             throw new IllegalAccessException("Paper is not being used");
         }
 
-        @Override
         public void log(LogLevel level, String string) {
             level = level != null ? level : LogLevel.INFO;
 
             try {
-                Class<?> legacy = from("serializer.legacy.LegacyComponentSerializer");
+                Class<?> legacy = Class.forName("net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer");
 
-                Method method = clazz.getMethod(level.getName(), from("Component"));
+                Method method = clazz.getMethod(level.getName(), Class.forName("net.kyori.adventure.text.Component"));
                 method.setAccessible(true);
 
                 Method section = legacy.getMethod("legacySection");
@@ -83,19 +81,11 @@ public class TakionLogger {
 
     private final TakionLib lib;
 
-    private final Logger bukkitLogger;
-    private RawLogger paperLogger;
+    private final Logger bukkit;
+    private PaperLogger paper;
 
-    /**
-     * Whether to strip prefixes from log messages.
-     */
     @Getter @Setter
-    private boolean stripPrefix = false;
-    /**
-     * Whether to apply color to log messages.
-     */
-    @Getter @Setter
-    private boolean colored = true;
+    private boolean stripPrefix = false, colored = true;
 
     interface LibStringFunction {
         String get(String message, TakionLib lib, boolean strip, boolean colored);
@@ -121,10 +111,7 @@ public class TakionLogger {
                     )
                     .toString();
 
-    private static final boolean USE_PAPER_LOGGER =
-            ServerInfoUtils.PAPER_ENABLED && ServerInfoUtils.SERVER_VERSION >= 18.2;
-
-    public TakionLogger(@NotNull TakionLib lib) {
+    public TakionLogger(@NotNull TakionLib lib, boolean usePlugin) {
         this.lib = lib;
 
         Plugin plugin = null;
@@ -132,22 +119,26 @@ public class TakionLogger {
             plugin = lib.getPlugin();
         } catch (Exception ignored) {}
 
-        bukkitLogger = plugin != null ?
-                plugin.getLogger() :
-                Bukkit.getLogger();
+        bukkit = usePlugin && plugin != null ? plugin.getLogger() : Bukkit.getLogger();
 
-        if (USE_PAPER_LOGGER)
+        if (ServerInfoUtils.PAPER_ENABLED && ServerInfoUtils.SERVER_VERSION >= 18.2)
             try {
-                paperLogger = new PaperLogger(plugin);
-            } catch (Exception ignored) {}
+                paper = new PaperLogger(usePlugin ? plugin : null);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
     }
 
-    private class Record {
+    public TakionLogger(@NotNull TakionLib lib) {
+        this(lib, true);
+    }
+
+    private class LoggerLine {
 
         private final LogLevel level;
         private final String message;
 
-        private Record(LogLevel level, String message) {
+        private LoggerLine(LogLevel level, String message) {
             this.level = level;
 
             if (message != null)
@@ -156,29 +147,23 @@ public class TakionLogger {
             this.message = message;
         }
 
-        private void log0() {
-            if (paperLogger != null) {
-                paperLogger.log(level, message);
+        private void log() {
+            if (paper != null) {
+                paper.log(level, message);
                 return;
             }
 
-            bukkitLogger.log(level.toJava(), message);
+            bukkit.log(level.toJava(), message);
         }
     }
 
-    public void log(LogLevel level, List<String> messages) {
-        if (level == null)
-            level = LogLevel.INFO;
-
-        if (messages != null && messages.size() == 1) {
-            new Record(level, messages.get(0)).log0();
-            return;
-        }
+    public void log(LogLevel level, Collection<String> messages) {
+        if (level == null) level = LogLevel.INFO;
 
         for (String message : CollectionBuilder
                 .of(messages)
                 .filter(Objects::nonNull))
-            new Record(level, message).log0();
+            new LoggerLine(level, message).log();
     }
 
     public void log(LogLevel level, String... messages) {
@@ -187,39 +172,5 @@ public class TakionLogger {
 
     public void log(String... messages) {
         log(null, messages);
-    }
-
-    static final RawLogger BUKKIT_DEFAULT_LOGGER = (l, s) -> Bukkit.getLogger().log(l != null ? l.toJava() : Level.INFO, s);
-    private static final RawLogger PAPER_SERVER_LOGGER = new PaperLogger(null);
-
-    private static RawLogger getServerLogger() {
-        return USE_PAPER_LOGGER ? PAPER_SERVER_LOGGER : BUKKIT_DEFAULT_LOGGER;
-    }
-
-    public static void doLog(LogLevel level, List<String> messages) {
-        final RawLogger logger = getServerLogger();
-        LogLevel result = level != null ? level : LogLevel.INFO;
-
-        TakionLib lib = TakionLib.getLib();
-
-        boolean strip = lib.getLogger().isStripPrefix();
-        boolean colored = lib.getLogger().isColored();
-
-        for (String message : CollectionBuilder.of(messages)
-                .filter(Objects::nonNull)
-                .apply(s -> FORMATTER.get(s, lib, strip, colored)))
-            logger.log(result, message);
-    }
-
-    public static void doLog(LogLevel level, String... messages) {
-        doLog(level, ArrayUtils.toList(messages));
-    }
-
-    public static void doLog(String... messages) {
-        doLog(null, messages);
-    }
-
-    public static TakionLogger getLogger() {
-        return TakionLib.getLib().getLogger();
     }
 }

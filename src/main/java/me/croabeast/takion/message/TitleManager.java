@@ -2,9 +2,7 @@ package me.croabeast.takion.message;
 
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import me.croabeast.takion.TakionLib;
 import me.croabeast.lib.util.Exceptions;
-import org.apache.commons.lang.StringUtils;
 import org.bukkit.entity.Player;
 
 public interface TitleManager {
@@ -39,12 +37,7 @@ public interface TitleManager {
         return new Builder(this, title, subtitle);
     }
 
-    default Builder builder(String message) {
-        Exceptions.validate(StringUtils::isNotBlank, message);
-
-        String[] array = TakionLib.getLib().splitString(message, 2);
-        return builder(array[0], array.length == 2 ? array[1] : null);
-    }
+    Builder builder(String message);
 
     @Accessors(chain = true)
     @Setter

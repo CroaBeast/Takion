@@ -12,14 +12,19 @@ import org.jetbrains.annotations.NotNull;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 @RequiredArgsConstructor
 public final class ChatClick implements ChatEvent<ClickEvent> {
 
+    private final TakionLib lib;
+
     final Action action;
     final String string;
 
-    public ChatClick(String message) {
+    public ChatClick(TakionLib lib, String message) {
+        this.lib = Objects.requireNonNull(lib);
+
         Exceptions.validate(StringUtils::isNotBlank, message);
         String[] array = message.replace("\"", "").split(":", 2);
 
@@ -29,8 +34,7 @@ public final class ChatClick implements ChatEvent<ClickEvent> {
 
     @NotNull
     public ClickEvent createEvent(Player parser) {
-        String s = TakionLib.getLib().replace(parser, string);
-        return new ClickEvent(action.bukkit, s);
+        return new ClickEvent(action.bukkit, lib.replace(parser, string));
     }
 
     @Override

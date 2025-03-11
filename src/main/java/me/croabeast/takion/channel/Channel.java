@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 
@@ -18,12 +19,24 @@ public interface Channel {
     String getName();
 
     @NotNull
-    String getPrefix();
+    List<String> getPrefixes();
 
-    void setPrefix(@NotNull String prefix);
+    @NotNull
+    default String getPrefix() {
+        return getPrefixes().get(0);
+    }
 
-    @Nullable
-    @Regex
+    void setPrefixes(@NotNull Collection<String> prefixes);
+
+    void addPrefix(@NotNull String prefix);
+
+    void removePrefix(@NotNull String prefix);
+
+    boolean isCaseSensitive();
+
+    void setCaseSensitive(boolean sensitive);
+
+    @Nullable @Regex
     String getPattern();
 
     void setPattern(@Nullable @Regex String pattern);

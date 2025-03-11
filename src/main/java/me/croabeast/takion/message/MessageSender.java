@@ -57,22 +57,6 @@ public class MessageSender {
         this(lib, null, null);
     }
 
-    public MessageSender(Collection<? extends Player> targets, Player parser) {
-        this(TakionLib.getLib(), targets, parser);
-    }
-
-    public MessageSender(Collection<? extends Player> targets) {
-        this(targets, null);
-    }
-
-    public MessageSender(Player player) {
-        this(player != null ? ArrayUtils.toList(player) : null, player);
-    }
-
-    public MessageSender() {
-        this((Collection<? extends Player>) null, null);
-    }
-
     public MessageSender(MessageSender sender) {
         this(sender.lib, sender.targets, sender.parser);
 
@@ -244,7 +228,7 @@ public class MessageSender {
             String s = lib.getPlaceholderManager().replace(parser, formatMessage());
             String error = getErrorPrefix();
 
-            lib.getLogger().log(sent || StringUtils.isBlank(error) ? "" : (error + s));
+            lib.getLogger().log((sent || StringUtils.isBlank(error) ? "" : error) + s);
         }
 
         boolean send(Player target) {

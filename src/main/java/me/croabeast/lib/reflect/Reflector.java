@@ -94,6 +94,10 @@ public final class Reflector {
         return ArrayUtils.toList(clazz.getDeclaredConstructors());
     }
 
+    public List<Class<?>> getClasses() {
+        return ArrayUtils.toList(clazz.getDeclaredClasses());
+    }
+
     /**
      * Gets a specific method by name and parameter types.
      *
@@ -204,6 +208,14 @@ public final class Reflector {
         return call(null, methodName, objects);
     }
 
+    public Reflector callAsReflector(Object initial, String methodName, Object... objects) {
+        return Reflector.from(() -> call(initial, methodName, objects));
+    }
+
+    public Reflector callAsReflector(String methodName, Object... objects) {
+        return Reflector.from(() -> call(methodName, objects));
+    }
+
     /**
      * Gets a field value from the initial object or a specified object.
      *
@@ -252,6 +264,26 @@ public final class Reflector {
         return get(null, clazz);
     }
 
+    @SneakyThrows
+    public Reflector getAsReflector(Object initial, String fieldName) {
+        return Reflector.from(() -> get(initial, fieldName));
+    }
+
+    @SneakyThrows
+    public Reflector getAsReflector(String fieldName) {
+        return Reflector.from(() -> get(fieldName));
+    }
+
+    @SneakyThrows
+    public Reflector getAsReflector(Object initial, Class<?> clazz) {
+        return Reflector.from(() -> get(initial, clazz));
+    }
+
+    @SneakyThrows
+    public Reflector getAsReflector(Class<?> clazz) {
+        return Reflector.from(() -> get(clazz));
+    }
+
     /**
      * Sets a field value on the initial object or a specified object.
      *
@@ -294,7 +326,7 @@ public final class Reflector {
     }
 
     @SneakyThrows
-    public Reflector asReflector(Object... objects) {
+    public Reflector createAsReflector(Object... objects) {
         return Reflector.from(() -> create(objects));
     }
 

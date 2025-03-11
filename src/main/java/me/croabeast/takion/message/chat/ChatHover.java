@@ -14,10 +14,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public final class ChatHover implements ChatEvent<HoverEvent> {
 
+    private final TakionLib lib;
     final List<String> list;
 
-    public ChatHover(String... array) {
-        this(ArrayUtils.toList(array));
+    public ChatHover(TakionLib lib, String... array) {
+        this(lib, ArrayUtils.toList(array));
     }
 
     @SuppressWarnings("deprecation")
@@ -27,7 +28,7 @@ public final class ChatHover implements ChatEvent<HoverEvent> {
         int size = list.size();
 
         for (int i = 0; i < size; i++) {
-            String s = TakionLib.getLib().colorize(parser, list.get(i));
+            String s = lib.colorize(parser, list.get(i));
             if (i != size - 1) s += "\n";
 
             contents[i] = new TextComponent(TextComponent.fromLegacyText(s));

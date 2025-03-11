@@ -14,8 +14,6 @@ public interface ChannelManager {
 
     void setEndDelimiter(@NotNull String delimiter);
 
-    void setDefaults();
-
     @NotNull
     Channel identify(@NotNull String string);
 }

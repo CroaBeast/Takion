@@ -3,6 +3,8 @@ package me.croabeast.lib.time;
 import me.croabeast.takion.TakionLib;
 import org.bukkit.entity.Player;
 
+import java.util.Objects;
+
 public class TimeFormatter {
 
     /**
@@ -32,34 +34,26 @@ public class TimeFormatter {
 
     private static final String PLURAL_REGEX = "\\s*\\([^)]*\\)\\s*";
 
+    private final TakionLib lib;
+
     private final TimeValues values;
     private final long seconds;
 
-    /**
-     * Creates a new parser using a {@link TimeValues} instance and an amount of seconds.
-     *
-     * @param values a {@link TimeValues} instance
-     * @param seconds time in seconds
-     */
-    public TimeFormatter(TimeValues values, long seconds) {
+    public TimeFormatter(TakionLib lib, TimeValues values, long seconds) {
+        this.lib = Objects.requireNonNull(lib);
         this.values = values == null ? TimeValues.DEFAULT_KEYS : values;
         this.seconds = seconds;
     }
 
-    /**
-     * Creates a new parser using an amount of seconds.
-     *
-     * @param seconds time in seconds
-     */
-    public TimeFormatter(long seconds) {
-        this(null, seconds);
+    public TimeFormatter(TakionLib lib, long seconds) {
+        this(lib, null, seconds);
     }
 
-    private static long getFixedTime(long seconds, long formatter) {
+    private long getFixedTime(long seconds, long formatter) {
         return (seconds - (seconds % formatter)) / formatter;
     }
 
-    private static String isPlural(long value, String string) {
+    private String isPlural(long value, String string) {
         string = value + " " + string;
         if (value == 1)
             return string.replaceAll(PLURAL_REGEX, "");
@@ -67,8 +61,8 @@ public class TimeFormatter {
         return string.replace("(", "").replace(")", "");
     }
 
-    private static String colorize(Player target, Player parser, String string) {
-        return TakionLib.getLib().colorize(target, parser, string);
+    private String colorize(Player target, Player parser, String string) {
+        return lib.colorize(target, parser, string);
     }
 
     public String formatTime(Player target, Player parser) {

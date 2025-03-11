@@ -118,6 +118,10 @@ public final class CollectionBuilder<T> implements Iterable<T> {
         return collection;
     }
 
+    public int sizeByFilter(Predicate<T> predicate) {
+        return filter(predicate).size();
+    }
+
     public List<T> toList() {
         return new ArrayList<>(collection);
     }
@@ -134,13 +138,17 @@ public final class CollectionBuilder<T> implements Iterable<T> {
         return Collections.enumeration(collection);
     }
 
+    public int size() {
+        return collection.size();
+    }
+
     @Override
     public String toString() {
         return collection.toString();
     }
 
     public static <T> CollectionBuilder<T> of(Collection<T> collection) {
-        return new CollectionBuilder<>(Objects.requireNonNull(collection));
+        return new CollectionBuilder<>(collection == null ? new ArrayList<>() : collection);
     }
 
     public static <K, V> CollectionBuilder<Map.Entry<K, V>> of(Map<K, V> map) {

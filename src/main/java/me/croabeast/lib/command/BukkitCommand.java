@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import me.croabeast.lib.reflect.Craft;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
@@ -219,25 +220,6 @@ public abstract class BukkitCommand extends org.bukkit.command.defaults.BukkitCo
         addPerm(cmd.getWildcardPermission());
     }
 
-    protected static SimpleCommandMap getCommandMap() throws Exception {
-        final Server server = Bukkit.getServer();
-
-        Field field = server.getClass().getDeclaredField("commandMap");
-        field.setAccessible(true);
-
-        return (SimpleCommandMap) field.get(server);
-    }
-
-    @SuppressWarnings("unchecked")
-    protected static Map<String, org.bukkit.command.Command> knownCommands() throws Exception {
-        final SimpleCommandMap map = getCommandMap();
-
-        Field field = SimpleCommandMap.class.getDeclaredField("knownCommands");
-        field.setAccessible(true);
-
-        return (Map<String, org.bukkit.command.Command>) field.get(map);
-    }
-
     private Plugin fromLoaded(org.bukkit.command.Command command) {
         return !(command instanceof PluginIdentifiableCommand) ?
                 null :
@@ -258,8 +240,8 @@ public abstract class BukkitCommand extends org.bukkit.command.defaults.BukkitCo
         Map<String, org.bukkit.command.Command> commands;
 
         try {
-            map = getCommandMap();
-            commands = knownCommands();
+            map = Craft.Server.getCommandMap();
+            commands = Craft.Server.getKnownCommands();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -299,8 +281,8 @@ public abstract class BukkitCommand extends org.bukkit.command.defaults.BukkitCo
         Map<String, org.bukkit.command.Command> commands;
 
         try {
-            map = getCommandMap();
-            commands = knownCommands();
+            map = Craft.Server.getCommandMap();
+            commands = Craft.Server.getKnownCommands();
         }
         catch (Exception e) {
             e.printStackTrace();

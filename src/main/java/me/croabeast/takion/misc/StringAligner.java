@@ -63,6 +63,10 @@ public class StringAligner {
         return align(TakionLib.getLib(), limit, string);
     }
 
+    public String align(TakionLib lib, String string) {
+        return align(lib, 154, string);
+    }
+
     public String align(String string) {
         return align(154, string);
     }
