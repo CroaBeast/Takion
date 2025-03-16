@@ -5,86 +5,86 @@ import lombok.Getter;
 import java.util.Locale;
 
 @Getter
-public enum DefaultCharacter {
-    A('A', 5),
-    a('a', 5),
-    B('B', 5),
-    b('b', 5),
-    C('C', 5),
-    c('c', 5),
-    D('D', 5),
-    d('d', 5),
-    E('E', 5),
-    e('e', 5),
-    F('F', 5),
+public enum DefaultCharacter implements CharacterInfo {
+    A('A'),
+    a('a'),
+    B('B'),
+    b('b'),
+    C('C'),
+    c('c'),
+    D('D'),
+    d('d'),
+    E('E'),
+    e('e'),
+    F('F'),
     f('f', 4),
-    G('G', 5),
-    g('g', 5),
-    H('H', 5),
-    h('h', 5),
+    G('G'),
+    g('g'),
+    H('H'),
+    h('h'),
     I('I', 3),
     i('i', 1),
-    J('J', 5),
-    j('j', 5),
-    K('K', 5),
+    J('J'),
+    j('j'),
+    K('K'),
     k('k', 4),
-    L('L', 5),
+    L('L'),
     l('l', 1),
-    M('M', 5),
-    m('m', 5),
-    N('N', 5),
-    n('n', 5),
-    O('O', 5),
-    o('o', 5),
-    P('P', 5),
-    p('p', 5),
-    Q('Q', 5),
-    q('q', 5),
-    R('R', 5),
-    r('r', 5),
-    S('S', 5),
-    s('s', 5),
-    T('T', 5),
+    M('M'),
+    m('m'),
+    N('N'),
+    n('n'),
+    O('O'),
+    o('o'),
+    P('P'),
+    p('p'),
+    Q('Q'),
+    q('q'),
+    R('R'),
+    r('r'),
+    S('S'),
+    s('s'),
+    T('T'),
     t('t', 4),
-    U('U', 5),
-    u('u', 5),
-    V('V', 5),
-    v('v', 5),
-    W('W', 5),
-    w('w', 5),
-    X('X', 5),
-    x('x', 5),
-    Y('Y', 5),
-    y('y', 5),
-    Z('Z', 5),
-    z('z', 5),
+    U('U'),
+    u('u'),
+    V('V'),
+    v('v'),
+    W('W'),
+    w('w'),
+    X('X'),
+    x('x'),
+    Y('Y'),
+    y('y'),
+    Z('Z'),
+    z('z'),
 
-    NUM_1('1', 5),
-    NUM_2('2', 5),
-    NUM_3('3', 5),
-    NUM_4('4', 5),
-    NUM_5('5', 5),
-    NUM_6('6', 5),
-    NUM_7('7', 5),
-    NUM_8('8', 5),
-    NUM_9('9', 5),
-    NUM_0('0', 5),
+    NUM_1('1'),
+    NUM_2('2'),
+    NUM_3('3'),
+    NUM_4('4'),
+    NUM_5('5'),
+    NUM_6('6'),
+    NUM_7('7'),
+    NUM_8('8'),
+    NUM_9('9'),
+    NUM_0('0'),
 
     EXCLAMATION_POINT('!', 1),
     AT_SYMBOL('@', 6),
-    NUM_SIGN('#', 5),
-    DOLLAR_SIGN('$', 5),
-    PERCENT('%', 5),
-    UP_ARROW('^', 5),
-    AMPERSAND('&', 5),
-    ASTERISK('*', 5),
+    NUM_SIGN('#'),
+    DOLLAR_SIGN('$'),
+    PERCENT('%'),
+    UP_ARROW('^'),
+    AMPERSAND('&'),
+    ASTERISK('*'),
 
     LEFT_PARENTHESIS('(', 4),
     RIGHT_PARENTHESIS(')', 4),
-    MINUS('-', 5),
-    UNDERSCORE('_', 5),
-    PLUS_SIGN('+', 5),
-    EQUALS_SIGN('=', 5),
+    MINUS('-'),
+    UNDERSCORE('_'),
+    PLUS_SIGN('+'),
+    EQUALS_SIGN('='),
     LEFT_CURL_BRACE('{', 4),
     RIGHT_CURL_BRACE('}', 4),
     LEFT_BRACKET('[', 3),
@@ -96,11 +96,11 @@ public enum DefaultCharacter {
     SINGLE_QUOTE('\'', 1),
     LEFT_ARROW('<', 4),
     RIGHT_ARROW('>', 4),
-    QUESTION_MARK('?', 5),
-    SLASH('/', 5),
-    BACK_SLASH('\\', 5),
+    QUESTION_MARK('?'),
+    SLASH('/'),
+    BACK_SLASH('\\'),
     LINE('|', 1),
-    TILDE('~', 5),
+    TILDE('~'),
     TICK('`', 2),
     PERIOD('.', 1),
     COMMA(',', 1),
@@ -108,17 +108,27 @@ public enum DefaultCharacter {
 
     final String name;
     final char character;
-    final int length;
+    int length = 5;
 
     DefaultCharacter(char character, int length) {
-        this.character = character;
+        this(character);
         this.length = length;
-
+    }
+    
+    DefaultCharacter(char character) {
+        this.character = character;
         name = name().toLowerCase(Locale.ENGLISH);
     }
 
     @Override
     public String toString() {
         return "DefaultCharacter{name='" + name + "', character='" + character + "', length=" + length + '}';
+    }
+    
+    public static int getLength(char character) {
+        for (DefaultCharacter def : values())
+            if (def.character == character) return def.length;
+
+        return 0;
     }
 }

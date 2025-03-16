@@ -1,16 +1,31 @@
 package me.croabeast.takion.character;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+public interface CharacterInfo {
 
-@RequiredArgsConstructor
-@Getter
-public final class CharacterInfo {
+    char getCharacter();
 
-    private final char character;
-    private final int length;
+    int getLength();
 
-    public int getBoldLength() {
-        return length + (character == ' ' ? 0 : 1);
+    default int getBoldLength() {
+        return getLength() + (getCharacter() == ' ' ? 0 : 1);
+    }
+
+    static CharacterInfo of(char c, int i) {
+        return new CharacterInfo() {
+            @Override
+            public char getCharacter() {
+                return c;
+            }
+
+            @Override
+            public int getLength() {
+                return i;
+            }
+
+            @Override
+            public String toString() {
+                return "CharacterInfo{character='" + c + "', length=" + i + "}";
+            }
+        };
     }
 }

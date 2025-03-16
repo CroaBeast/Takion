@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
  * characters for accented small caps.
  */
 @Getter
-public enum SmallCaps {
+public enum SmallCaps implements CharacterInfo {
     A('ᴀ'),
     B('ʙ'),
     C('ᴄ'),

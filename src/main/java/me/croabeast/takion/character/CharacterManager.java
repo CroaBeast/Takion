@@ -1,14 +1,14 @@
 package me.croabeast.takion.character;
 
 import me.croabeast.lib.util.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.Nullable;
 
 public interface CharacterManager {
 
-    CharacterInfo DEFAULT = new CharacterInfo('a', 5);
+    CharacterInfo DEFAULT = CharacterInfo.of('a', 5);
 
     CharacterInfo getInfo(char c);
-
-    Character toCharacter(String string);
 
     default CharacterInfo getInfo(String string) {
         Character c = toCharacter(string);
@@ -33,5 +33,19 @@ public interface CharacterManager {
             if (character != null)
                 removeCharacters(character);
         }
+    }
+
+    String align(int limit, String string);
+
+    default String align(String string) {
+        return align(154, string);
+    }
+
+    @Nullable
+    static Character toCharacter(String string) {
+        if (StringUtils.isBlank(string)) return null;
+
+        char[] array = string.toCharArray();
+        return array.length != 1 ? null : array[0];
     }
 }

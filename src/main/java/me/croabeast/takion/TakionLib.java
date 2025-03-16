@@ -12,7 +12,6 @@ import me.croabeast.takion.character.SmallCaps;
 import me.croabeast.takion.logger.TakionLogger;
 import me.croabeast.takion.message.MessageSender;
 import me.croabeast.takion.message.TitleManager;
-import me.croabeast.takion.misc.PatternAction;
 import me.croabeast.takion.placeholder.Placeholder;
 import me.croabeast.takion.placeholder.PlaceholderManager;
 import me.croabeast.lib.PlayerFormatter;
@@ -175,15 +174,10 @@ public class TakionLib {
             private final Map<Character, CharacterInfo> map = new LinkedHashMap<>();
 
             {
-                for (DefaultCharacter character : DefaultCharacter.values()) {
-                    char c = character.getCharacter();
-                    map.put(c, new CharacterInfo(c, character.getLength()));
-                }
+                for (DefaultCharacter character : DefaultCharacter.values())
+                    map.put(character.getCharacter(), character);
 
-                for (SmallCaps caps : SmallCaps.values()) {
-                    char c = caps.getCharacter();
-                    map.put(c, new CharacterInfo(c, caps.getLength()));
-                }
+                for (SmallCaps caps : SmallCaps.values()) map.put(caps.getCharacter(), caps);
             }
 
             @Override
@@ -193,21 +187,62 @@ public class TakionLib {
             }
 
             @Override
-            public Character toCharacter(String string) {
-                if (StringUtils.isBlank(string)) return null;
-
-                char[] array = string.toCharArray();
-                return array.length != 1 ? null : array[0];
-            }
-
-            @Override
             public void addCharacter(char c, int length) {
-                map.put(c, new CharacterInfo(c, length));
+                map.put(c, CharacterInfo.of(c, length));
             }
 
             @Override
             public void removeCharacters(char... chars) {
                 if (!ArrayUtils.isArrayEmpty(chars)) for (char c : chars) map.remove(c);
+            }
+
+            @Override
+            public String align(int limit, String string) {
+                if (StringUtils.isBlank(string)) return string;
+
+                final String prefix = getCenterPrefix();
+                if (StringUtils.isBlank(prefix) ||
+                        !string.startsWith(prefix)) return string;
+
+                final String before = string.replace(prefix, "");
+
+                String temp = StringApplier.simplified(before)
+                        .apply(PrismaticAPI::stripAll)
+                        .apply(TextUtils.STRIP_JSON)
+                        .apply(getCharacterAction()::act).toString();
+
+                int size = 0;
+                boolean previousCode = false;
+                boolean isBold = false;
+
+                for (char c : temp.toCharArray()) {
+                    if (c == '§') {
+                        previousCode = true;
+                        continue;
+                    }
+
+                    else if (previousCode) {
+                        previousCode = false;
+                        isBold = c == 'l' || c == 'L';
+                        continue;
+                    }
+
+                    CharacterInfo info = getInfo(c);
+                    size += isBold ?
+                            info.getBoldLength() : info.getLength();
+                    size++;
+                }
+
+                int toCompensate = limit - (size / 2);
+                int compensated = 0;
+
+                StringBuilder sb = new StringBuilder();
+                while (compensated < toCompensate) {
+                    sb.append(' ');
+                    compensated += 4;
+                }
+
+                return sb + before;
             }
         };
 
