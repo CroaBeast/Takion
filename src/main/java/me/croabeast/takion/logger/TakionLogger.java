@@ -5,7 +5,6 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.experimental.Accessors;
 import me.croabeast.takion.TakionLib;
-import me.croabeast.takion.misc.StringAligner;
 import me.croabeast.lib.CollectionBuilder;
 import me.croabeast.lib.applier.StringApplier;
 import me.croabeast.lib.util.ArrayUtils;
@@ -14,52 +13,44 @@ import me.croabeast.lib.util.TextUtils;
 import me.croabeast.prismatic.PrismaticAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginLogger;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
-@Accessors(chain = true)
 public class TakionLogger {
 
-    interface RawLogger {
-        void log(LogLevel level, String message);
-    }
-
-    @SneakyThrows
-    static Class<?> from(String name) {
-        return Class.forName("net.kyori.adventure.text." + name);
-    }
-
-    static class PaperLogger implements RawLogger {
+    static final class PaperLogger {
 
         private final Class<?> clazz;
         private final Object logger;
 
         @SneakyThrows
-        PaperLogger(Plugin plugin) {
-            if (ServerInfoUtils.PAPER_ENABLED) {
-                String name = plugin != null ? plugin.getName() : "";
+        PaperLogger(String name) {
+            logger = Class
+                    .forName("net.kyori.adventure.text.logger.slf4j.ComponentLogger")
+                    .getMethod("logger", String.class).invoke(null, name);
 
-                logger = Class.forName("net.kyori.adventure.text.logger.slf4j.ComponentLogger")
-                        .getMethod("logger", String.class).invoke(null, name);
-
-                clazz = logger.getClass();
-                return;
-            }
-
-            throw new IllegalAccessException("Paper is not being used");
+            clazz = logger.getClass();
         }
 
-        public void log(LogLevel level, String string) {
+        void log(LogLevel level, String string) {
             level = level != null ? level : LogLevel.INFO;
 
             try {
-                Class<?> legacy = Class.forName("net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer");
+                Class<?> legacy = Class.forName(
+                        "net.kyori.adventure.text.serializer." +
+                                "legacy.LegacyComponentSerializer"
+                );
 
-                Method method = clazz.getMethod(level.getName(), Class.forName("net.kyori.adventure.text.Component"));
+                Method method = clazz.getMethod(
+                        level.getName(),
+                        Class.forName("net.kyori.adventure.text.Component")
+                );
                 method.setAccessible(true);
 
                 Method section = legacy.getMethod("legacySection");
@@ -72,8 +63,7 @@ public class TakionLogger {
                                         section.invoke(null),
                                         string
                                 ));
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -81,9 +71,11 @@ public class TakionLogger {
 
     private final TakionLib lib;
 
+    @Getter
     private final Logger bukkit;
     private PaperLogger paper;
 
+    @Accessors(chain = true)
     @Getter @Setter
     private boolean stripPrefix = false, colored = true;
 
@@ -103,7 +95,7 @@ public class TakionLogger {
                                 "&f" + split.replaceAll(r, "")
                         );
                     })
-                    .apply(StringAligner::align)
+                    .apply(l.getCharacterManager()::align)
                     .apply(TextUtils.STRIP_JSON)
                     .apply(b ?
                             PrismaticAPI::colorize :
@@ -123,7 +115,7 @@ public class TakionLogger {
 
         if (ServerInfoUtils.PAPER_ENABLED && ServerInfoUtils.SERVER_VERSION >= 18.2)
             try {
-                paper = new PaperLogger(usePlugin ? plugin : null);
+                paper = new PaperLogger(usePlugin && plugin != null ? plugin.getName() : "");
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -172,5 +164,23 @@ public class TakionLogger {
 
     public void log(String... messages) {
         log(null, messages);
+    }
+
+    public static Logger createBukkit(Plugin plugin) {
+        return new PluginLogger(Objects.requireNonNull(plugin)) {
+
+            private final TakionLib lib = TakionLib.fromPlugin(plugin);
+
+            @Override
+            public void log(@NotNull LogRecord record) {
+                record.setMessage(FORMATTER.get(
+                        record.getMessage(),
+                        lib,
+                        lib.getLogger().isStripPrefix(),
+                        lib.getLogger().isColored()
+                ));
+                super.log(record);
+            }
+        };
     }
 }
