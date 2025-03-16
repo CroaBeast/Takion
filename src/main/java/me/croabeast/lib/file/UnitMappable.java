@@ -1,8 +1,6 @@
 package me.croabeast.lib.file;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 
 /**
@@ -15,25 +13,12 @@ import java.util.function.Predicate;
  */
 public interface UnitMappable<U extends ConfigurableUnit> extends Mappable<U> {
 
-    @Override
-    default UnitMappable<U> filter(Predicate<U> predicate) {
-        return UnitMappable.of(Mappable.super.filter(predicate));
-    }
+    UnitMappable<U> filter(Predicate<U> predicate);
 
-    @Override
+    UnitMappable<U> order(Comparator<Integer> comparator);
+
     default UnitMappable<U> order(boolean ascendant) {
-        return UnitMappable.of(Mappable.super.order(ascendant));
-    }
-
-    /**
-     * Creates an empty UnitMappable instance.
-     * This method is useful when you need a UnitMappable without any initial data.
-     *
-     * @param <U> The type of ConfigurableUnit.
-     * @return An empty UnitMappable instance.
-     */
-    static <U extends ConfigurableUnit> UnitMappable<U> empty() {
-        return of(new LinkedHashMap<>());
+        return order(ascendant ? Comparator.naturalOrder() : Comparator.reverseOrder());
     }
 
     /**
@@ -48,5 +33,16 @@ public interface UnitMappable<U extends ConfigurableUnit> extends Mappable<U> {
      */
     static <U extends ConfigurableUnit> UnitMappable<U> of(Map<Integer, Set<U>> map) {
         return new MapUtils.UnitMapImpl<>(map);
+    }
+
+    /**
+     * Creates an empty UnitMappable instance.
+     * This method is useful when you need a UnitMappable without any initial data.
+     *
+     * @param <U> The type of ConfigurableUnit.
+     * @return An empty UnitMappable instance.
+     */
+    static <U extends ConfigurableUnit> UnitMappable<U> empty() {
+        return of(new LinkedHashMap<>());
     }
 }

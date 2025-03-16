@@ -1,4 +1,4 @@
-package me.croabeast.takion.misc;
+package me.croabeast.takion;
 
 import lombok.Getter;
 import lombok.Setter;

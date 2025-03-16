@@ -5,13 +5,11 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * Utility class providing helper methods and inner classes to handle mappings
@@ -23,19 +21,28 @@ import java.util.function.Function;
 @UtilityClass
 final class MapUtils {
 
-    /**
-     * Implementation of the Mappable interface for generic values.
-     * This class wraps a standard map and provides additional methods to handle
-     * sets of values.
-     *
-     * @param <U> The type of the values in the sets.
-     */
-    static class BaseMapImpl<U> implements Mappable<U> {
+    static class BaseMapImpl<T> implements Mappable<T> {
 
-        final Map<Integer, Set<U>> map;
+        final Map<Integer, Set<T>> map = new TreeMap<>();
 
-        BaseMapImpl(Map<Integer, Set<U>> map) {
-            this.map = map;
+        BaseMapImpl(Map<Integer, Set<T>> map) {
+            putAll(map);
+        }
+
+        @Override
+        public Mappable<T> filter(Predicate<T> predicate) {
+            map.values().forEach(c -> c.removeIf(predicate.negate()));
+            return this;
+        }
+
+        @Override
+        public Mappable<T> order(Comparator<Integer> comparator) {
+            Map<Integer, Set<T>> units = new TreeMap<>(comparator);
+            units.putAll(this);
+
+            clear();
+            putAll(units);
+            return this;
         }
 
         @Override
@@ -59,23 +66,23 @@ final class MapUtils {
         }
 
         @Override
-        public Set<U> get(Object key) {
+        public Set<T> get(Object key) {
             return map.get(key);
         }
 
         @Nullable
         @Override
-        public Set<U> put(Integer key, Set<U> value) {
+        public Set<T> put(Integer key, Set<T> value) {
             return map.put(key, value);
         }
 
         @Override
-        public Set<U> remove(Object key) {
+        public Set<T> remove(Object key) {
             return map.remove(key);
         }
 
         @Override
-        public void putAll(@NotNull Map<? extends Integer, ? extends Set<U>> m) {
+        public void putAll(@NotNull Map<? extends Integer, ? extends Set<T>> m) {
             map.putAll(m);
         }
 
@@ -90,32 +97,32 @@ final class MapUtils {
         }
 
         @NotNull
-        public Collection<Set<U>> values() {
+        public Collection<Set<T>> values() {
             return map.values();
         }
 
         @NotNull
-        public Set<Entry<Integer, Set<U>>> entrySet() {
+        public Set<Entry<Integer, Set<T>>> entrySet() {
             return map.entrySet();
         }
 
         @Override
-        public Set<U> getOrDefault(Object key, Set<U> defaultValue) {
+        public Set<T> getOrDefault(Object key, Set<T> defaultValue) {
             return map.getOrDefault(key, defaultValue);
         }
 
         @Override
-        public void forEach(BiConsumer<? super Integer, ? super Set<U>> action) {
+        public void forEach(BiConsumer<? super Integer, ? super Set<T>> action) {
             map.forEach(action);
         }
 
         @Override
-        public void replaceAll(BiFunction<? super Integer, ? super Set<U>, ? extends Set<U>> function) {
+        public void replaceAll(BiFunction<? super Integer, ? super Set<T>, ? extends Set<T>> function) {
             map.replaceAll(function);
         }
 
         @Override
-        public Set<U> putIfAbsent(Integer key, Set<U> value) {
+        public Set<T> putIfAbsent(Integer key, Set<T> value) {
             return map.putIfAbsent(key, value);
         }
 
@@ -125,39 +132,56 @@ final class MapUtils {
         }
 
         @Override
-        public boolean replace(Integer key, Set<U> oldValue, Set<U> newValue) {
+        public boolean replace(Integer key, Set<T> oldValue, Set<T> newValue) {
             return map.replace(key, oldValue, newValue);
         }
 
         @Override
-        public Set<U> replace(Integer key, Set<U> value) {
+        public Set<T> replace(Integer key, Set<T> value) {
             return map.replace(key, value);
         }
 
         @Override
-        public Set<U> computeIfAbsent(Integer key, @NotNull Function<? super Integer, ? extends Set<U>> mappingFunction) {
+        public Set<T> computeIfAbsent(Integer key, @NotNull Function<? super Integer, ? extends Set<T>> mappingFunction) {
             return map.computeIfAbsent(key, mappingFunction);
         }
 
         @Override
-        public Set<U> computeIfPresent(Integer key, @NotNull BiFunction<? super Integer, ? super Set<U>, ? extends Set<U>> remappingFunction) {
+        public Set<T> computeIfPresent(Integer key, @NotNull BiFunction<? super Integer, ? super Set<T>, ? extends Set<T>> remappingFunction) {
             return map.computeIfPresent(key, remappingFunction);
         }
 
         @Override
-        public Set<U> compute(Integer key, @NotNull BiFunction<? super Integer, ? super Set<U>, ? extends Set<U>> remappingFunction) {
+        public Set<T> compute(Integer key, @NotNull BiFunction<? super Integer, ? super Set<T>, ? extends Set<T>> remappingFunction) {
             return map.compute(key, remappingFunction);
         }
 
         @Override
-        public Set<U> merge(Integer key, @NotNull Set<U> value, @NotNull BiFunction<? super Set<U>, ? super Set<U>, ? extends Set<U>> remappingFunction) {
+        public Set<T> merge(Integer key, @NotNull Set<T> value, @NotNull BiFunction<? super Set<T>, ? super Set<T>, ? extends Set<T>> remappingFunction) {
             return map.merge(key, value, remappingFunction);
         }
     }
 
     static class SectionMapImpl extends BaseMapImpl<ConfigurationSection> implements SectionMappable {
+
         SectionMapImpl(Map<Integer, Set<ConfigurationSection>> map) {
             super(map);
+        }
+
+        @Override
+        public SectionMappable filter(Predicate<ConfigurationSection> predicate) {
+            map.values().forEach(c -> c.removeIf(predicate.negate()));
+            return this;
+        }
+
+        @Override
+        public SectionMappable order(Comparator<Integer> comparator) {
+            Map<Integer, Set<ConfigurationSection>> units = new TreeMap<>(comparator);
+            units.putAll(this);
+
+            clear();
+            putAll(units);
+            return this;
         }
     }
 
@@ -165,5 +189,22 @@ final class MapUtils {
         UnitMapImpl(Map<Integer, Set<U>> map) {
             super(map);
         }
+
+        @Override
+        public UnitMappable<U> filter(Predicate<U> predicate) {
+            map.values().forEach(c -> c.removeIf(predicate.negate()));
+            return this;
+        }
+
+        @Override
+        public UnitMappable<U> order(Comparator<Integer> comparator) {
+            Map<Integer, Set<U>> units = new TreeMap<>(comparator);
+            units.putAll(this);
+
+            clear();
+            putAll(units);
+            return this;
+        }
+
     }
 }

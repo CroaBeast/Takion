@@ -13,29 +13,12 @@ import java.util.function.Supplier;
  */
 public interface Mappable<T> extends Map<Integer, Set<T>> {
 
-    default Mappable<T> filter(Predicate<T> predicate) {
-        final Mappable<T> units = empty();
+    Mappable<T> filter(Predicate<T> predicate);
 
-        forEach(((integer, set) -> {
-            final Set<T> results = new HashSet<>();
-            for (T unit : set)
-                if (predicate.test(unit)) results.add(unit);
-
-            units.put(integer, results);
-        }));
-
-        return units;
-    }
+    Mappable<T> order(Comparator<Integer> comparator);
 
     default Mappable<T> order(boolean ascendant) {
-        final Comparator<Integer> comparator = ascendant ?
-                Comparator.naturalOrder() :
-                Comparator.reverseOrder();
-
-        Map<Integer, Set<T>> units = new TreeMap<>(comparator);
-        units.putAll(this);
-
-        return of(units);
+        return order(ascendant ? Comparator.naturalOrder() : Comparator.reverseOrder());
     }
 
     default <C extends Collection<T>> C values(Supplier<C> supplier) {
@@ -51,6 +34,6 @@ public interface Mappable<T> extends Map<Integer, Set<T>> {
     }
 
     static <T> Mappable<T> empty() {
-        return of(new LinkedHashMap<>());
+        return of(new HashMap<>());
     }
 }

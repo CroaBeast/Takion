@@ -15,14 +15,12 @@ import java.util.function.Predicate;
  */
 public interface SectionMappable extends Mappable<ConfigurationSection> {
 
-    @Override
-    default SectionMappable filter(Predicate<ConfigurationSection> predicate) {
-        return SectionMappable.of(Mappable.super.filter(predicate));
-    }
+    SectionMappable filter(Predicate<ConfigurationSection> predicate);
 
-    @Override
+    SectionMappable order(Comparator<Integer> comparator);
+
     default SectionMappable order(boolean ascendant) {
-        return SectionMappable.of(Mappable.super.order(ascendant));
+        return order(ascendant ? Comparator.naturalOrder() : Comparator.reverseOrder());
     }
 
     /**
@@ -51,16 +49,6 @@ public interface SectionMappable extends Mappable<ConfigurationSection> {
     }
 
     /**
-     * Creates an empty SectionMappable instance.
-     * This is useful when you need a SectionMappable without any initial data.
-     *
-     * @return An empty SectionMappable instance.
-     */
-    static SectionMappable empty() {
-        return of(new LinkedHashMap<>());
-    }
-
-    /**
      * Creates a SectionMappable instance from the provided map.
      * This method is used to wrap a standard map into a SectionMappable interface.
      *
@@ -69,5 +57,15 @@ public interface SectionMappable extends Mappable<ConfigurationSection> {
      */
     static SectionMappable of(Map<Integer, Set<ConfigurationSection>> map) {
         return new MapUtils.SectionMapImpl(map);
+    }
+
+    /**
+     * Creates an empty SectionMappable instance.
+     * This is useful when you need a SectionMappable without any initial data.
+     *
+     * @return An empty SectionMappable instance.
+     */
+    static SectionMappable empty() {
+        return of(new LinkedHashMap<>());
     }
 }
