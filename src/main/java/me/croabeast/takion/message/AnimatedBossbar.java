@@ -336,12 +336,21 @@ public class AnimatedBossbar {
 
         bossbars.values().forEach(BossBar::removeAll);
         bossbars.clear();
+
+        CACHE.remove(uuid, this);
     }
 
     public enum Progress {
         INCREASE,
         DECREASE,
         STATIC
+    }
+
+    public static void unregister(Player player) {
+        for (final AnimatedBossbar bossbar : CACHE.values()) {
+            bossbar.removeViewer(player);
+            if (bossbar.bossbars.isEmpty()) bossbar.deleteBossBar();
+        }
     }
 
     public static void unregisterAll() {

@@ -12,7 +12,6 @@ import me.croabeast.takion.message.MessageSender;
 import me.croabeast.takion.message.MessageUtils;
 import me.croabeast.takion.message.TitleManager;
 import me.croabeast.takion.message.chat.ChatComponent;
-import me.croabeast.takion.misc.StringAligner;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.chat.ComponentSerializer;
 import org.apache.commons.lang.StringUtils;
@@ -81,7 +80,7 @@ final class ChannelManagerImpl implements ChannelManager {
                     return false;
                 }
 
-                String temp = StringAligner.align(message);
+                String temp = lib.getCharacterManager().align(message);
                 Matcher matcher = matcher(message);
                 if (matcher.find())
                     temp = message.replace(matcher.group(), "");
@@ -337,22 +336,6 @@ final class ChannelManagerImpl implements ChannelManager {
 
         ChannelImpl(String prefix) {
             this(prefix, null);
-        }
-
-        @Override
-        public void setPrefixes(@NotNull Collection<String> prefixes) {
-            this.prefixes.clear();
-            this.prefixes.addAll(prefixes);
-        }
-
-        @Override
-        public void addPrefix(@NotNull String prefix) {
-            this.prefixes.add(prefix);
-        }
-
-        @Override
-        public void removePrefix(@NotNull String prefix) {
-            this.prefixes.remove(prefix);
         }
 
         @Override

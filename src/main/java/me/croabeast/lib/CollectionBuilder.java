@@ -14,7 +14,7 @@ public final class CollectionBuilder<T> implements Iterable<T> {
 
     private final List<T> collection;
 
-    CollectionBuilder(Collection<T> collection) {
+    private CollectionBuilder(Collection<T> collection) {
         this.collection = new ArrayList<>(collection);
     }
 
@@ -112,7 +112,7 @@ public final class CollectionBuilder<T> implements Iterable<T> {
     public <C extends Collection<T>> C collect(Supplier<C> supplier) {
         Objects.requireNonNull(supplier);
 
-        C collection = supplier.get();
+        C collection = Objects.requireNonNull(supplier.get());
         collection.addAll(this.collection);
 
         return collection;

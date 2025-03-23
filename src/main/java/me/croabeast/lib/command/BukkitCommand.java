@@ -9,7 +9,6 @@ import me.croabeast.lib.reflect.Craft;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
-import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginIdentifiableCommand;
 import org.bukkit.command.SimpleCommandMap;
@@ -17,7 +16,6 @@ import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.Field;
 import java.util.*;
 import java.util.function.BiPredicate;
 
@@ -52,9 +50,11 @@ public abstract class BukkitCommand extends org.bukkit.command.defaults.BukkitCo
     @Setter @NotNull
     BiPredicate<CommandSender, String> wrongArgumentAction;
 
-    @RequiredArgsConstructor
+    @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
     private static class Entry {
+        @NotNull
         private final Plugin plugin;
+        @NotNull
         private final org.bukkit.command.Command command;
     }
 
@@ -220,12 +220,6 @@ public abstract class BukkitCommand extends org.bukkit.command.defaults.BukkitCo
         addPerm(cmd.getWildcardPermission());
     }
 
-    private Plugin fromLoaded(org.bukkit.command.Command command) {
-        return !(command instanceof PluginIdentifiableCommand) ?
-                null :
-                ((PluginIdentifiableCommand) command).getPlugin();
-    }
-
     /**
      * Registers the command with the Bukkit command map.
      * <p> If the command is already registered or not enabled, this method does nothing.
@@ -258,7 +252,12 @@ public abstract class BukkitCommand extends org.bukkit.command.defaults.BukkitCo
                     .removeIf(c1 -> Objects.equals(c1, c));
             c.unregister(map);
 
-            loadedCommand = new Entry(fromLoaded(c), c);
+            Plugin pl = !(c instanceof PluginIdentifiableCommand) ?
+                    null :
+                    ((PluginIdentifiableCommand) c).getPlugin();
+
+            if (pl != null)
+                loadedCommand = new Entry(pl, c);
         }
 
         loadCommandPermissions(this, true);
@@ -297,13 +296,15 @@ public abstract class BukkitCommand extends org.bukkit.command.defaults.BukkitCo
         c.unregister(map);
         loadCommandPermissions(this, false);
 
-        if (loadedCommand != null)
+        if (loadedCommand != null) {
             map.register(
                     loadedCommand.plugin
                             .getName()
                             .toLowerCase(Locale.ENGLISH),
                     loadedCommand.command
             );
+            loadedCommand = null;
+        }
 
         registered = false;
         return true;

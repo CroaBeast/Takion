@@ -26,11 +26,18 @@ public interface Channel {
         return getPrefixes().get(0);
     }
 
-    void setPrefixes(@NotNull Collection<String> prefixes);
+    default void setPrefixes(@NotNull Collection<String> prefixes) {
+        getPrefixes().clear();
+        getPrefixes().addAll(prefixes);
+    }
 
-    void addPrefix(@NotNull String prefix);
+    default void addPrefix(@NotNull String prefix) {
+        getPrefixes().add(prefix);
+    }
 
-    void removePrefix(@NotNull String prefix);
+    default void removePrefix(@NotNull String prefix) {
+        getPrefixes().remove(prefix);
+    }
 
     boolean isCaseSensitive();
 

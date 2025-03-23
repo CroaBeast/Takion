@@ -94,10 +94,10 @@ public class Webhook {
             return null;
         }
 
-        hook.setContent(sec.getString("content")).
-                setTts(sec.getBoolean("tts")).
-                setAvatarUrl(sec.getString("avatar-url")).
-                setUsername(sec.getString("username"));
+        hook.setContent(sec.getString("content"))
+                .setTts(sec.getBoolean("tts"))
+                .setAvatarUrl(sec.getString("avatar-url"))
+                .setUsername(sec.getString("username"));
 
         ConfigurationSection s = sec.getConfigurationSection("embeds");
         if (s == null) {
@@ -115,22 +115,22 @@ public class Webhook {
             ConfigurationSection em = s.getConfigurationSection(key);
             if (em == null) continue;
 
-            EmbedObject embed = new EmbedObject(token, message).
-                    setTitle(em.getString("title")).
-                    setDescription(em.getString("description")).
-                    setUrl(em.getString("url")).
-                    setFooter(
+            EmbedObject embed = new EmbedObject(token, message)
+                    .setTitle(em.getString("title"))
+                    .setDescription(em.getString("description"))
+                    .setUrl(em.getString("url"))
+                    .setFooter(
                             em.getString("footer.text"),
                             em.getString("footer.icon-url")
-                    ).
-                    setThumbnail(em.getString("thumbnail-url")).
-                    setImage(em.getString("image-url")).
-                    setAuthor(
+                    )
+                    .setThumbnail(em.getString("thumbnail-url"))
+                    .setImage(em.getString("image-url"))
+                    .setAuthor(
                             em.getString("author.name"),
                             em.getString("author.url"),
                             em.getString("author.icon-url")
-                    ).
-                    setColor(em.getString("color"));
+                    )
+                    .setColor(em.getString("color"));
 
             em = em.getConfigurationSection("fields");
             if (em == null) {

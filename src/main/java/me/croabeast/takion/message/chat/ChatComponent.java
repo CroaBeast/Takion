@@ -2,7 +2,6 @@ package me.croabeast.takion.message.chat;
 
 import lombok.Setter;
 import me.croabeast.takion.TakionLib;
-import me.croabeast.takion.misc.StringAligner;
 import me.croabeast.lib.applier.StringApplier;
 import me.croabeast.lib.util.ArrayUtils;
 import me.croabeast.lib.util.TextUtils;
@@ -62,10 +61,11 @@ public final class ChatComponent {
             return;
         }
 
-        String line = StringApplier.simplified(string).
-                apply(TextUtils.CONVERT_OLD_JSON).
-                apply(lib.getSmallCapsAction()::act).
-                apply(StringAligner::align).toString();
+        final String line = StringApplier.simplified(string)
+                .apply(TextUtils.CONVERT_OLD_JSON)
+                .apply(lib.getSmallCapsAction()::act)
+                .apply(lib.getCharacterManager()::align)
+                .toString();
 
         Matcher match = TextUtils.FORMAT_CHAT_PATTERN.matcher(line);
         int last = 0;

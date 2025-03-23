@@ -126,10 +126,10 @@ public class RawWebhook {
         List<JSONObject> embedObjects = new ArrayList<>();
 
         for (EmbedObject embed : embeds) {
-            JSONObject jsonEmbed = new JSONObject().
-                    put("description", embed.getDescription()).
-                    put("url", embed.getUrl()).
-                    put("title", embed.getTitle());
+            JSONObject jsonEmbed = new JSONObject()
+                    .put("description", embed.getDescription())
+                    .put("url", embed.getUrl())
+                    .put("title", embed.getTitle());
 
             if (embed.getColor() != null) {
                 Color color = embed.getColor();

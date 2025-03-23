@@ -3,6 +3,7 @@ package me.croabeast.takion.message;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import me.croabeast.lib.CollectionBuilder;
 import me.croabeast.takion.TakionLib;
 import me.croabeast.takion.channel.Channel;
 import me.croabeast.takion.placeholder.Placeholder;
@@ -11,6 +12,7 @@ import me.croabeast.lib.applier.StringApplier;
 import me.croabeast.lib.util.ArrayUtils;
 import me.croabeast.lib.util.ReplaceUtils;
 import org.apache.commons.lang.StringUtils;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -74,6 +76,14 @@ public class MessageSender {
 
         this.targets.removeIf(Objects::isNull);
         return this;
+    }
+
+    public MessageSender setTargets(CommandSender... senders) {
+        return setTargets(CollectionBuilder
+                .of(senders)
+                .map(s -> s instanceof Player ? (Player) s : null)
+                .filter(Objects::nonNull).toSet()
+        );
     }
 
     public MessageSender setTargets(Player... targets) {
