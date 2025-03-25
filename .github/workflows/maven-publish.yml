@@ -1,0 +1,30 @@
+name: Build and Package Spigot Plugin
+
+on:
+  push:
+    branches: [ "master" ] # Cambia esto según la rama principal de tu repo
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 8
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'  # Usa Temurin para Java 8
+        java-version: '8'
+
+    - name: Build with Maven
+      run: mvn clean package
+
+    - name: Upload plugin artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: Spigot-Plugin
+        path: target/*.jar  # Asegúrate de que el JAR se genera aquí
