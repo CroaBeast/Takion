@@ -183,15 +183,21 @@ public class MessageSender {
             if (lib.getBlankSpacesAction().act(targets, message.message)
                     && !message.isAllowed()) continue;
 
-            boolean wasSentBefore = false;
+            boolean wasSent = false, wasLogged = false;
+
             for (Player target : targets) {
                 boolean isSent = message.send(target);
 
-                if (isSent && !wasSentBefore) wasSentBefore = true;
+                if (isSent && !wasSent)
+                    wasSent = true;
+
+                if (wasLogged) continue;
+
                 message.log(isSent);
+                wasLogged = true;
             }
 
-            atLeastOneIsSent = wasSentBefore;
+            if (!atLeastOneIsSent) atLeastOneIsSent = wasSent;
         }
         return atLeastOneIsSent;
     }
