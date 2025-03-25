@@ -64,7 +64,6 @@ jobs:
         draft: false
         prerelease: false
         files: |
-          target/takion-*.jar
           target/takion-latest.jar
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
