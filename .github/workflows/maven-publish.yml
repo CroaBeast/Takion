@@ -1,8 +1,8 @@
-name: Build and Package Spigot Plugin
+name: Package & Release Plugin
 
 on:
   push:
-    branches: [ "master" ] # Cambia esto según la rama principal de tu repo
+    branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
 
@@ -26,5 +26,20 @@ jobs:
     - name: Upload plugin artifact
       uses: actions/upload-artifact@v4
       with:
-        name: takion.jar
+        name: Plugin
         path: target/takion-*.jar
+
+    - name: Get Plugin Version
+      id: version
+      run: echo "VERSION=$(ls target/takion-*.jar | sed -E 's/.*takion-(.*).jar/\1/')" >> $GITHUB_ENV
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v${{ env.VERSION }}
+        release_name: Release v${{ env.VERSION }}
+        draft: false
+        prerelease: false
+        files: target/takion-*.jar
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
