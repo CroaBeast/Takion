@@ -53,6 +53,9 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: Rename & Upload Latest Release
+      run: cp target/takion-*.jar target/takion-latest.jar
+
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v1
       with:
@@ -60,6 +63,9 @@ jobs:
         name: Release v${{ env.VERSION }}
         draft: false
         prerelease: false
-        files: target/takion-*.jar
+        files: |
+          target/takion-*.jar
+          target/takion-latest.jar
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
