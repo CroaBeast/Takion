@@ -26,5 +26,5 @@ jobs:
     - name: Upload plugin artifact
       uses: actions/upload-artifact@v4
       with:
-        name: Spigot-Plugin
-        path: target/*.jar  # Asegúrate de que el JAR se genera aquí
+        name: Plugin-Build
+        path: target/*.jar
