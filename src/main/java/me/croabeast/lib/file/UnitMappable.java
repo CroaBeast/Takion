@@ -21,6 +21,10 @@ public interface UnitMappable<U extends ConfigurableUnit> extends Mappable<U> {
         return order(ascendant ? Comparator.naturalOrder() : Comparator.reverseOrder());
     }
 
+    default UnitMappable<U> copy() {
+        return of(this);
+    }
+
     /**
      * Creates a UnitMappable instance from the provided map.
      *

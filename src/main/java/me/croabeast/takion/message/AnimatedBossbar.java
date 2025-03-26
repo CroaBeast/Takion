@@ -347,7 +347,7 @@ public class AnimatedBossbar {
     }
 
     public static void unregister(Player player) {
-        for (final AnimatedBossbar bossbar : CACHE.values()) {
+        for (AnimatedBossbar bossbar : CACHE.values()) {
             bossbar.removeViewer(player);
             if (bossbar.bossbars.isEmpty()) bossbar.deleteBossBar();
         }

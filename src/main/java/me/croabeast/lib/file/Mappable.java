@@ -21,6 +21,10 @@ public interface Mappable<T> extends Map<Integer, Set<T>> {
         return order(ascendant ? Comparator.naturalOrder() : Comparator.reverseOrder());
     }
 
+    default Mappable<T> copy() {
+        return of(this);
+    }
+
     default <C extends Collection<T>> C values(Supplier<C> supplier) {
         Objects.requireNonNull(supplier);
         C collection = supplier.get();

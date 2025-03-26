@@ -4,15 +4,18 @@ import me.croabeast.lib.util.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public interface CharacterManager {
 
-    CharacterInfo DEFAULT = CharacterInfo.of('a', 5);
+    CharacterInfo DEFAULT_INFO = CharacterInfo.of('a', 5);
 
     CharacterInfo getInfo(char c);
 
     default CharacterInfo getInfo(String string) {
         Character c = toCharacter(string);
-        return c == null ? DEFAULT : getInfo(c);
+        return c == null ? DEFAULT_INFO : getInfo(c);
     }
 
     void addCharacter(char c, int length);
@@ -22,17 +25,18 @@ public interface CharacterManager {
         if (c != null) addCharacter(c, length);
     }
 
-    void removeCharacters(char... chars);
+    void removeCharacters(Character... chars);
 
     default void removeCharacters(String... strings) {
-        if (ArrayUtils.isArrayEmpty(strings))
-            return;
+        if (ArrayUtils.isArrayEmpty(strings)) return;
 
+        List<Character> list = new ArrayList<>();
         for (String input : strings) {
-            Character character = toCharacter(input);
-            if (character != null)
-                removeCharacters(character);
+            Character c = toCharacter(input);
+            if (c != null) list.add(c);
         }
+
+        removeCharacters(list.toArray(new Character[0]));
     }
 
     String align(int limit, String string);

@@ -23,7 +23,7 @@ final class MapUtils {
 
     static class BaseMapImpl<T> implements Mappable<T> {
 
-        final Map<Integer, Set<T>> map = new TreeMap<>();
+        final Map<Integer, Set<T>> map = new TreeMap<>(Comparator.reverseOrder());
 
         BaseMapImpl(Map<Integer, Set<T>> map) {
             putAll(map);

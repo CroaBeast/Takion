@@ -48,6 +48,10 @@ public interface SectionMappable extends Mappable<ConfigurationSection> {
         return UnitMappable.of(map);
     }
 
+    default SectionMappable copy() {
+        return of(this);
+    }
+
     /**
      * Creates a SectionMappable instance from the provided map.
      * This method is used to wrap a standard map into a SectionMappable interface.

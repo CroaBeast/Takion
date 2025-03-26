@@ -174,16 +174,17 @@ public class TakionLib {
             private final Map<Character, CharacterInfo> map = new LinkedHashMap<>();
 
             {
-                for (DefaultCharacter character : DefaultCharacter.values())
-                    map.put(character.getCharacter(), character);
+                for (DefaultCharacter c : DefaultCharacter.values())
+                    map.put(c.getCharacter(), c);
 
-                for (SmallCaps caps : SmallCaps.values()) map.put(caps.getCharacter(), caps);
+                for (SmallCaps caps : SmallCaps.values())
+                    map.put(caps.getCharacter(), caps);
             }
 
             @Override
             public CharacterInfo getInfo(char c) {
                 CharacterInfo info = map.getOrDefault(c, null);
-                return info == null ? DEFAULT : info;
+                return info == null ? DEFAULT_INFO : info;
             }
 
             @Override
@@ -192,7 +193,7 @@ public class TakionLib {
             }
 
             @Override
-            public void removeCharacters(char... chars) {
+            public void removeCharacters(Character... chars) {
                 if (!ArrayUtils.isArrayEmpty(chars)) for (char c : chars) map.remove(c);
             }
 
@@ -209,7 +210,7 @@ public class TakionLib {
                 String temp = StringApplier.simplified(before)
                         .apply(PrismaticAPI::stripAll)
                         .apply(TextUtils.STRIP_JSON)
-                        .apply(getCharacterAction()::act).toString();
+                        .apply(characterAction::act).toString();
 
                 int size = 0;
                 boolean previousCode = false;
