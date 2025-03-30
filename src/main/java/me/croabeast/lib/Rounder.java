@@ -7,14 +7,17 @@ import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
 /**
- * The {@code Rounder} object rounds a number using a mutable
- * amount of fixed decimals.
+ * A utility class for rounding numbers to a specified number of decimal places.
+ * <p>
+ * The {@code Rounder} class supports various numeric types (e.g., {@link Double}, {@link Integer}, {@link Float}, etc.)
+ * and provides methods to round a given number to a default of 2 decimal places or a custom amount.
+ * Internally, it formats the number into a string using a customizable pattern and then parses it back
+ * to the original numeric type.
+ * </p>
  *
- * @param <T> the number class type
- *
- * @author CroaBeast
- * @since 1.4
+ * @param <T> the type of the number, which must extend {@link Number}
  */
+@SuppressWarnings("unchecked")
 public final class Rounder<T extends Number> {
 
     private final T number;
@@ -61,25 +64,23 @@ public final class Rounder<T extends Number> {
     }
 
     /**
-     * Rounds a number to a two-decimal number.
+     * Rounds the given number to the default of 2 decimal places.
      *
-     * @param t a number
-     * @return the rounded number
-     *
-     * @param <T> a number class
+     * @param t the number to be rounded
+     * @param <T> the type of the number
+     * @return the rounded number with 2 decimal places
      */
     public static <T extends Number> T round(T t) {
         return new Rounder<>(t).result();
     }
 
     /**
-     * Rounds a number to another number with a fixed amount of decimals.
+     * Rounds the given number to the specified number of decimal places.
      *
-     * @param decimalAmount a fixed amount of decimals
-     * @param t a number
-     * @return the rounded number
-     *
-     * @param <T> a number class
+     * @param decimalAmount the desired number of decimal places
+     * @param t the number to be rounded
+     * @param <T> the type of the number
+     * @return the rounded number with the specified decimal places
      */
     public static <T extends Number> T round(int decimalAmount, T t) {
         return new Rounder<>(t).setAmount(decimalAmount).result();

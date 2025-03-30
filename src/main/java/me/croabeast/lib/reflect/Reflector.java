@@ -18,40 +18,85 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
- * Reflector is a class designed to simplify reflection operations.
+ * A powerful utility for performing reflection operations in a fluent and concise manner.
+ * <p>
+ * The {@code Reflector} class encapsulates a target class and provides methods to retrieve
+ * its constructors, fields, methods, and inner classes. It also offers helper functions to
+ * invoke methods, access and modify fields, and create new instances dynamically.
+ * </p>
+ * <p>
+ * This tool is particularly useful in plugin development where access to internal server classes
+ * (such as NMS or CraftBukkit classes) is needed. It abstracts away the boilerplate associated with
+ * reflection and helps in writing more readable and maintainable code.
+ * </p>
+ * <p>
+ * <strong>Example usage:</strong>
+ * <pre><code>
+ * // Create a Reflector for a target class by its fully-qualified name:
+ * Reflector reflector = Reflector.of("net.minecraft.server.v1_16_R3.EntityPlayer");
  *
- * <p> It allows for easy access and manipulation of methods, fields, and constructors
- * of a specified class.
+ * // Retrieve a declared method and invoke it:
+ * Method method = reflector.getMethod("someInternalMethod", String.class);
+ * Object result = method.invoke(someEntityPlayerInstance, "argument");
+ *
+ * // Alternatively, invoke a method using the fluent call:
+ * Object resultFluent = reflector.call("someInternalMethod", "argument");
+ * </code></pre>
+ * </p>
+ *
+ * <p>
+ * Additionally, the {@code Reflector} supports creating new instances, accessing private fields,
+ * and converting return values into new Reflector objects for further chained operations.
+ * </p>
+ *
+ * @see java.lang.reflect
  */
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 @SuppressWarnings("unchecked")
 public final class Reflector {
 
+    /**
+     * The current Bukkit API version, used for dynamic resolution of NMS classes.
+     */
     private static final String API = ServerInfoUtils.BUKKIT_API_VERSION;
 
     /**
-     * The base package name for NMS classes.
+     * The package path for NMS (net.minecraft.server) classes, dynamically constructed based on the API version.
      */
     public static final String NMS_PACKAGE = "net.minecraft.server." + API + (StringUtils.isNotBlank(API) ? "." : "");
 
     /**
-     * The base package name for CraftBukkit classes.
+     * The package path for CraftBukkit classes, derived from the server's implementation.
      */
     public static final String CRAFT_BUKKIT_PACKAGE = Bukkit.getServer().getClass().getPackage().getName();
 
+    /**
+     * The target class that this Reflector instance wraps.
+     */
     private final Class<?> clazz;
+
+    /**
+     * An optional supplier used to provide an initial object instance for non-static reflection operations.
+     */
     @Getter
     private Supplier<Object> initial = null;
 
+    /**
+     * Returns an object from the initial supplier if available; otherwise returns the provided object.
+     *
+     * @param o the object to fallback to if the initial supplier returns {@code null}
+     * @return the object from the initial supplier or the fallback object
+     */
     private Object fromInitial(Object o) {
         return o != null ? o : (initial != null ? initial.get() : null);
     }
 
     /**
-     * Sets the initial object supplier for this Reflector.
+     * Sets the supplier for the initial object instance. This can be used to delay the instantiation
+     * or to provide dynamic values for non-static method invocations.
      *
-     * @param supplier the object supplier
-     * @return this Reflector instance
+     * @param supplier the supplier to set (must not be null)
+     * @return this Reflector instance for chaining
      */
     public Reflector setInitial(Supplier<Object> supplier) {
         this.initial = Objects.requireNonNull(supplier);
@@ -59,51 +104,60 @@ public final class Reflector {
     }
 
     /**
-     * Gets the type of the reflected class.
+     * Returns the target class wrapped by this Reflector.
      *
-     * @return the class type
+     * @return the target {@code Class<?>}
      */
     public Class<?> getType() {
         return clazz;
     }
 
     /**
-     * Gets all methods of the reflected class.
+     * Retrieves a list of all declared methods of the target class.
      *
-     * @return a list of methods
+     * @return a {@code List} of {@link Method} objects representing the declared methods
      */
     public List<Method> getMethods() {
         return ArrayUtils.toList(clazz.getDeclaredMethods());
     }
 
     /**
-     * Gets all fields of the reflected class.
+     * Retrieves a list of all declared fields of the target class.
      *
-     * @return a list of fields
+     * @return a {@code List} of {@link Field} objects representing the declared fields
      */
     public List<Field> getFields() {
         return ArrayUtils.toList(clazz.getDeclaredFields());
     }
 
     /**
-     * Gets all constructors of the reflected class.
+     * Retrieves a list of all declared constructors of the target class.
      *
-     * @return a list of constructors
+     * @return a {@code List} of {@link Constructor} objects representing the declared constructors
      */
     public List<Constructor<?>> getConstructors() {
         return ArrayUtils.toList(clazz.getDeclaredConstructors());
     }
 
+    /**
+     * Retrieves a list of all declared inner classes of the target class.
+     *
+     * @return a {@code List} of {@link Class} objects representing the declared inner classes
+     */
     public List<Class<?>> getClasses() {
         return ArrayUtils.toList(clazz.getDeclaredClasses());
     }
 
     /**
-     * Gets a specific method by name and parameter types.
+     * Retrieves a declared method by name and parameter types.
+     * <p>
+     * If the method is not accessible, its accessibility is set to {@code true}.
+     * </p>
      *
-     * @param name the method name
-     * @param parameters the method parameter types
-     * @return the method
+     * @param name       the name of the method
+     * @param parameters the parameter types of the method
+     * @return the {@link Method} matching the given signature
+     * @throws NullPointerException if the method is not found
      */
     public Method getMethod(String name, Class<?>... parameters) {
         Method method;
@@ -112,16 +166,19 @@ public final class Reflector {
         } catch (Exception e) {
             throw new NullPointerException(e.getLocalizedMessage());
         }
-
         if (!method.isAccessible()) method.setAccessible(true);
         return method;
     }
 
     /**
-     * Gets a specific field by name.
+     * Retrieves a declared field by name.
+     * <p>
+     * If the field is not accessible, its accessibility is set to {@code true}.
+     * </p>
      *
-     * @param name the field name
-     * @return the field
+     * @param name the name of the field
+     * @return the {@link Field} with the specified name
+     * @throws NullPointerException if the field is not found
      */
     public Field getField(String name) {
         Field field;
@@ -130,38 +187,42 @@ public final class Reflector {
         } catch (Exception e) {
             throw new NullPointerException(e.getLocalizedMessage());
         }
-
         if (!field.isAccessible()) field.setAccessible(true);
         return field;
     }
 
     /**
-     * Gets a specific field by type.
+     * Retrieves a declared field from the specified class that is not of the same type as the class itself.
+     * <p>
+     * This method is useful when trying to find a field that holds an instance of a different type.
+     * </p>
      *
-     * @param clazz the field type
-     * @return the field
+     * @param clazz the class in which to search for the field
+     * @return the first {@link Field} that does not have the same type as the provided class
+     * @throws NullPointerException if no such field is found
      */
     public Field getField(Class<?> clazz) {
         Field field = null;
-
         for (Field f : clazz.getDeclaredFields())
             if (!Objects.equals(f.getType(), clazz)) {
                 field = f;
                 break;
             }
-
         Objects.requireNonNull(field);
         if (!field.isAccessible())
             field.setAccessible(true);
-
         return field;
     }
 
     /**
-     * Gets a specific constructor by parameter types.
+     * Retrieves a declared constructor with the specified parameter types.
+     * <p>
+     * If the constructor is not accessible, its accessibility is set to {@code true}.
+     * </p>
      *
-     * @param parameters the constructor parameter types
-     * @return the constructor
+     * @param parameters the parameter types of the constructor
+     * @return the {@link Constructor} matching the given signature
+     * @throws NullPointerException if the constructor is not found
      */
     public Constructor<?> getConstructor(Class<?>... parameters) {
         Constructor<?> c;
@@ -170,59 +231,77 @@ public final class Reflector {
         } catch (Exception e) {
             throw new NullPointerException(e.getLocalizedMessage());
         }
-
         if (!c.isAccessible()) c.setAccessible(true);
         return c;
     }
 
     /**
-     * Calls a method on the initial object or a specified object.
+     * Invokes a method on the target object (or an object provided by the initial supplier) with the given parameters.
+     * <p>
+     * The method is looked up by name and parameter types inferred from the provided arguments.
+     * </p>
      *
-     * @param initial    the initial object (optional)
-     * @param methodName the method name
-     * @param objects    the method arguments
-     * @param <T>        the return type
-     * @return the result of the method call
+     * @param <T>        the expected return type
+     * @param initial    an optional initial object to invoke the method on; if {@code null}, the supplier's value is used
+     * @param methodName the name of the method to invoke
+     * @param objects    the arguments to pass to the method
+     * @return the result of the method invocation, cast to type {@code T}
      */
     @SneakyThrows
     public <T> T call(Object initial, String methodName, Object... objects) {
         if (ArrayUtils.isArrayEmpty(objects)) objects = new Object[0];
-
         Class<?>[] classes = new Class[objects.length];
         if (objects.length > 0)
             for (int i = 0; i < objects.length; i++)
                 classes[i] = objects[i].getClass();
-
         return (T) getMethod(methodName, classes).invoke(fromInitial(initial), objects);
     }
 
     /**
-     * Calls a method on the initial object.
+     * Invokes a method on the target object using the specified method name and parameters.
+     * <p>
+     * This is a convenience overload that assumes a {@code null} initial object.
+     * </p>
      *
-     * @param methodName the method name
-     * @param objects    the method arguments
-     * @param <T>        the return type
-     * @return the result of the method call
+     * @param <T>        the expected return type
+     * @param methodName the name of the method to invoke
+     * @param objects    the arguments to pass to the method
+     * @return the result of the method invocation, cast to type {@code T}
      */
     public <T> T call(String methodName, Object... objects) {
         return call(null, methodName, objects);
     }
 
+    /**
+     * Invokes a method on the target object and wraps the result in a new {@code Reflector} for further reflection.
+     *
+     * @param initial    an optional initial object to invoke the method on
+     * @param methodName the name of the method to invoke
+     * @param objects    the arguments to pass to the method
+     * @return a new {@code Reflector} wrapping the result of the method call
+     */
     public Reflector callAsReflector(Object initial, String methodName, Object... objects) {
         return Reflector.from(() -> call(initial, methodName, objects));
     }
 
+    /**
+     * Invokes a method on the target object and wraps the result in a new {@code Reflector} for further reflection.
+     *
+     * @param methodName the name of the method to invoke
+     * @param objects    the arguments to pass to the method
+     * @return a new {@code Reflector} wrapping the result of the method call
+     */
     public Reflector callAsReflector(String methodName, Object... objects) {
         return Reflector.from(() -> call(methodName, objects));
     }
 
     /**
-     * Gets a field value from the initial object or a specified object.
+     * Retrieves the value of a field from the target object (or an object provided by the initial supplier).
      *
-     * @param initial   the initial object (optional)
-     * @param fieldName the field name
-     * @param <T>       the field type
-     * @return the field value
+     * @param <T>       the expected type of the field value
+     * @param initial   an optional initial object from which to retrieve the field value; if {@code null}, the supplier's value is used
+     * @param fieldName the name of the field
+     * @return the value of the field, cast to type {@code T}
      */
     @SneakyThrows
     public <T> T get(Object initial, String fieldName) {
@@ -230,23 +309,23 @@ public final class Reflector {
     }
 
     /**
-     * Gets a field value from the initial object.
+     * Retrieves the value of a field with the given name from the target object.
      *
-     * @param fieldName the field name
-     * @param <T>       the field type
-     * @return the field value
+     * @param <T>       the expected type of the field value
+     * @param fieldName the name of the field
+     * @return the field value, cast to type {@code T}
      */
     public <T> T get(String fieldName) {
         return get(null, fieldName);
     }
 
     /**
-     * Gets a field value of a specific type from the initial object or a specified object.
+     * Retrieves the value of a field (by matching type) from the target object.
      *
-     * @param initial the initial object (optional)
-     * @param clazz   the field type
-     * @param <T>     the field type
-     * @return the field value
+     * @param <T>     the expected type of the field value
+     * @param clazz   the type of the field to retrieve
+     * @param initial an optional initial object from which to retrieve the field value; if {@code null}, the supplier's value is used
+     * @return the field value, cast to type {@code T}
      */
     @SneakyThrows
     public <T> T get(Object initial, Class<?> clazz) {
@@ -254,42 +333,68 @@ public final class Reflector {
     }
 
     /**
-     * Gets a field value of a specific type from the initial object.
+     * Retrieves the value of a field (by matching type) from the target object.
      *
-     * @param clazz the field type
-     * @param <T>   the field type
-     * @return the field value
+     * @param <T>   the expected type of the field value
+     * @param clazz the type of the field to retrieve
+     * @return the field value, cast to type {@code T}
      */
     public <T> T get(Class<?> clazz) {
         return get(null, clazz);
     }
 
+    /**
+     * Retrieves a field value and wraps it in a new {@code Reflector} for further reflective operations.
+     *
+     * @param initial   an optional initial object from which to retrieve the field value
+     * @param fieldName the name of the field
+     * @return a new {@code Reflector} wrapping the retrieved field value
+     */
     @SneakyThrows
     public Reflector getAsReflector(Object initial, String fieldName) {
         return Reflector.from(() -> get(initial, fieldName));
     }
 
+    /**
+     * Retrieves a field value by name and wraps it in a new {@code Reflector} for further reflective operations.
+     *
+     * @param fieldName the name of the field
+     * @return a new {@code Reflector} wrapping the retrieved field value
+     */
     @SneakyThrows
     public Reflector getAsReflector(String fieldName) {
         return Reflector.from(() -> get(fieldName));
     }
 
+    /**
+     * Retrieves a field value (by matching type) and wraps it in a new {@code Reflector} for further reflective operations.
+     *
+     * @param initial an optional initial object from which to retrieve the field value
+     * @param clazz   the type of the field to retrieve
+     * @return a new {@code Reflector} wrapping the retrieved field value
+     */
     @SneakyThrows
     public Reflector getAsReflector(Object initial, Class<?> clazz) {
         return Reflector.from(() -> get(initial, clazz));
     }
 
+    /**
+     * Retrieves a field value (by matching type) and wraps it in a new {@code Reflector} for further reflective operations.
+     *
+     * @param clazz the type of the field to retrieve
+     * @return a new {@code Reflector} wrapping the retrieved field value
+     */
     @SneakyThrows
     public Reflector getAsReflector(Class<?> clazz) {
         return Reflector.from(() -> get(clazz));
     }
 
     /**
-     * Sets a field value on the initial object or a specified object.
+     * Sets the value of a field with the specified name on the target object (or an object provided by the initial supplier).
      *
-     * @param initial   the initial object (optional)
-     * @param fieldName the field name
-     * @param value     the value to set
+     * @param initial   an optional initial object on which to set the field value; if {@code null}, the supplier's value is used
+     * @param fieldName the name of the field
+     * @param value     the value to set in the field
      */
     @SneakyThrows
     public void set(Object initial, String fieldName, Object value) {
@@ -297,93 +402,101 @@ public final class Reflector {
     }
 
     /**
-     * Sets a field value on the initial object.
+     * Sets the value of a field with the specified name on the target object.
      *
-     * @param fieldName the field name
-     * @param value     the value to set
+     * @param fieldName the name of the field
+     * @param value     the value to set in the field
      */
     public void set(String fieldName, Object value) {
         set(null, fieldName, value);
     }
 
     /**
-     * Creates an instance of the reflected class using the specified constructor arguments.
+     * Creates a new instance of the target class using the constructor that matches the provided arguments.
      *
-     * @param objects the constructor arguments
-     * @param <T>     the instance type
-     * @return the new instance
+     * @param objects the arguments to pass to the constructor
+     * @param <T>     the type of the created instance
+     * @return a new instance of type {@code T}
      */
     @SneakyThrows
     public <T> T create(Object... objects) {
         if (ArrayUtils.isArrayEmpty(objects)) objects = new Object[0];
-
         Class<?>[] classes = new Class[objects.length];
         if (objects.length > 0)
             for (int i = 0; i < objects.length; i++)
                 classes[i] = objects[i].getClass();
-
         return (T) getConstructor(classes).newInstance(objects);
     }
 
+    /**
+     * Creates a new instance of the target class using the provided constructor arguments,
+     * and wraps the resulting object in a {@code Reflector} for further reflection.
+     *
+     * @param objects the arguments to pass to the constructor
+     * @return a new {@code Reflector} wrapping the created instance
+     */
     @SneakyThrows
     public Reflector createAsReflector(Object... objects) {
         return Reflector.from(() -> create(objects));
     }
 
     /**
-     * Creates a Reflector for the specified class.
+     * Creates a new {@code Reflector} for the specified target class.
      *
-     * @param clazz the class to reflect
-     * @return a new Reflector instance
+     * @param clazz the target class
+     * @return a new {@code Reflector} wrapping the target class
      */
     public static Reflector of(Class<?> clazz) {
         return new Reflector(Objects.requireNonNull(clazz));
     }
 
     /**
-     * Creates a Reflector for the specified class name.
+     * Creates a new {@code Reflector} for the class with the specified fully-qualified name.
      *
-     * @param path the class name
-     * @return a new Reflector instance
+     * @param path the fully-qualified class name
+     * @return a new {@code Reflector} wrapping the target class
+     * @throws IllegalStateException if the class cannot be found
      */
     public static Reflector of(String path) {
         Exceptions.validate(StringUtils::isNotBlank, path);
-
         Class<?> clazz;
         try {
             clazz = Class.forName(path);
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
-
         return of(clazz);
     }
 
     /**
-     * Creates a Reflector for the specified NMS class name.
+     * Creates a new {@code Reflector} for an NMS (net.minecraft.server) class with the given name.
      *
-     * @param className the NMS class name
-     * @return a new Reflector instance
+     * @param className the name of the NMS class
+     * @return a new {@code Reflector} wrapping the NMS class
      */
     public static Reflector ofNms(String className) {
         return of(NMS_PACKAGE + className);
     }
 
     /**
-     * Creates a Reflector for the specified CraftBukkit class name.
+     * Creates a new {@code Reflector} for a CraftBukkit class with the given name.
      *
-     * @param className the CraftBukkit class name
-     * @return a new Reflector instance
+     * @param className the name of the CraftBukkit class
+     * @return a new {@code Reflector} wrapping the CraftBukkit class
      */
     public static Reflector ofCraftBukkit(String className) {
         return of(CRAFT_BUKKIT_PACKAGE + className);
     }
 
     /**
-     * Creates a Reflector from a supplier providing an initial object.
+     * Creates a new {@code Reflector} from a supplier that provides an object instance.
+     * <p>
+     * The supplier is stored as the initial supplier for this reflector, allowing future operations
+     * to work with the supplied instance.
+     * </p>
      *
-     * @param supplier the object supplier
-     * @return a new Reflector instance
+     * @param supplier a supplier that provides an object instance
+     * @return a new {@code Reflector} wrapping the class of the supplied object
      */
     public static Reflector from(Supplier<Object> supplier) {
         return new Reflector(supplier.get().getClass()).setInitial(supplier);

@@ -4,8 +4,18 @@ import lombok.Getter;
 
 import java.util.Locale;
 
+/**
+ * An enumeration of default characters along with their associated display widths.
+ * <p>
+ * This enum implements {@link CharacterInfo} and provides a predefined list of characters
+ * (letters, numbers, and symbols) with configurable length values for text formatting purposes.
+ * </p>
+ * Each enum constant represents a character with a default or custom length, which can be used
+ * to determine how much space the character occupies when rendered (for example, in custom chat formats or UI elements).
+ */
 @Getter
 public enum DefaultCharacter implements CharacterInfo {
+    // Alphabet characters with default length (5) unless specified
     A('A'),
     a('a'),
     B('B'),
@@ -59,6 +69,7 @@ public enum DefaultCharacter implements CharacterInfo {
     Z('Z'),
     z('z'),
 
+    // Numeric characters
     NUM_1('1'),
     NUM_2('2'),
     NUM_3('3'),
@@ -70,6 +81,7 @@ public enum DefaultCharacter implements CharacterInfo {
     NUM_9('9'),
     NUM_0('0'),
 
+    // Special characters with optional custom lengths
     EXCLAMATION_POINT('!', 1),
     AT_SYMBOL('@', 6),
     NUM_SIGN('#'),
@@ -106,29 +118,53 @@ public enum DefaultCharacter implements CharacterInfo {
     COMMA(',', 1),
     SPACE(' ', 3);
 
+    /**
+     * A lowercased name of the enum constant, used for identification purposes.
+     */
     final String name;
+    /**
+     * The character represented by this enum constant.
+     */
     final char character;
+    /**
+     * The display length (or width) of the character. This value is used in text alignment and formatting.
+     * The default length is 5 unless a custom value is provided.
+     */
     int length = 5;
 
     DefaultCharacter(char character, int length) {
         this(character);
         this.length = length;
     }
-    
+
     DefaultCharacter(char character) {
         this.character = character;
         name = name().toLowerCase(Locale.ENGLISH);
     }
 
+    /**
+     * Returns a string representation of the default character, including its name, character value, and length.
+     *
+     * @return a string representation of the character info
+     */
     @Override
     public String toString() {
         return "DefaultCharacter{name='" + name + "', character='" + character + "', length=" + length + '}';
     }
-    
+
+    /**
+     * Retrieves the display length for the specified character.
+     * <p>
+     * This static method iterates over the available default characters and returns the length
+     * for the matching character. If the character is not found, a length of 0 is returned.
+     * </p>
+     *
+     * @param character the character whose length is to be retrieved
+     * @return the display length of the character, or 0 if the character is not defined
+     */
     public static int getLength(char character) {
         for (DefaultCharacter def : values())
             if (def.character == character) return def.length;
-
         return 0;
     }
 }

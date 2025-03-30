@@ -1,7 +1,6 @@
 package me.croabeast.takion.message;
 
 import lombok.experimental.UtilityClass;
-import me.croabeast.lib.reflect.Reflector;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.entity.Player;
@@ -11,27 +10,6 @@ import java.util.function.UnaryOperator;
 
 @UtilityClass
 public class MessageUtils {
-
-    boolean test(Player player, String message) {
-        if (player == null) return false;
-
-        if (ReflectUtils.VERSION < 11.0) {
-            try {
-                Class<?> clazz = ReflectUtils.from(null, "IChatBaseComponent").getDeclaredClasses()[0];
-                final Object result = "{\"text\":\"" + message + "\"}";
-
-                Reflector.from(() -> player).callAsReflector("getHandle")
-                        .callAsReflector("playerConnection")
-                        .call("sendPacket", Reflector.of(clazz).call("a", result));
-            } catch (Exception e) {
-                e.printStackTrace();
-                return false;
-            }
-        }
-
-        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(message));
-        return true;
-    }
 
     public boolean sendActionBar(Player player, String message) {
         if (player == null) return false;

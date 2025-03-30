@@ -1,5 +1,6 @@
 package me.croabeast.takion;
 
+import me.croabeast.lib.MetricsLoader;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -16,11 +17,21 @@ public final class TakionPlugin extends JavaPlugin {
     @Override
     public void onLoad() {
         this.lib = new TakionLib(this);
-        lib.getLogger().log("&eTakion &7was loaded successfully in the server.");
+
+        Plugin plugin = lib.getVaultHolder().getPlugin();
+
+        MetricsLoader.initialize(this, 25287)
+                .addDrillDownPie(
+                        "permissionPlugin", "Permission Plugin",
+                        plugin != null ? plugin.getName() : null,
+                        "None"
+                );
+
+        lib.getLogger().log("&eTakion &7was loaded successfully.");
     }
 
     @Override
     public void onDisable() {
-        lib.getLogger().log("&eTakion &7was disabled successfully from the server.");
+        lib.getLogger().log("&eTakion &7was disabled successfully.");
     }
 }
