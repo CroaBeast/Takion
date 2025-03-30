@@ -1,4 +1,4 @@
-package me.croabeast.lib.file;
+package me.croabeast.file;
 
 import lombok.experimental.UtilityClass;
 import org.jetbrains.annotations.Nullable;

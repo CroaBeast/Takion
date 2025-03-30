@@ -1,4 +1,4 @@
-package me.croabeast.lib.file;
+package me.croabeast.file;
 
 import lombok.AllArgsConstructor;
 import org.bukkit.configuration.ConfigurationSection;
@@ -16,6 +16,20 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
+/**
+ * A utility class for updating YAML configuration files while preserving comments and formatting.
+ * This class ensures that existing configurations remain intact while merging new keys and values.
+ *
+ * <p>Designed for scenarios where configuration files need to be updated dynamically
+ * without losing manually added comments, spacing, or structure.</p>
+ *
+ * <p>Features:</p>
+ * <ul>
+ *     <li>Keeps original file comments and formatting.</li>
+ *     <li>Only adds missing keys from a default configuration.</li>
+ *     <li>Ensures a non-destructive update process.</li>
+ * </ul>
+ */
 @SuppressWarnings("unchecked")
 public final class YAMLUpdater {
 
@@ -277,19 +291,19 @@ public final class YAMLUpdater {
         private final char sep;
         private final StringBuilder b;
 
-        public KeyBuilder(FileConfiguration c, char sep) {
+        KeyBuilder(FileConfiguration c, char sep) {
             this.c = c;
             this.sep = sep;
             this.b = new StringBuilder();
         }
 
-        private KeyBuilder(KeyBuilder key) {
+        KeyBuilder(KeyBuilder key) {
             this.c = key.c;
             this.sep = key.sep;
             this.b = new StringBuilder(key.toString());
         }
 
-        public void parseLine(String line, boolean checkIfExists) {
+        void parseLine(String line, boolean checkIfExists) {
             String s = b.toString();
             line = line.trim();
 
@@ -309,7 +323,7 @@ public final class YAMLUpdater {
             b.append(key);
         }
 
-        public void removeLastKey() {
+        void removeLastKey() {
             final int length = b.length();
 
             if (length != 0) {
@@ -318,11 +332,11 @@ public final class YAMLUpdater {
             }
         }
 
-        public boolean isEmpty() {
+        boolean isEmpty() {
             return b.length() == 0;
         }
 
-        public void clear() {
+        void clear() {
             b.setLength(0);
         }
 
@@ -337,6 +351,20 @@ public final class YAMLUpdater {
         }
     }
 
+    /**
+     * Updates the YAML configuration file by merging missing keys while preserving comments and formatting.
+     * <p>
+     * This method ensures that:
+     * <ul>
+     *     <li>Existing keys and values are retained.</li>
+     *     <li>New keys from the default configuration are added.</li>
+     *     <li>Comments and formatting remain intact.</li>
+     *     <li>Ignored keys are properly skipped.</li>
+     * </ul>
+     * </p>
+     *
+     * @throws IOException If an I/O error occurs while reading or writing the file.
+     */
     public void update() throws IOException {
         FileConfiguration parser = new YamlConfiguration();
         final StringWriter writer = new StringWriter();
@@ -408,10 +436,40 @@ public final class YAMLUpdater {
             Files.write(path, value.getBytes(UTF_8));
     }
 
+    /**
+     * Creates a new {@code YAMLUpdater} instance using the specified resource path and ignored keys.
+     * <p>
+     * This method allows easy instantiation of the updater with a loader, resource path, and file location.
+     * It also supports ignoring specific keys to prevent them from being added or modified.
+     * </p>
+     *
+     * @param loader       The class loader or plugin instance used to access the resource file.
+     * @param resourcePath The path to the default configuration resource inside the JAR.
+     * @param file         The target YAML configuration file to update.
+     * @param ignored      A list of keys that should be ignored during the update process.
+     * @param <T>          The type of the loader (e.g., a plugin instance or class reference).
+     * @return A new instance of {@code YAMLUpdater} configured with the given parameters.
+     * @throws IOException If an error occurs while reading the resource or target file.
+     */
     public static <T> YAMLUpdater of(T loader, String resourcePath, File file, List<String> ignored) throws IOException {
         return new YAMLUpdater(loader, resourcePath, file, ignored);
     }
 
+    /**
+     * Creates a new {@code YAMLUpdater} instance with ignored keys provided as varargs.
+     * <p>
+     * This is a convenience method that converts the ignored keys array into a list before
+     * calling {@link #of(Object, String, File, List)}.
+     * </p>
+     *
+     * @param loader       The class loader or plugin instance used to access the resource file.
+     * @param resourcePath The path to the default configuration resource inside the JAR.
+     * @param file         The target YAML configuration file to update.
+     * @param ignored      An array of keys that should be ignored during the update process.
+     * @param <T>          The type of the loader (e.g., a plugin instance or class reference).
+     * @return A new instance of {@code YAMLUpdater} configured with the given parameters.
+     * @throws IOException If an error occurs while reading the resource or target file.
+     */
     public static <T> YAMLUpdater of(T loader, String resourcePath, File file, String... ignored) throws IOException {
         return of(loader, resourcePath, file, Arrays.asList(ignored));
     }

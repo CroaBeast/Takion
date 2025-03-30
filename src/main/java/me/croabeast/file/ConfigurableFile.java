@@ -1,4 +1,4 @@
-package me.croabeast.lib.file;
+package me.croabeast.file;
 
 import org.jetbrains.annotations.Nullable;
 

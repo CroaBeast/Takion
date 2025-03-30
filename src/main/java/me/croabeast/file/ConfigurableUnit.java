@@ -1,4 +1,4 @@
-package me.croabeast.lib.file;
+package me.croabeast.file;
 
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.command.CommandSender;
