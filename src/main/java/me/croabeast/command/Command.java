@@ -1,4 +1,4 @@
-package me.croabeast.lib.command;
+package me.croabeast.command;
 
 import me.croabeast.lib.Registrable;
 import org.bukkit.Keyed;

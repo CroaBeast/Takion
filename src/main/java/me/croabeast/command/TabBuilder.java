@@ -1,4 +1,4 @@
-package me.croabeast.lib.command;
+package me.croabeast.command;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
