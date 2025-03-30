@@ -9,8 +9,22 @@ import java.util.function.Supplier;
 
 /**
  * Represents a specialized mapping structure that associates integer keys with collections of elements.
- * This interface extends {@link Map} and provides additional functionality for filtering, ordering,
- * and retrieving stored values efficiently.
+ * <p>
+ * {@code Mappable} extends {@link Map} and the {@link Builder} interface,
+ * providing additional utility methods for filtering, ordering, and retrieving values across all stored collections.
+ * It is designed to facilitate operations on grouped data, enabling you to easily combine values from
+ * multiple collections into a single collection.
+ * </p>
+ * <p>
+ * Key functionalities include:
+ * <ul>
+ *   <li>Filtering stored elements across all collections via {@link #filter(Predicate)}.</li>
+ *   <li>Ordering the mappings based on keys using {@link #order(Comparator)} or {@link #order(boolean)}.</li>
+ *   <li>Merging all stored values into a single collection with {@link #getAllValues(Supplier)} or {@link #getAllValues()}.</li>
+ *   <li>Creating a shallow copy of the mapping using {@link #copy()}.</li>
+ *   <li>Factory methods to create new {@code Mappable} instances with specific backing collection types.</li>
+ * </ul>
+ * </p>
  *
  * @param <T> The type of elements stored in the collections.
  * @param <C> The type of collection that holds the elements.
@@ -29,6 +43,9 @@ public interface Mappable<T, C extends Collection<T>, M extends Mappable<T, C, M
 
     /**
      * Filters the stored elements based on the given predicate, modifying the current instance.
+     * <p>
+     * For each collection stored in the map, any element that does not match the predicate is removed.
+     * </p>
      *
      * @param predicate The condition used to filter elements.
      * @return The modified instance of {@code M}, with non-matching elements removed.
@@ -40,6 +57,10 @@ public interface Mappable<T, C extends Collection<T>, M extends Mappable<T, C, M
 
     /**
      * Orders the keys in the map based on the given comparator.
+     * <p>
+     * This method creates a new ordered map from the current entries, clears the existing map,
+     * and then re-populates it with the ordered entries.
+     * </p>
      *
      * @param comparator The comparator used to determine the ordering of keys.
      * @return A reference to the modified instance with reordered keys.
@@ -47,7 +68,6 @@ public interface Mappable<T, C extends Collection<T>, M extends Mappable<T, C, M
     default M order(Comparator<Integer> comparator) {
         Map<Integer, C> orderedMap = new TreeMap<>(comparator);
         orderedMap.putAll(this);
-
         clear();
         putAll(orderedMap);
         return instance();
@@ -65,6 +85,10 @@ public interface Mappable<T, C extends Collection<T>, M extends Mappable<T, C, M
 
     /**
      * Retrieves all values across all collections and merges them into a new collection.
+     * <p>
+     * The provided supplier is used to create a new collection instance, and then every element from
+     * each collection stored in the map is added to this new collection.
+     * </p>
      *
      * @param supplier The supplier used to create a new collection instance.
      * @param <X>      The type of the resulting collection.
@@ -100,6 +124,9 @@ public interface Mappable<T, C extends Collection<T>, M extends Mappable<T, C, M
 
     /**
      * Creates a shallow copy of the current instance.
+     * <p>
+     * This copy shares the same keys and values but is a separate instance.
+     * </p>
      *
      * @return A new instance of {@code M} with the same data.
      */
@@ -110,6 +137,10 @@ public interface Mappable<T, C extends Collection<T>, M extends Mappable<T, C, M
 
     /**
      * Creates a new {@code Mappable} instance with a given collection supplier and initial data.
+     * <p>
+     * This factory method instantiates a new {@code Mappable} implementation using the provided supplier and
+     * populates it with the given map data.
+     * </p>
      *
      * @param supplier The supplier responsible for creating collections of type {@code C}.
      * @param map      The initial map data to populate the instance.
@@ -138,11 +169,14 @@ public interface Mappable<T, C extends Collection<T>, M extends Mappable<T, C, M
     }
 
     /**
-     * Creates a {@code Mappable.Set} instance from an existing map.
+     * Creates a {@code Mappable.Set} instance from a given map.
+     * <p>
+     * The input map is expected to map integer keys to {@link java.util.Set} collections.
+     * </p>
      *
-     * @param map The map containing integer keys and set values.
+     * @param map The map whose contents will be copied.
      * @param <T> The type of elements in the set.
-     * @return A new {@code Set} instance.
+     * @return A new {@code Mappable.Set} instance.
      */
     static <T> Set<T> asSet(Map<Integer, java.util.Set<T>> map) {
         Set<T> set = new MapUtils.MappableImpl.Set<>();
@@ -154,18 +188,21 @@ public interface Mappable<T, C extends Collection<T>, M extends Mappable<T, C, M
      * Creates an empty {@code Mappable.Set} instance.
      *
      * @param <T> The type of elements in the set.
-     * @return A new empty {@code Set} instance.
+     * @return A new empty {@code Mappable.Set} instance.
      */
     static <T> Set<T> asSet() {
         return new MapUtils.MappableImpl.Set<>();
     }
 
     /**
-     * Creates a {@code Mappable.List} instance from an existing map.
+     * Creates a {@code Mappable.List} instance from a given map.
+     * <p>
+     * The input map is expected to map integer keys to {@link java.util.List} collections.
+     * </p>
      *
-     * @param map The map containing integer keys and list values.
+     * @param map The map whose contents will be copied.
      * @param <T> The type of elements in the list.
-     * @return A new {@code List} instance.
+     * @return A new {@code Mappable.List} instance.
      */
     static <T> List<T> asList(Map<Integer, java.util.List<T>> map) {
         List<T> list = new MapUtils.MappableImpl.List<>();
@@ -177,7 +214,7 @@ public interface Mappable<T, C extends Collection<T>, M extends Mappable<T, C, M
      * Creates an empty {@code Mappable.List} instance.
      *
      * @param <T> The type of elements in the list.
-     * @return A new empty {@code List} instance.
+     * @return A new empty {@code Mappable.List} instance.
      */
     static <T> List<T> asList() {
         return new MapUtils.MappableImpl.List<>();
@@ -191,9 +228,9 @@ public interface Mappable<T, C extends Collection<T>, M extends Mappable<T, C, M
     interface Set<T> extends Mappable<T, java.util.Set<T>, Set<T>> {
 
         /**
-         * Returns the current instance.
+         * Returns this instance of {@code Mappable.Set}.
          *
-         * @return The current instance of {@code Set<T>}.
+         * @return this instance for fluent chaining.
          */
         @NotNull
         default Set<T> instance() {
@@ -201,9 +238,9 @@ public interface Mappable<T, C extends Collection<T>, M extends Mappable<T, C, M
         }
 
         /**
-         * Creates a copy of this instance.
+         * Creates a copy of this {@code Mappable.Set}, preserving all its mappings.
          *
-         * @return A new {@code Set<T>} with the same data.
+         * @return a new {@code Mappable.Set} instance with the same data.
          */
         @NotNull
         default Set<T> copy() {
@@ -219,9 +256,9 @@ public interface Mappable<T, C extends Collection<T>, M extends Mappable<T, C, M
     interface List<T> extends Mappable<T, java.util.List<T>, List<T>> {
 
         /**
-         * Returns the current instance.
+         * Returns this instance of {@code Mappable.List}.
          *
-         * @return The current instance of {@code List<T>}.
+         * @return this instance for fluent chaining.
          */
         @NotNull
         default List<T> instance() {
@@ -229,9 +266,9 @@ public interface Mappable<T, C extends Collection<T>, M extends Mappable<T, C, M
         }
 
         /**
-         * Creates a copy of this instance.
+         * Creates a copy of this {@code Mappable.List}, preserving all its mappings.
          *
-         * @return A new {@code List<T>} with the same data.
+         * @return a new {@code Mappable.List} instance with the same data.
          */
         @NotNull
         default List<T> copy() {
