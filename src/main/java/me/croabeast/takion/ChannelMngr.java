@@ -8,7 +8,6 @@ import me.croabeast.lib.util.TextUtils;
 import me.croabeast.takion.channel.Channel;
 import me.croabeast.takion.channel.ChannelManager;
 import me.croabeast.takion.message.AnimatedBossbar;
-import me.croabeast.takion.message.MessageSender;
 import me.croabeast.takion.message.MessageUtils;
 import me.croabeast.takion.message.TitleManager;
 import me.croabeast.takion.message.chat.ChatComponent;
