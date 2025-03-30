@@ -25,14 +25,14 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-final class ChannelManagerImpl implements ChannelManager {
+final class ChannelMngr implements ChannelManager {
 
     private final Map<String, Channel> channels = new LinkedHashMap<>();
 
     @Getter @Setter
     private String startDelimiter = Pattern.quote("["), endDelimiter = Pattern.quote("]");
 
-    ChannelManagerImpl(TakionLib lib) {
+    ChannelMngr(TakionLib lib) {
         channels.put("action_bar", new ChannelImpl("action_bar") {
             @Override
             public String formatString(Player target, Player parser, String string) {
@@ -339,8 +339,8 @@ final class ChannelManagerImpl implements ChannelManager {
         }
 
         @Override
-        public MessageSender.Flag getFlag() {
-            return MessageSender.Flag.valueOf(name.toUpperCase(Locale.ENGLISH));
+        public Flag getFlag() {
+            return Flag.valueOf(name.toUpperCase(Locale.ENGLISH));
         }
 
         @NotNull
