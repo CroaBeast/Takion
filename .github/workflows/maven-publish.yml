@@ -31,7 +31,7 @@ jobs:
 
     - name: Get Plugin Version
       id: version
-      run: echo "VERSION=$(ls target/takion-*.jar | sed -E 's/.*takion-(.*).jar/\1/')" >> $GITHUB_ENV
+      run: echo "VERSION=$(basename $(ls target/takion-*.jar | grep -vE '(-sources|-javadoc).jar') .jar | sed 's/takion-//')" >> $GITHUB_ENV
 
     - name: Delete existing GitHub release (if exists)
       run: |
