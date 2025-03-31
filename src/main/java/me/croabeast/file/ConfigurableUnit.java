@@ -7,21 +7,36 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Represents a configuration unit used for handling permissions and groups in a configuration section.
+ * Represents a configuration unit used for handling permissions, groups, and priorities
+ * in a configuration section.
+ * <p>
+ * A {@code ConfigurableUnit} provides methods to access the underlying {@link ConfigurationSection},
+ * retrieve its name, permission, group, and priority settings, and perform permission and group checks
+ * on a {@link CommandSender}. It serves as a basic unit for representing configuration-based access control.
+ * </p>
+ * <p>
+ * The interface also includes static factory methods to create new instances based on an existing
+ * {@link ConfigurationSection} or another {@code ConfigurableUnit}.
+ * </p>
+ *
+ * @see ConfigurationSection
+ * @see CommandSender
  */
 public interface ConfigurableUnit {
 
     /**
      * Gets the configuration section associated with this unit.
      *
-     * @return The configuration section.
-     * @throws NullPointerException If the configuration section is null.
+     * @return the configuration section (never {@code null}).
+     * @throws NullPointerException if the configuration section is null.
      */
-    @NotNull ConfigurationSection getSection() throws NullPointerException;
+    @NotNull
+    ConfigurationSection getSection() throws NullPointerException;
 
     /**
      * Gets the name of the configuration section.
-     * @return The name of the configuration section.
+     *
+     * @return the name of the configuration section.
      */
     @NotNull
     default String getName() {
@@ -30,7 +45,8 @@ public interface ConfigurableUnit {
 
     /**
      * Gets the permission associated with this unit.
-     * @return The permission string. If not specified, returns "DEFAULT".
+     *
+     * @return the permission string; if not specified, returns "DEFAULT".
      */
     @NotNull
     default String getPermission() {
@@ -39,8 +55,9 @@ public interface ConfigurableUnit {
 
     /**
      * Checks if the given command sender has the permission associated with this unit.
-     * @param sender The command sender.
-     * @return True if the sender has the permission, false otherwise.
+     *
+     * @param sender the command sender.
+     * @return {@code true} if the sender has the permission, {@code false} otherwise.
      */
     default boolean hasPerm(CommandSender sender) {
         return sender.hasPermission(getPermission());
@@ -48,7 +65,8 @@ public interface ConfigurableUnit {
 
     /**
      * Gets the group associated with this unit.
-     * @return The group string, or null if not specified.
+     *
+     * @return the group string, or {@code null} if not specified.
      */
     @Nullable
     default String getGroup() {
@@ -58,26 +76,26 @@ public interface ConfigurableUnit {
     /**
      * Checks if the given command sender is in the group associated with this unit.
      *
-     * @param sender The command sender.
-     * @return True if the sender is in the group, false otherwise.
+     * @param sender the command sender.
+     * @return {@code true} if the sender is in the group, {@code false} otherwise.
      */
     boolean isInGroup(CommandSender sender);
 
     /**
-     * Checks if the group associated with this unit is not null and the given sender is in that group.
+     * Checks if the group associated with this unit is not blank and the given sender is in that group.
      *
-     * @param sender The command sender.
-     * @return True if the group is not null and the sender is in that group, false otherwise.
+     * @param sender the command sender.
+     * @return {@code true} if the group is not blank and the sender is in that group, {@code false} otherwise.
      */
     default boolean isInGroupNonNull(CommandSender sender) {
         return StringUtils.isNotBlank(getGroup()) && isInGroup(sender);
     }
 
     /**
-     * Checks if the group associated with this unit is null or the given sender is in that group.
+     * Checks if the group associated with this unit is blank or the given sender is in that group.
      *
-     * @param sender The command sender.
-     * @return True if the group is null or the sender is in that group, false otherwise.
+     * @param sender the command sender.
+     * @return {@code true} if the group is blank or the sender is in that group, {@code false} otherwise.
      */
     default boolean isInGroupAsNull(CommandSender sender) {
         return StringUtils.isBlank(getGroup()) || isInGroup(sender);
@@ -85,7 +103,12 @@ public interface ConfigurableUnit {
 
     /**
      * Gets the priority associated with this unit.
-     * @return The priority value. If not specified, returns 0 for "DEFAULT" permission, and 1 otherwise.
+     * <p>
+     * The priority is determined by the "priority" value in the configuration section. If not specified,
+     * it returns 0 when the permission is "DEFAULT" (case-insensitive), and 1 otherwise.
+     * </p>
+     *
+     * @return the priority value.
      */
     default int getPriority() {
         int def = getPermission().matches("(?i)DEFAULT") ? 0 : 1;
@@ -93,12 +116,15 @@ public interface ConfigurableUnit {
     }
 
     /**
-     * Creates a new ConfigUnit instance based on the provided configuration section.
+     * Creates a new {@code ConfigurableUnit} instance based on the provided configuration section.
+     * <p>
+     * This factory method returns a simple implementation of {@code ConfigurableUnit} where the group check
+     * always returns {@code true}.
+     * </p>
      *
-     * @param section The configuration section.
-     *
-     * @return A new ConfigUnit instance.
-     * @throws NullPointerException If the configuration section is null.
+     * @param section the configuration section.
+     * @return a new {@code ConfigurableUnit} instance.
+     * @throws NullPointerException if the configuration section is null.
      */
     static ConfigurableUnit of(ConfigurationSection section) {
         return new ConfigurableUnit() {
@@ -115,10 +141,10 @@ public interface ConfigurableUnit {
     }
 
     /**
-     * Creates a new ConfigUnit instance based on the provided ConfigUnit instance.
+     * Creates a new {@code ConfigurableUnit} instance based on the provided {@code ConfigurableUnit}.
      *
-     * @param unit The ConfigUnit instance.
-     * @return A new ConfigUnit instance.
+     * @param unit the existing {@code ConfigurableUnit} instance.
+     * @return a new {@code ConfigurableUnit} instance based on the unit's configuration section.
      */
     static ConfigurableUnit of(ConfigurableUnit unit) {
         return of(unit.getSection());

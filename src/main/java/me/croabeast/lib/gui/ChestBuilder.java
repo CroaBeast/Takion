@@ -6,6 +6,8 @@ import me.croabeast.prismatic.PrismaticAPI;
 import org.bukkit.entity.HumanEntity;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
 /**
  * A builder for creating and managing a chest GUI with paginated panes.
  * <p>
@@ -89,5 +91,10 @@ public final class ChestBuilder extends GuiBuilder<ChestGui, ChestBuilder> {
     @NotNull
     public ChestBuilder instance() {
         return this;
+    }
+
+    @NotNull
+    public static ChestBuilder of(int rows, String name) {
+        return new ChestBuilder(rows, Objects.requireNonNull(name));
     }
 }

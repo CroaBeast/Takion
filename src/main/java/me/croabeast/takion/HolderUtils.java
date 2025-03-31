@@ -558,10 +558,10 @@ class HolderUtils {
     VaultHolder<?> loadHolder() {
         if (Exceptions.isPluginEnabled("LuckPerms"))
             return new LuckHolder();
-        try {
+
+        if (Exceptions.isPluginEnabled("Vault"))
             return new BasicHolder();
-        } catch (Exception e1) {
-            return new NoHolder();
-        }
+
+        return new NoHolder();
     }
 }

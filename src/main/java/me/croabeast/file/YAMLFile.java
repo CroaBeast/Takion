@@ -19,9 +19,38 @@ import java.util.function.Consumer;
 
 /**
  * YAMLFile is a utility class for managing YAML configuration files in Bukkit plugins.
+ * <p>
+ * It provides methods for loading, saving, and updating YAML configuration files,
+ * handling resource paths, and logging messages during these operations.
+ * The class also supports configurable messages for different operations (such as load, save, and update),
+ * and allows for custom logger actions via a {@link Consumer}.
+ * </p>
+ * <p>
+ * Usage example:
+ * <pre><code>
+ * // Create a new YAMLFile instance for "config.yml" in the default folder:
+ * YAMLFile yamlFile = new YAMLFile(plugin, "config");
  *
- * <p> It provides methods for loading, saving, and updating configuration files, as well
- * as handling resource paths and logging.
+ * // Set custom resource path if needed:
+ * yamlFile.setResourcePath("config.yml");
+ *
+ * // Save defaults if the file does not exist:
+ * yamlFile.saveDefaults();
+ *
+ * // Retrieve and modify the configuration:
+ * FileConfiguration config = yamlFile.getConfiguration();
+ * config.set("setting", "value");
+ *
+ * // Save changes:
+ * yamlFile.save();
+ *
+ * // Update the file using the YAMLUpdater:
+ * yamlFile.update();
+ * </code></pre>
+ * </p>
+ *
+ * @see FileConfiguration
+ * @see YamlConfiguration
  */
 @Accessors(chain = true)
 public class YAMLFile {
@@ -33,21 +62,25 @@ public class YAMLFile {
      */
     @Getter
     private String name = "file-" + UUID.randomUUID().hashCode();
+
     /**
-     * The folder in which the YAML file is located.
+     * The folder in which the YAML file is located (may be {@code null}).
      */
-    @Nullable @Getter
+    @Nullable
+    @Getter
     private String folder;
 
     /**
-     * The file location path.
+     * The location path of the YAML file.
      */
     @Getter
     private final String location;
+
     /**
-     * The YAML file.
+     * The actual YAML file.
      */
-    @NotNull @Getter
+    @NotNull
+    @Getter
     private final File file;
 
     private String path;
@@ -60,10 +93,12 @@ public class YAMLFile {
      */
     @Setter
     private Consumer<String> loggerAction;
+
     /**
      * Flag indicating whether the YAML file is updatable.
      */
-    @Setter @Getter
+    @Setter
+    @Getter
     private boolean updatable = true;
 
     /**
@@ -71,26 +106,31 @@ public class YAMLFile {
      */
     @Setter
     private String loadErrorMessage;
+
     /**
      * Message displayed when loading the YAML file succeeds.
      */
     @Setter
     private String loadSuccessMessage;
+
     /**
      * Message displayed when saving the YAML file fails.
      */
     @Setter
     private String saveErrorMessage;
+
     /**
      * Message displayed when saving the YAML file succeeds.
      */
     @Setter
     private String saveSuccessMessage;
+
     /**
      * Message displayed when updating the YAML file fails.
      */
     @Setter
     private String updateErrorMessage;
+
     /**
      * Message displayed when updating the YAML file succeeds.
      */
@@ -99,12 +139,16 @@ public class YAMLFile {
 
     /**
      * Constructs a YAMLFile with the specified loader, folder, and name.
+     * <p>
+     * The file is created in the plugin's data folder, optionally within a subfolder.
+     * The resource path is set to the file's location, and a YAMLUpdater is initialized.
+     * Default logger actions and error/success messages are also configured.
+     * </p>
      *
-     * @param loader the object loader
-     * @param folder the folder name (nullable)
-     * @param name the file name
-     *
-     * @throws IOException if an I/O error occurs
+     * @param loader the object loader (used for resource loading)
+     * @param folder the folder name where the file is located (nullable)
+     * @param name   the file name (without extension)
+     * @throws IOException if an I/O error occurs during file initialization
      */
     public YAMLFile(Object loader, @Nullable String folder, String name) throws IOException {
         this.loader = new FileLoader(loader);
@@ -117,10 +161,8 @@ public class YAMLFile {
 
         if (StringUtils.isNotBlank(folder)) {
             this.folder = folder;
-
             File file = new File(dataFolder, folder);
             if (!file.exists()) file.mkdirs();
-
             location = folder + File.separator + location;
         }
 
@@ -141,10 +183,8 @@ public class YAMLFile {
         loadSuccessMessage = "&cFile " + getLocation() + " missing... &7Generating!";
 
         String msg = "&7The &e" + getLocation() + "&7 file ";
-
         loadErrorMessage = msg + "has been&a saved&7.";
         loadSuccessMessage = msg + "&ccouldn't be saved&7.";
-
         updateErrorMessage = msg + "has been&a updated&7.";
         updateSuccessMessage = msg + "&ccouldn't be updated&7.";
     }
@@ -152,9 +192,9 @@ public class YAMLFile {
     /**
      * Constructs a YAMLFile with the specified loader and name.
      *
-     * @param loader the object loader
-     * @param name the file name
-     * @throws IOException if an I/O error occurs
+     * @param loader the object loader.
+     * @param name   the file name.
+     * @throws IOException if an I/O error occurs during file initialization.
      */
     public YAMLFile(Object loader, String name) throws IOException {
         this(loader, null, name);
@@ -171,25 +211,24 @@ public class YAMLFile {
     /**
      * Sets the resource path for this YAMLFile.
      *
-     * @param path the resource path
-     * @param debug if true, enables debug logging
-     * @return this YAMLFile instance
+     * @param path  the resource path.
+     * @param debug if true, enables debug logging.
+     * @return this YAMLFile instance.
      */
     public YAMLFile setResourcePath(String path, boolean debug) {
         if (StringUtils.isBlank(path))
             throw new NullPointerException();
 
         this.path = path.replace('\\', '/');
-
         loadUpdaterToData(debug);
         return this;
     }
 
     /**
-     * Sets the resource path for this YAMLFile.
+     * Sets the resource path for this YAMLFile without debug logging.
      *
-     * @param path the resource path
-     * @return this YAMLFile instance
+     * @param path the resource path.
+     * @return this YAMLFile instance.
      */
     public YAMLFile setResourcePath(String path) {
         return setResourcePath(path, false);
@@ -197,7 +236,8 @@ public class YAMLFile {
 
     /**
      * Gets the input stream of the resource file.
-     * @return the input stream of the resource
+     *
+     * @return the input stream of the resource.
      */
     public InputStream getResource() {
         return loader.getResource(path);
@@ -205,7 +245,8 @@ public class YAMLFile {
 
     /**
      * Reloads the YAML configuration from the file.
-     * @return the reloaded FileConfiguration
+     *
+     * @return the reloaded {@link FileConfiguration}.
      */
     @SneakyThrows
     public FileConfiguration reload() {
@@ -225,7 +266,6 @@ public class YAMLFile {
 
     private void log(String line, Exception e, boolean debug) {
         if (!debug) return;
-
         if (loggerAction != null) loggerAction.accept(line);
         e.printStackTrace();
     }
@@ -233,8 +273,8 @@ public class YAMLFile {
     /**
      * Saves the default configuration if the file does not exist.
      *
-     * @param debug if true, enables debug logging
-     * @return true if the defaults were saved, false otherwise
+     * @param debug if true, enables debug logging.
+     * @return true if the defaults were saved successfully; false otherwise.
      */
     public boolean saveDefaults(boolean debug) {
         if (getFile().exists()) return true;
@@ -252,8 +292,9 @@ public class YAMLFile {
     }
 
     /**
-     * Saves the default configuration if the file does not exist.
-     * @return true if the defaults were saved, false otherwise
+     * Saves the default configuration if the file does not exist (without debug logging).
+     *
+     * @return true if the defaults were saved successfully; false otherwise.
      */
     public boolean saveDefaults() {
         return saveDefaults(false);
@@ -262,7 +303,7 @@ public class YAMLFile {
     /**
      * Gets the YAML configuration.
      *
-     * @return the FileConfiguration
+     * @return the {@link FileConfiguration} of this YAML file.
      */
     @NotNull
     public FileConfiguration getConfiguration() {
@@ -272,25 +313,24 @@ public class YAMLFile {
     /**
      * Saves the YAML configuration to the file.
      *
-     * @param debug if true, enables debug logging
-     * @return true if the configuration was saved successfully, false otherwise
+     * @param debug if true, enables debug logging.
+     * @return true if the configuration was saved successfully; false otherwise.
      */
     public boolean save(boolean debug) {
         try {
             getConfiguration().save(getFile());
-
             log(saveSuccessMessage, debug);
             return true;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             log(saveErrorMessage, e, debug);
             return false;
         }
     }
 
     /**
-     * Saves the YAML configuration to the file.
-     * @return true if the configuration was saved successfully, false otherwise
+     * Saves the YAML configuration to the file (without debug logging).
+     *
+     * @return true if the configuration was saved successfully; false otherwise.
      */
     public boolean save() {
         return save(false);
@@ -299,36 +339,35 @@ public class YAMLFile {
     /**
      * Updates the YAML configuration.
      *
-     * @param debug if true, enables debug logging
-     * @return true if the configuration was updated successfully, false otherwise
+     * @param debug if true, enables debug logging.
+     * @return true if the configuration was updated successfully; false otherwise.
      */
     public boolean update(boolean debug) {
         if (!isUpdatable()) return false;
-
         try {
             if (updater == null) loadUpdaterToData(debug);
             updater.update();
-
             log(updateSuccessMessage, debug);
             return true;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             log(updateErrorMessage, e, debug);
             return false;
         }
     }
 
     /**
-     * Updates the YAML configuration.
-     * @return true if the configuration was updated successfully, false otherwise
+     * Updates the YAML configuration (without debug logging).
+     *
+     * @return true if the configuration was updated successfully; false otherwise.
      */
     public boolean update() {
         return update(false);
     }
 
     /**
-     * Returns a string representation of the YAMLFile.
-     * @return a string representation of the YAMLFile
+     * Returns a string representation of this YAMLFile.
+     *
+     * @return a string containing the folder and name of the YAML file.
      */
     @Override
     public String toString() {
@@ -336,8 +375,9 @@ public class YAMLFile {
     }
 
     /**
-     * Computes a hash code for this YAMLFile.
-     * @return a hash code value for this YAMLFile
+     * Computes the hash code for this YAMLFile based on its folder and name.
+     *
+     * @return a hash code value for this YAMLFile.
      */
     @Override
     public int hashCode() {
@@ -347,10 +387,9 @@ public class YAMLFile {
     /**
      * Compares this YAMLFile to another YAMLFile based on folder and name.
      *
-     * @param folder the folder name to compare
-     * @param name the file name to compare
-     *
-     * @return true if the folder and name are equal, false otherwise
+     * @param folder the folder name to compare.
+     * @param name   the file name to compare.
+     * @return true if both folder and name are equal; false otherwise.
      */
     public boolean equals(String folder, String name) {
         return Objects.equals(this.getFolder(), folder) && Objects.equals(this.getName(), name);
@@ -359,16 +398,14 @@ public class YAMLFile {
     /**
      * Compares this YAMLFile to another object.
      *
-     * @param o the object to compare
-     * @return true if the object is a YAMLFile with the same folder and name, false otherwise
+     * @param o the object to compare.
+     * @return true if the object is a YAMLFile with the same folder and name; false otherwise.
      */
     @Override
     public boolean equals(Object o) {
         if (o == null) return false;
-
         if (this == o) return true;
         if (getClass() != o.getClass()) return false;
-
         YAMLFile f = (YAMLFile) o;
         return equals(f.getFolder(), f.getName());
     }

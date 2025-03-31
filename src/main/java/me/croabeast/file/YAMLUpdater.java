@@ -361,7 +361,6 @@ public final class YAMLUpdater {
      *     <li>Comments and formatting remain intact.</li>
      *     <li>Ignored keys are properly skipped.</li>
      * </ul>
-     * </p>
      *
      * @throws IOException If an I/O error occurs while reading or writing the file.
      */

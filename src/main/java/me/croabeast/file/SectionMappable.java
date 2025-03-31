@@ -1,254 +1,130 @@
 package me.croabeast.file;
 
-import me.croabeast.lib.CollectionBuilder;
 import org.bukkit.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
- * Represents a {@link Mappable} implementation that works with {@link ConfigurationSection}.
+ * Represents a specialized {@link Mappable} for mapping integer keys to collections of
+ * {@link ConfigurationSection} objects.
  * <p>
- * A SectionMappable is designed to manage and transform collections of {@link ConfigurationSection} objects,
- * typically used to organize configuration data. It provides methods to convert its underlying map into
- * a {@code Set} or {@code List} representation and offers utilities to transform the stored sections into
- * configurable units via the {@link UnitMappable} interface.
+ * {@code SectionMappable} provides a framework for organizing configuration sections by numeric keys,
+ * along with utility methods to convert the stored values into more specific data structures such as sets
+ * or lists. It is designed to be implemented by a concrete class to ensure full functionality, such as
+ * correctly handling storage and retrieval of configuration sections.
+ * </p>
+ * <p>
+ * <strong>Note:</strong> While the base {@code SectionMappable} interface must be implemented for full
+ * functionality, its nested sub-interfaces {@code SectionMappable.Set} and {@code SectionMappable.List} do not
+ * require separate implementations. They can be directly instantiated using the provided static factory methods
+ * {@link #asSet(Map)} and {@link #asList(Map)}, which return ready-to-use instances.
  * </p>
  *
- * @param <C> The type of collection that holds {@link ConfigurationSection} elements.
+ * @param <C> the type of collection that holds {@link ConfigurationSection} elements
+ * @param <S> the type of the implementing {@code SectionMappable} instance
  */
-public interface SectionMappable<C extends Collection<ConfigurationSection>> extends Mappable<ConfigurationSection, C, SectionMappable<C>> {
+public interface SectionMappable<C extends Collection<ConfigurationSection>, S extends SectionMappable<C, S>> extends
+        Mappable<ConfigurationSection, C, S> {
 
     /**
-     * Returns this instance of {@link SectionMappable}.
+     * Creates a {@code SectionMappable.Set} instance from the given map.
      *
-     * @return the current instance.
+     * @param map a map with integer keys and sets of {@link ConfigurationSection} as values
+     * @return a new instance of {@code SectionMappable.Set} populated with the given map
      */
-    @NotNull
-    default SectionMappable<C> instance() {
-        return this;
+    static SectionMappable.Set asSet(Map<Integer, java.util.Set<ConfigurationSection>> map) {
+        return new MapUtils.AbstractSection.SetImpl(map);
     }
 
     /**
-     * Creates a copy of the current {@link SectionMappable}, preserving all its entries.
+     * Creates an empty {@code SectionMappable.Set} instance.
      *
-     * @return a new {@link SectionMappable} instance with the same contents.
+     * @return a new empty instance of {@code SectionMappable.Set}
      */
-    @NotNull
-    default SectionMappable<C> copy() {
-        return of(getSupplier(), this);
+    static SectionMappable.Set asSet() {
+        return new MapUtils.AbstractSection.SetImpl();
     }
 
     /**
-     * Converts this SectionMappable into a Set-based representation.
+     * Creates a {@code SectionMappable.List} instance from the given map.
+     *
+     * @param map a map with integer keys and lists of {@link ConfigurationSection} as values
+     * @return a new instance of {@code SectionMappable.List} populated with the given map
+     */
+    static SectionMappable.List asList(Map<Integer, java.util.List<ConfigurationSection>> map) {
+        return new MapUtils.AbstractSection.ListImpl(map);
+    }
+
+    /**
+     * Creates an empty {@code SectionMappable.List} instance.
+     *
+     * @return a new empty instance of {@code SectionMappable.List}
+     */
+    static SectionMappable.List asList() {
+        return new MapUtils.AbstractSection.ListImpl();
+    }
+
+    /**
+     * Represents a {@code SectionMappable} implementation backed by a {@link java.util.Set}.
      * <p>
-     * Each entry in this mappable is converted so that its collection is transformed into a {@link Set}
-     * of {@link ConfigurationSection} elements.
-     * </p>
-     *
-     * @return a {@link SectionMappable.Set} representing the same mappings as a map of {@code Map<Integer, Set<ConfigurationSection>>}.
-     */
-    @NotNull
-    default Set toSet() {
-        Map<Integer, java.util.Set<ConfigurationSection>> map = new LinkedHashMap<>();
-        forEach((k, v) -> map.put(k, CollectionBuilder.of(v).toSet()));
-        return asSet(map);
-    }
-
-    /**
-     * Converts this SectionMappable into a List-based representation.
-     * <p>
-     * Each entry in this mappable is converted so that its collection is transformed into a {@link List}
-     * of {@link ConfigurationSection} elements.
-     * </p>
-     *
-     * @return a {@link SectionMappable.List} representing the same mappings as a map of {@code Map<Integer, List<ConfigurationSection>>}.
-     */
-    @NotNull
-    default List toList() {
-        Map<Integer, java.util.List<ConfigurationSection>> map = new LinkedHashMap<>();
-        forEach((k, v) -> map.put(k, CollectionBuilder.of(v).toList()));
-        return asList(map);
-    }
-
-    /**
-     * Creates a new {@link SectionMappable} instance with the provided collection supplier and map.
-     *
-     * @param supplier the supplier for the collection type.
-     * @param map      the initial mapping of indices to collections.
-     * @param <C>      the type of collection containing {@link ConfigurationSection} elements.
-     * @return a new {@link SectionMappable} instance populated with the provided map.
-     */
-    static <C extends Collection<ConfigurationSection>> SectionMappable<C> of(Supplier<C> supplier, Map<Integer, C> map) {
-        SectionMappable<C> before = new MapUtils.SectionImpl<>(supplier);
-        before.putAll(map);
-        return before;
-    }
-
-    /**
-     * Creates a new empty {@link SectionMappable} instance using the provided collection supplier.
-     *
-     * @param supplier the supplier for the collection type.
-     * @param <C>      the type of collection containing {@link ConfigurationSection} elements.
-     * @return a new empty {@link SectionMappable} instance.
-     */
-    static <C extends Collection<ConfigurationSection>> SectionMappable<C> of(Supplier<C> supplier) {
-        return new MapUtils.SectionImpl<>(supplier);
-    }
-
-    /**
-     * Converts a map of indexed sets of {@link ConfigurationSection} into a {@link SectionMappable.Set} instance.
-     *
-     * @param map the input map with integer keys mapping to sets of {@link ConfigurationSection} objects.
-     * @return a {@link SectionMappable.Set} representing the provided map.
-     */
-    static Set asSet(Map<Integer, java.util.Set<ConfigurationSection>> map) {
-        Set set = new MapUtils.SectionImpl.Set();
-        set.putAll(map);
-        return set;
-    }
-
-    /**
-     * Creates an empty {@link SectionMappable.Set} instance.
-     *
-     * @return a new empty {@link SectionMappable.Set}.
-     */
-    static Set asSet() {
-        return new MapUtils.SectionImpl.Set();
-    }
-
-    /**
-     * Converts a map of indexed lists of {@link ConfigurationSection} into a {@link SectionMappable.List} instance.
-     *
-     * @param map the input map with integer keys mapping to lists of {@link ConfigurationSection} objects.
-     * @return a {@link SectionMappable.List} representing the provided map.
-     */
-    static List asList(Map<Integer, java.util.List<ConfigurationSection>> map) {
-        List set = new MapUtils.SectionImpl.List();
-        set.putAll(map);
-        return set;
-    }
-
-    /**
-     * Creates an empty {@link SectionMappable.List} instance.
-     *
-     * @return a new empty {@link SectionMappable.List}.
-     */
-    static List asList() {
-        return new MapUtils.SectionImpl.List();
-    }
-
-    /**
-     * Represents a {@link SectionMappable} implementation backed by a {@link java.util.Set}.
-     * <p>
-     * This sub-interface provides additional utility methods specific to set-based mappings.
-     * It allows copying the current set mapping and transforming the stored {@link ConfigurationSection}
-     * objects into configurable units via {@link UnitMappable}.
+     * This sub-interface extends both {@link SectionMappable} and {@link BaseSet} to provide default methods
+     * for converting and transforming configuration sections into sets. No additional implementation is required
+     * beyond instantiating it via the static methods.
      * </p>
      */
-    interface Set extends SectionMappable<java.util.Set<ConfigurationSection>> {
-
-        /**
-         * Returns this instance of {@link SectionMappable.Set}.
-         *
-         * @return the current instance.
-         */
-        @NotNull
-        default SectionMappable.Set instance() {
-            return this;
-        }
-
-        /**
-         * Creates a copy of the current {@link SectionMappable.Set}, preserving all its mappings.
-         *
-         * @return a new {@link SectionMappable.Set} instance with identical contents.
-         */
-        @NotNull
-        default SectionMappable.Set copy() {
-            return asSet(this);
-        }
-
+    interface Set extends
+            SectionMappable<java.util.Set<ConfigurationSection>, Set>, BaseSet<ConfigurationSection, Set>
+    {
         /**
          * Transforms the contained {@link ConfigurationSection} elements into a {@link UnitMappable.Set}
          * by applying the provided function.
          *
-         * @param function the transformation function mapping a {@link ConfigurationSection} to a {@link ConfigurableUnit}
+         * @param function the function to transform each configuration section into a {@link ConfigurableUnit}
          * @param <U>      the type of the resulting {@link ConfigurableUnit}
-         * @return a {@link UnitMappable.Set} containing the transformed elements
-         */
-        default <U extends ConfigurableUnit> UnitMappable.Set<U> toUnits(Function<ConfigurationSection, U> function) {
-            Objects.requireNonNull(function);
-            Map<Integer, java.util.Set<U>> map = new HashMap<>();
-            forEach((k, v) -> map.put(k, CollectionBuilder.of(v).map(function).toSet()));
-            return UnitMappable.asSet(map);
-        }
-
-        /**
-         * Convenience method to return this instance as a set.
-         *
-         * @return this instance.
+         * @return a {@link UnitMappable.Set} containing the transformed elements.
          */
         @NotNull
-        default SectionMappable.Set toSet() {
-            return instance();
-        }
+        <U extends ConfigurableUnit> UnitMappable.Set<U> toUnits(Function<ConfigurationSection, U> function);
+
+        /**
+         * Converts this set-based mappable into a list-based mappable.
+         *
+         * @return a {@link List} representation of this mappable.
+         */
+        @NotNull
+        List toList();
     }
 
     /**
-     * Represents a {@link SectionMappable} implementation backed by a {@link java.util.List}.
+     * Represents a {@code SectionMappable} implementation backed by a {@link java.util.List}.
      * <p>
-     * This sub-interface provides additional utility methods specific to list-based mappings.
-     * It allows copying the current list mapping and transforming the stored {@link ConfigurationSection}
-     * objects into configurable units via {@link UnitMappable}.
+     * This sub-interface extends both {@link SectionMappable} and {@link BaseList} to provide default methods
+     * for converting and transforming configuration sections into lists. No additional implementation is required
+     * beyond instantiating it via the static methods.
      * </p>
      */
-    interface List extends SectionMappable<java.util.List<ConfigurationSection>> {
-
-        /**
-         * Returns this instance of {@link SectionMappable.List}.
-         *
-         * @return the current instance.
-         */
-        @NotNull
-        default SectionMappable.List instance() {
-            return this;
-        }
-
-        /**
-         * Creates a copy of the current {@link SectionMappable.List}, preserving all its mappings.
-         *
-         * @return a new {@link SectionMappable.List} instance with identical contents.
-         */
-        @NotNull
-        default SectionMappable.List copy() {
-            return asList(this);
-        }
-
+    interface List extends
+            SectionMappable<java.util.List<ConfigurationSection>, List>, BaseList<ConfigurationSection, List>
+    {
         /**
          * Transforms the contained {@link ConfigurationSection} elements into a {@link UnitMappable.List}
          * by applying the provided function.
          *
-         * @param function the transformation function mapping a {@link ConfigurationSection} to a {@link ConfigurableUnit}
+         * @param function the function to transform each configuration section into a {@link ConfigurableUnit}
          * @param <U>      the type of the resulting {@link ConfigurableUnit}
-         * @return a {@link UnitMappable.List} containing the transformed elements
-         */
-        default <U extends ConfigurableUnit> UnitMappable.List<U> toUnits(Function<ConfigurationSection, U> function) {
-            Objects.requireNonNull(function);
-            Map<Integer, java.util.List<U>> map = new HashMap<>();
-            forEach((k, v) -> map.put(k, CollectionBuilder.of(v).map(function).toList()));
-            return UnitMappable.asList(map);
-        }
-
-        /**
-         * Convenience method to return this instance as a list.
-         *
-         * @return this instance.
+         * @return a {@link UnitMappable.List} containing the transformed elements.
          */
         @NotNull
-        default SectionMappable.List toList() {
-            return instance();
-        }
+        <U extends ConfigurableUnit> UnitMappable.List<U> toUnits(Function<ConfigurationSection, U> function);
+
+        /**
+         * Converts this list-based mappable into a set-based mappable.
+         *
+         * @return a {@link Set} representation of this mappable.
+         */
+        @NotNull
+        Set toSet();
     }
 }

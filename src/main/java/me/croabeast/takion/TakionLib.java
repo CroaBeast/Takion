@@ -166,7 +166,7 @@ public class TakionLib {
     private final PatternAction<String> smallCapsAction;
 
     /**
-     * A pre-loaded instance of {@link MessageSender} used as a template.
+     * A preloaded instance of {@link MessageSender} used as a template.
      */
     @Getter(AccessLevel.NONE)
     private MessageSender loadedSender = new MessageSender(this);
@@ -279,7 +279,7 @@ public class TakionLib {
     }
 
     /**
-     * Returns a copy of the pre-loaded MessageSender.
+     * Returns a copy of the preloaded MessageSender.
      * <p>
      * This allows modifications and sending of messages without altering the original sender.
      * </p>

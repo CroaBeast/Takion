@@ -12,13 +12,14 @@ import java.util.function.BiFunction;
  * details, such as names, ranks, or statistics.
  * </p>
  *
- * <p>Example usage:</p>
- * <pre>
+ * <p>
+ * <strong>Example usage:</strong>
+ * <pre><code>
  * PlayerFormatter formatter = (player, message) ->
  *     message.replace("{player}", player.getName());
  *
- * String result = formatter.apply(somePlayer, "Hello, {player}!");
- * // Output: "Hello, Steve!" </pre>
+ * formatter.apply(somePlayer, "Hello, {player}!");
+ * // Output: "Hello, Steve!"</code></pre></p>
  *
  * @see BiFunction
  */

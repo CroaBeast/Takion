@@ -14,30 +14,73 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- * A builder class for creating and customizing {@link BukkitCommand} instances.
+ * A builder for creating and configuring Bukkit commands with tab-completion support.
+ * <p>
+ * {@code CommandBuilder} extends {@link BukkitCommand} and allows fluent configuration of command
+ * properties such as enabling/disabling the command, overriding existing commands, and setting up custom
+ * tab-completion suggestions via a {@link TabBuilder}. It provides methods to set a custom completion
+ * function or a static list of completions, and to supply a {@link TabBuilder} for advanced completion
+ * configuration.
+ * </p>
+ * <p>
+ * Example usage:
+ * <pre><code>
+ * CommandBuilder builder = CommandBuilder.from(plugin, "example")
+ *     .setOverriding(true)
+ *     .setCompletions((sender, args) -&gt; Arrays.asList("option1", "option2"))
+ *     .setCompletionBuilder(new TabBuilder().addArgument(1, "option1"));
  *
- * <p> This class provides a fluent API for setting various properties and behaviors of a command,
- * including its executable logic and tab completion suggestions.
+ * // Register the command:
+ * builder.register();
+ *
+ * // Later, to unregister:
+ * builder.unregister();
+ * </code></pre>
+ * </p>
+ *
+ * @see BukkitCommand
+ * @see TabBuilder
  */
 @Getter
 public final class CommandBuilder extends BukkitCommand {
 
-    private boolean enabled = true, overriding = true;
+    /**
+     * Flag indicating whether this command is enabled.
+     */
+    private boolean enabled = true;
 
+    /**
+     * Flag indicating whether this command should override an existing command.
+     */
+    private boolean overriding = true;
+
+    /**
+     * A function to generate tab-completion suggestions based on the command sender and arguments.
+     */
     @Getter(AccessLevel.NONE)
     private BiFunction<CommandSender, String[], List<String>> completions;
+
+    /**
+     * A supplier for a {@link TabBuilder} that provides advanced tab-completion configuration.
+     */
     @Getter(AccessLevel.NONE)
     private Supplier<TabBuilder> builder = null;
 
+    /**
+     * Constructs a new {@code CommandBuilder} with the specified plugin and command name.
+     *
+     * @param plugin the plugin that owns this command.
+     * @param name   the name of the command.
+     */
     private CommandBuilder(Plugin plugin, String name) {
         super(plugin, name);
     }
 
     /**
-     * Sets whether this command should override existing commands with the same name.
+     * Sets whether this command should override an existing command.
      *
-     * @param override true if the command should override existing commands, false otherwise.
-     * @return the current CommandBuilder instance.
+     * @param override {@code true} to override; {@code false} otherwise.
+     * @return this {@code CommandBuilder} instance for chaining.
      */
     @NotNull
     public CommandBuilder setOverriding(boolean override) {
@@ -46,10 +89,11 @@ public final class CommandBuilder extends BukkitCommand {
     }
 
     /**
-     * Sets the completions list for this command using a function.
+     * Sets a custom function to generate tab-completion suggestions.
      *
-     * @param function the function for the completions list.
-     * @return the current CommandBuilder instance.
+     * @param function a {@link BiFunction} that takes a {@link CommandSender} and an array of arguments,
+     *                 and returns a {@link List} of suggestion strings.
+     * @return this {@code CommandBuilder} instance for chaining.
      */
     @NotNull
     public CommandBuilder setCompletions(BiFunction<CommandSender, String[], List<String>> function) {
@@ -58,10 +102,10 @@ public final class CommandBuilder extends BukkitCommand {
     }
 
     /**
-     * Sets the completions list for this command.
+     * Sets a static list of tab-completion suggestions.
      *
-     * @param completions the completions list.
-     * @return the current CommandBuilder instance.
+     * @param completions a {@link List} of suggestion strings.
+     * @return this {@code CommandBuilder} instance for chaining.
      */
     @NotNull
     public CommandBuilder setCompletions(List<String> completions) {
@@ -70,10 +114,10 @@ public final class CommandBuilder extends BukkitCommand {
     }
 
     /**
-     * Sets the tab completion builder for this command using a supplier.
+     * Sets a supplier for a custom {@link TabBuilder} for advanced tab-completion configuration.
      *
-     * @param builder the supplier for the tab completion builder.
-     * @return the current CommandBuilder instance.
+     * @param builder a supplier that returns a {@link TabBuilder} instance.
+     * @return this {@code CommandBuilder} instance for chaining.
      */
     @NotNull
     public CommandBuilder setCompletionBuilder(Supplier<TabBuilder> builder) {
@@ -82,10 +126,10 @@ public final class CommandBuilder extends BukkitCommand {
     }
 
     /**
-     * Sets the tab completion builder for this command.
+     * Sets a custom {@link TabBuilder} for advanced tab-completion configuration.
      *
-     * @param builder the tab completion builder to set.
-     * @return the current CommandBuilder instance.
+     * @param builder a {@link TabBuilder} instance.
+     * @return this {@code CommandBuilder} instance for chaining.
      */
     @NotNull
     public CommandBuilder setCompletionBuilder(TabBuilder builder) {
@@ -94,10 +138,11 @@ public final class CommandBuilder extends BukkitCommand {
     }
 
     /**
-     * Applies a consumer function to this command.
+     * Applies a consumer to this {@code CommandBuilder} for further configuration.
      *
-     * @param consumer the consumer to apply.
-     * @return the current CommandBuilder instance.
+     * @param consumer a consumer that accepts a {@link BukkitCommand} for configuration.
+     * @return this {@code CommandBuilder} instance for chaining.
+     * @throws NullPointerException if the consumer is {@code null}.
      */
     @NotNull
     public CommandBuilder apply(@NotNull Consumer<BukkitCommand> consumer) {
@@ -106,10 +151,11 @@ public final class CommandBuilder extends BukkitCommand {
     }
 
     /**
-     * Unsupported operation: the name of a command cannot be changed after it is created.
+     * Setting the command name is not supported.
      *
      * @param name the new name.
-     * @throws UnsupportedOperationException always.
+     * @return never returns normally.
+     * @throws UnsupportedOperationException always thrown.
      */
     @Override
     public boolean setName(@NotNull String name) {
@@ -117,31 +163,49 @@ public final class CommandBuilder extends BukkitCommand {
     }
 
     /**
-     * Unsupported operation: the label of a command cannot be changed after it is created.
+     * Setting the command label is not supported.
      *
      * @param label the new label.
-     * @throws UnsupportedOperationException always.
+     * @return never returns normally.
+     * @throws UnsupportedOperationException always thrown.
      */
     @Override
     public boolean setLabel(@NotNull String label) {
         throw new UnsupportedOperationException("Label can not be changed");
     }
 
+    /**
+     * Generates tab-completion suggestions.
+     * <p>
+     * This method uses the configured completions function to generate suggestions based on the sender and arguments.
+     * </p>
+     *
+     * @param sender the command sender.
+     * @param args   the command arguments.
+     * @return a supplier that provides a collection of suggestion strings.
+     */
     @NotNull
-    public Supplier<Collection<String>> generateCompletions(CommandSender sender, String[] arguments) {
-        return () -> completions.apply(sender, arguments);
+    public Supplier<Collection<String>> generateCompletions(CommandSender sender, String[] args) {
+        return () -> completions.apply(sender, args);
     }
 
+    /**
+     * Retrieves the {@link TabBuilder} for advanced tab-completion configuration.
+     *
+     * @return the {@link TabBuilder} instance if set; {@code null} otherwise.
+     */
     @Override
     public TabBuilder getCompletionBuilder() {
         return builder == null ? null : builder.get();
     }
 
     /**
-     * Registers the command with the Bukkit command map.
-     * <p> If the command is already registered, this method does nothing.
+     * Ensures the command is enabled and then registers it.
+     * <p>
+     * If the command is disabled, it is enabled before registration.
+     * </p>
      *
-     * @return {@code true} if the command was successfully registered, {@code false} otherwise.
+     * @return {@code true} if registration was successful; {@code false} otherwise.
      */
     @Override
     public boolean register() {
@@ -150,10 +214,9 @@ public final class CommandBuilder extends BukkitCommand {
     }
 
     /**
-     * Unregisters the command from the Bukkit command map.
-     * <p> If the command is not registered, this method does nothing.
+     * Unregisters the command and marks it as disabled.
      *
-     * @return {@code true} if the command was successfully unregistered, {@code false} otherwise.
+     * @return {@code true} if unregistration was successful; {@code false} otherwise.
      */
     @Override
     public boolean unregister() {
@@ -162,12 +225,11 @@ public final class CommandBuilder extends BukkitCommand {
     }
 
     /**
-     * Creates a new CommandBuilder instance for the specified plugin and command name.
+     * Creates a new {@code CommandBuilder} for the specified plugin and command name.
      *
-     * @param plugin the plugin that owns the command.
+     * @param plugin the plugin that will own the command.
      * @param name   the name of the command.
-     *
-     * @return a new CommandBuilder instance.
+     * @return a new {@code CommandBuilder} instance.
      */
     public static CommandBuilder from(Plugin plugin, String name) {
         return new CommandBuilder(plugin, name);
