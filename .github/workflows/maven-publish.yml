@@ -54,7 +54,9 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Rename & Upload Latest Release
-      run: cp target/takion-*.jar target/takion-latest.jar
+      run: |
+        JAR_FILE=$(ls target/takion-*.jar | grep -vE '(-sources|-javadoc).jar' | head -n 1)
+        cp "$JAR_FILE" target/takion-latest.jar
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v1
