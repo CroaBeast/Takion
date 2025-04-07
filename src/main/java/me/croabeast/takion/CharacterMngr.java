@@ -1,8 +1,8 @@
 package me.croabeast.takion;
 
-import me.croabeast.lib.applier.StringApplier;
-import me.croabeast.lib.util.ArrayUtils;
-import me.croabeast.lib.util.TextUtils;
+import me.croabeast.common.applier.StringApplier;
+import me.croabeast.common.util.ArrayUtils;
+import me.croabeast.common.util.TextUtils;
 import me.croabeast.prismatic.PrismaticAPI;
 import me.croabeast.takion.character.CharacterInfo;
 import me.croabeast.takion.character.CharacterManager;

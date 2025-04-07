@@ -3,7 +3,7 @@ package me.croabeast.takion.placeholder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import me.croabeast.lib.util.ReplaceUtils;
+import me.croabeast.common.util.ReplaceUtils;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.entity.Player;
 

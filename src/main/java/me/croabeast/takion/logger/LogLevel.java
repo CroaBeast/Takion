@@ -1,6 +1,6 @@
 package me.croabeast.takion.logger;
 
-import me.croabeast.lib.util.ArrayUtils;
+import me.croabeast.common.util.ArrayUtils;
 
 import java.util.List;
 import java.util.Locale;

@@ -2,8 +2,8 @@ package me.croabeast.takion;
 
 import lombok.Getter;
 import lombok.Setter;
-import me.croabeast.lib.Regex;
-import me.croabeast.lib.util.ArrayUtils;
+import me.croabeast.common.Regex;
+import me.croabeast.common.util.ArrayUtils;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 

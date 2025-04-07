@@ -1,7 +1,8 @@
 package me.croabeast.takion.message;
 
 import lombok.experimental.UtilityClass;
-import me.croabeast.lib.util.ServerInfoUtils;
+import me.croabeast.common.function.TriFunction;
+import me.croabeast.common.util.ServerInfoUtils;
 import org.bukkit.entity.Player;
 
 import java.util.function.BiFunction;
@@ -70,15 +71,11 @@ class ReflectUtils {
         return Math.round((float) i / 20);
     }
 
-    interface TimesInitialize {
-        Object from(int in, int stay, int out);
-    }
-
     private enum TitleType {
         TITLE, SUBTITLE
     }
 
-    final TimesInitialize TIMES_PACKET_INSTANCE = (in, stay, out) -> {
+    final TriFunction<Integer, Integer, Integer, ?> TIMES_PACKET_INSTANCE = (in, stay, out) -> {
         try {
             return from(null, "PacketPlayOutTitle")
                     .getDeclaredConstructor(int.class, int.class, int.class)

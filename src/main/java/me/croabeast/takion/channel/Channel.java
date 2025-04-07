@@ -1,7 +1,7 @@
 package me.croabeast.takion.channel;
 
 import me.croabeast.takion.message.MessageSender;
-import me.croabeast.lib.Regex;
+import me.croabeast.common.Regex;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -224,7 +224,7 @@ public interface Channel {
     /**
      * Enumeration of possible channel types.
      * <p>
-     * The flag defines how a message should be delivered.:
+     * The flag defines how a message should be delivered.
      * </p>
      */
     enum Flag {

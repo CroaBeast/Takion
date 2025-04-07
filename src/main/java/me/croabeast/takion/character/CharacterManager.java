@@ -1,6 +1,6 @@
 package me.croabeast.takion.character;
 
-import me.croabeast.lib.util.ArrayUtils;
+import me.croabeast.common.util.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Nullable;
 

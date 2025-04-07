@@ -1,5 +1,6 @@
 package me.croabeast.takion.character;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.commons.lang.StringUtils;
 
@@ -8,15 +9,29 @@ import java.util.Locale;
 import java.util.regex.Pattern;
 
 /**
- * This enum class provides methods for converting strings to and from small caps.
+ * An enumeration representing small capital letters as a specialized form of characters.
+ * <p>
+ * Each constant in {@code SmallCaps} implements {@link CharacterInfo} and provides a corresponding
+ * small capital character along with a default length used for display calculations. This enum also
+ * provides utility methods for stripping accents from characters and converting strings to small caps
+ * or back to their normal representations.
+ * </p>
  *
- * <p> Small caps are a typographic style where lowercase letters are replaced by
- * smaller versions of uppercase letters. For example, "Hello" becomes "ʜᴇʟʟᴏ".
+ * <p>
+ * Example usage:
+ * <pre><code>
+ * // Convert a normal string to small caps:
+ * String smallCapsString = SmallCaps.toSmallCaps("Hello World");
  *
- * <p> This class uses the Unicode characters for small caps, which are not
- * supported by all fonts and platforms. It also strips accents from the input
- * characters before converting them to small caps, as there are no Unicode
- * characters for accented small caps.
+ * // Check if a character is in small caps:
+ * boolean isSmall = SmallCaps.isSmallCaps('ᴀ');
+ *
+ * // Convert a small caps string back to normal:
+ * String normalString = SmallCaps.toNormal(smallCapsString);
+ * </code></pre>
+ * </p>
+ *
+ * @see CharacterInfo
  */
 @Getter
 public enum SmallCaps implements CharacterInfo {
@@ -47,90 +62,144 @@ public enum SmallCaps implements CharacterInfo {
     Y('ʏ'),
     Z('ᴢ');
 
-    final char character, defaultValue;
+    /**
+     * The small capital character representation.
+     */
+    final char character;
+    /**
+     * The default (normal) character for this constant.
+     * <p>
+     * It is derived from the enum name in lowercase.
+     */
+    @Getter(AccessLevel.NONE)
+    final char defaultValue;
+    /**
+     * The display length for this character, used for alignment calculations.
+     */
     int length = 5;
 
+    /**
+     * Constructs a {@code SmallCaps} constant with the specified small capital character.
+     * The default value is automatically derived from the enum constant name.
+     *
+     * @param character the small capital character.
+     */
     SmallCaps(char character) {
         defaultValue = name().toLowerCase(Locale.ENGLISH).toCharArray()[0];
         this.character = character;
     }
 
+    /**
+     * Constructs a {@code SmallCaps} constant with the specified small capital character and display length.
+     *
+     * @param character the small capital character.
+     * @param i         the display length for the character.
+     */
     SmallCaps(char character, int i) {
         this(character);
         length = i;
     }
 
+    /**
+     * Compares the provided character to this constant's default value, ignoring case.
+     *
+     * @param c the character to compare.
+     * @return {@code true} if the character matches (ignoring case); {@code false} otherwise.
+     */
     private boolean equalsIgnoreCase(char c) {
         return (defaultValue + "").matches("(?i)" + Pattern.quote(String.valueOf(c)));
     }
 
+    /**
+     * Returns the bold length of this character.
+     * <p>
+     * Bold length is calculated as the defined length plus one.
+     * </p>
+     *
+     * @return the bold length.
+     */
+    @Override
+    public int getBoldLength() {
+        return length + 1;
+    }
+
+    /**
+     * Returns the small capital character as a string.
+     *
+     * @return the small capital character in string form.
+     */
     @Override
     public String toString() {
         return String.valueOf(character);
     }
 
     /**
-     * Strips accents from the given string.
+     * Removes accents from the provided string.
      *
-     * @param string The string to strip accents from
-     * @return A string with no accents
+     * @param string the string from which accents should be removed.
+     * @return the string without any accents.
      */
     public static String stripAccents(String string) {
         if (StringUtils.isBlank(string)) return string;
-
         Normalizer.Form form = Normalizer.Form.NFKD;
         return Normalizer.normalize(string, form).replaceAll("\\p{M}", "");
     }
 
     /**
-     * Strips accents from the given character.
+     * Removes accents from the given character.
      *
-     * @param character The character to strip accents from
-     * @return A character with no accents
+     * @param character the character to process.
+     * @return the character without accent marks.
      */
     public static char stripAccent(char character) {
         return stripAccents(String.valueOf(character)).toCharArray()[0];
     }
 
+    /**
+     * Returns the corresponding {@code SmallCaps} constant for the given character.
+     * <p>
+     * If {@code strip} is {@code true}, accents are removed from the character before comparison.
+     * </p>
+     *
+     * @param character the character to convert.
+     * @param strip     if {@code true}, the character is normalized by stripping accents.
+     * @return the corresponding {@code SmallCaps} constant, or {@code null} if no match is found.
+     */
     private static SmallCaps valueOf(char character, boolean strip) {
         char c = strip ? stripAccent(character) : character;
-
         for (SmallCaps caps : values())
             if (caps.equalsIgnoreCase(c)) return caps;
-
         return null;
     }
 
     /**
-     * Returns the SmallCaps enum constant corresponding to the given character,
-     * or null if none exists.
+     * Returns the corresponding {@code SmallCaps} constant for the given character.
+     * <p>
+     * Accents are stripped by default.
+     * </p>
      *
-     * <p> This method strips accents from the input character before looking
-     * for a match.
-     *
-     * @param character The character to look for a SmallCaps enum constant
-     * @return The respective SmallCaps enum constant, or null if none exists
+     * @param character the character to convert.
+     * @return the corresponding {@code SmallCaps} constant, or {@code null} if no match is found.
      */
     public static SmallCaps valueOf(char character) {
         return valueOf(character, true);
     }
 
     /**
-     * Checks if the given character is a small caps character.
+     * Checks if the provided character is represented as a small capital letter.
      *
-     * @param character The character to check
-     * @return true if the given character is small caps; false otherwise
+     * @param character the character to check.
+     * @return {@code true} if the character is a small capital; {@code false} otherwise.
      */
     public static boolean isSmallCaps(char character) {
         return valueOf(character) != null;
     }
 
     /**
-     * Checks if the given string contains any small caps characters.
+     * Checks if the provided string contains any small capital letters.
      *
-     * @param string The string to check
-     * @return true if the given string contains any small caps
-     *              characters; false otherwise
+     * @param string the string to check.
+     * @return {@code true} if the string contains at least one small capital letter; {@code false} otherwise.
      */
     public static boolean hasSmallCaps(String string) {
         if (StringUtils.isBlank(string))
@@ -138,19 +207,14 @@ public enum SmallCaps implements CharacterInfo {
 
         for (char c : string.toCharArray())
             if (isSmallCaps(c)) return true;
-
         return false;
     }
 
     /**
-     * Converts the given string to small caps, replacing lowercase letters with
-     * their small caps equivalents.
+     * Converts the provided string to its small capital form.
      *
-     * <p> This method strips accents from the input characters before converting
-     * them to small caps.
-     *
-     * @param string The string to convert to small caps
-     * @return A string in small caps
+     * @param string the input string.
+     * @return a new string where applicable characters are replaced with their small capital equivalents.
      */
     public static String toSmallCaps(String string) {
         if (StringUtils.isBlank(string))
@@ -160,10 +224,8 @@ public enum SmallCaps implements CharacterInfo {
         int length = first.length;
 
         char[] result = new char[length];
-
         for (int i = 0; i < length; i++) {
             SmallCaps caps = valueOf(first[i], false);
-
             result[i] = caps != null ?
                     caps.character : first[i];
         }
@@ -172,11 +234,10 @@ public enum SmallCaps implements CharacterInfo {
     }
 
     /**
-     * Converts the given string from small caps to normal, replacing small caps
-     * characters with their lowercase equivalents.
+     * Converts a small capital string back to its normal form.
      *
-     * @param string The string to convert from small caps
-     * @return A string in normal characters
+     * @param string the small capital string.
+     * @return a new string where small capital characters are replaced by their default (normal) counterparts.
      */
     public static String toNormal(String string) {
         if (StringUtils.isBlank(string))
@@ -186,7 +247,6 @@ public enum SmallCaps implements CharacterInfo {
         int length = first.length;
 
         char[] result = new char[length];
-
         for (int i = 0; i < length; i++) {
             char c = first[i];
 
@@ -196,7 +256,6 @@ public enum SmallCaps implements CharacterInfo {
             }
             result[i] = c;
         }
-
         return new String(result);
     }
 }

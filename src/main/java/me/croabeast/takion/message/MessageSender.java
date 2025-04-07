@@ -3,17 +3,19 @@ package me.croabeast.takion.message;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import me.croabeast.lib.CollectionBuilder;
+import me.croabeast.common.CollectionBuilder;
+import me.croabeast.common.Copyable;
 import me.croabeast.takion.TakionLib;
 import me.croabeast.takion.channel.Channel;
 import me.croabeast.takion.placeholder.Placeholder;
-import me.croabeast.lib.PlayerFormatter;
-import me.croabeast.lib.applier.StringApplier;
-import me.croabeast.lib.util.ArrayUtils;
-import me.croabeast.lib.util.ReplaceUtils;
+import me.croabeast.common.PlayerFormatter;
+import me.croabeast.common.applier.StringApplier;
+import me.croabeast.common.util.ArrayUtils;
+import me.croabeast.common.util.ReplaceUtils;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.function.UnaryOperator;
@@ -60,7 +62,7 @@ import java.util.function.UnaryOperator;
  */
 @Accessors(chain = true)
 @Setter
-public class MessageSender {
+public class MessageSender implements Copyable<MessageSender> {
 
     /**
      * The TakionLib instance providing configuration, channels, placeholders, and logging utilities.
@@ -330,6 +332,7 @@ public class MessageSender {
      *
      * @return a new {@code MessageSender} instance with the same configuration
      */
+    @NotNull
     public MessageSender copy() {
         return new MessageSender(this);
     }

@@ -3,8 +3,8 @@ package me.croabeast.takion;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-import me.croabeast.lib.Regex;
-import me.croabeast.lib.util.Exceptions;
+import me.croabeast.common.Regex;
+import me.croabeast.common.util.Exceptions;
 import me.croabeast.takion.channel.ChannelManager;
 import me.croabeast.takion.character.CharacterManager;
 import me.croabeast.takion.character.SmallCaps;
@@ -12,9 +12,9 @@ import me.croabeast.takion.logger.TakionLogger;
 import me.croabeast.takion.message.MessageSender;
 import me.croabeast.takion.message.TitleManager;
 import me.croabeast.takion.placeholder.PlaceholderManager;
-import me.croabeast.lib.PlayerFormatter;
-import me.croabeast.lib.applier.StringApplier;
-import me.croabeast.lib.util.TextUtils;
+import me.croabeast.common.PlayerFormatter;
+import me.croabeast.common.applier.StringApplier;
+import me.croabeast.common.util.TextUtils;
 import me.croabeast.prismatic.PrismaticAPI;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.configuration.ConfigurationSection;
@@ -71,8 +71,7 @@ import java.util.regex.Pattern;
  * @see MessageSender
  * @see PrismaticAPI
  */
-@Getter
-@Setter
+@Getter @Setter
 public class TakionLib {
 
     /**

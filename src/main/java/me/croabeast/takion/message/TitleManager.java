@@ -2,7 +2,7 @@ package me.croabeast.takion.message;
 
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import me.croabeast.lib.util.Exceptions;
+import me.croabeast.common.util.Exceptions;
 import org.bukkit.entity.Player;
 
 /**
@@ -189,7 +189,7 @@ public interface TitleManager {
             }
 
             try {
-                ReflectUtils.sendPacket(player, ReflectUtils.TIMES_PACKET_INSTANCE.from(fadeIn, stay, fadeOut));
+                ReflectUtils.sendPacket(player, ReflectUtils.TIMES_PACKET_INSTANCE.apply(fadeIn, stay, fadeOut));
                 ReflectUtils.sendPacket(player, ReflectUtils.LEGACY_PACKET_INSTANCE.apply(true, title));
                 ReflectUtils.sendPacket(player, ReflectUtils.LEGACY_PACKET_INSTANCE.apply(false, subtitle));
                 return true;

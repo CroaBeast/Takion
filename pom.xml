@@ -140,6 +140,11 @@
         </repository>
 
         <repository>
+            <id>croabeast-repo</id>
+            <url>https://croabeast.github.io/repo/</url>
+        </repository>
+
+        <repository>
             <id>placeholderapi</id>
             <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
         </repository>
@@ -147,11 +152,6 @@
         <repository>
             <id>loohp-repo</id>
             <url>https://repo.loohpjames.com/repository</url>
-        </repository>
-
-        <repository>
-            <id>viaversion-repo</id>
-            <url>https://repo.viaversion.com</url>
         </repository>
 
         <repository>
@@ -180,6 +180,27 @@
             <artifactId>spigot-api</artifactId>
             <version>1.16.5-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>me.croabeast</groupId>
+            <artifactId>PrismaticAPI</artifactId>
+            <version>1.0</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>me.croabeast</groupId>
+            <artifactId>CommandFramework</artifactId>
+            <version>1.0</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>me.croabeast</groupId>
+            <artifactId>YAML-API</artifactId>
+            <version>1.0</version>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
@@ -227,19 +248,6 @@
             <groupId>com.loohp</groupId>
             <artifactId>InteractiveChat</artifactId>
             <version>4.2.16.0</version>
-            <scope>provided</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>*</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>com.viaversion</groupId>
-            <artifactId>viaversion-api</artifactId>
-            <version>5.2.1</version>
             <scope>provided</scope>
             <exclusions>
                 <exclusion>

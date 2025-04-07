@@ -1,6 +1,6 @@
 package me.croabeast.takion;
 
-import me.croabeast.lib.MetricsLoader;
+import me.croabeast.common.MetricsLoader;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 

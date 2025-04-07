@@ -2,9 +2,9 @@ package me.croabeast.takion;
 
 import lombok.Getter;
 import lombok.Setter;
-import me.croabeast.lib.Regex;
-import me.croabeast.lib.discord.Webhook;
-import me.croabeast.lib.util.TextUtils;
+import me.croabeast.common.Regex;
+import me.croabeast.common.discord.Webhook;
+import me.croabeast.common.util.TextUtils;
 import me.croabeast.takion.channel.Channel;
 import me.croabeast.takion.channel.ChannelManager;
 import me.croabeast.takion.message.AnimatedBossbar;

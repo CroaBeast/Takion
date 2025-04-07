@@ -2,9 +2,9 @@ package me.croabeast.takion;
 
 import lombok.Getter;
 import lombok.experimental.UtilityClass;
-import me.croabeast.lib.CollectionBuilder;
-import me.croabeast.lib.util.ArrayUtils;
-import me.croabeast.lib.util.Exceptions;
+import me.croabeast.common.CollectionBuilder;
+import me.croabeast.common.util.ArrayUtils;
+import me.croabeast.common.util.Exceptions;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -376,8 +376,7 @@ class HolderUtils {
         public List<String> getGroups() {
             return CollectionBuilder
                     .of(source.getGroupManager().getLoadedGroups())
-                    .map(Group::getName)
-                    .toList();
+                    .map(Group::getName).toList();
         }
 
         /**

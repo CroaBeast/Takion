@@ -116,7 +116,12 @@ public enum DefaultCharacter implements CharacterInfo {
     TICK('`', 2),
     PERIOD('.', 1),
     COMMA(',', 1),
-    SPACE(' ', 3);
+    SPACE(' ', 3) {
+        @Override
+        public int getBoldLength() {
+            return length;
+        }
+    };
 
     /**
      * A lowercased name of the enum constant, used for identification purposes.
@@ -140,6 +145,14 @@ public enum DefaultCharacter implements CharacterInfo {
     DefaultCharacter(char character) {
         this.character = character;
         name = name().toLowerCase(Locale.ENGLISH);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int getBoldLength() {
+        return length + 1;
     }
 
     /**

@@ -1,7 +1,7 @@
 package me.croabeast.takion;
 
-import me.croabeast.lib.Rounder;
-import me.croabeast.lib.applier.StringApplier;
+import me.croabeast.common.Rounder;
+import me.croabeast.common.applier.StringApplier;
 import me.croabeast.takion.placeholder.Placeholder;
 import me.croabeast.takion.placeholder.PlaceholderManager;
 import org.apache.commons.lang.StringUtils;
