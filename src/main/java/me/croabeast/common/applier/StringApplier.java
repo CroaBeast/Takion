@@ -1,115 +1,83 @@
 package me.croabeast.common.applier;
 
 import org.jetbrains.annotations.NotNull;
-
 import java.util.Objects;
 import java.util.function.UnaryOperator;
 
 /**
- * Represents an object that can apply multiple string operators to a single string.
- *
- * <p> Each operator is applied in the order that they were called, if there is no
- * defined priority to those operators.
+ * A specialization of {@link ObjectApplier} for handling String transformations.
+ * <p>
+ * The {@code StringApplier} interface provides a fluent API to apply successive string operations,
+ * such as formatting, replacement, or any other transformation. It extends {@link ObjectApplier} with methods
+ * that are specific to strings.
+ * </p>
  */
 public interface StringApplier extends ObjectApplier<String> {
 
     /**
-     * Applies the operator with the defined priority if the applier allows
-     * prioritized operators.
+     * Applies a transformation to the string with the specified priority.
      *
-     * <p> If prioritized operators are not allowed, the operator will apply
-     * directly to the current string.
-     *
-     * @param priority the priority
-     * @param operator the operator
-     *
-     * @throws NullPointerException if the operator is null
-     * @return a reference of this applier
+     * @param priority the priority at which to apply the operator.
+     * @param operator the transformation to apply.
+     * @return this {@code StringApplier} instance for chaining.
+     * @throws NullPointerException if {@code operator} is {@code null}.
      */
     @NotNull
-    StringApplier apply(ApplierPriority priority, UnaryOperator<String> operator);
+    StringApplier apply(Priority priority, UnaryOperator<String> operator);
 
     /**
-     * Applies the operator directly to the current string if the applier does
-     * not allow prioritized operators.
+     * Applies a transformation to the string at the default priority (NORMAL).
      *
-     * <p> If prioritized operators are allowed, it will use {@link ApplierPriority#NORMAL}.
-     *
-     * @param operator the operator
-     *
-     * @throws NullPointerException if the operator is null
-     * @return a reference of this applier
+     * @param operator the transformation to apply.
+     * @return this {@code StringApplier} instance for chaining.
+     * @throws NullPointerException if {@code operator} is {@code null}.
      */
     @NotNull
     StringApplier apply(UnaryOperator<String> operator);
 
     /**
-     * Returns the string after all the operators were applied.
-     * Same result as {@link #result()}.
+     * Returns the resulting string after all transformations have been applied.
      *
-     * @return the applied string
+     * @return the transformed string.
      */
+    @Override
     String toString();
 
     /**
-     * Creates a new applier without prioritization in all its operators.
+     * Creates a simplified {@code StringApplier} for the provided string.
      *
-     * <p> Each call of the {@link #apply(ApplierPriority, UnaryOperator)} and {@link #apply(UnaryOperator)}
-     * methods, the operators are applied  directly to the string without any priority.
-     *
-     * @param string a string, can be empty/blank
-     *
-     * @throws NullPointerException if the string is null
-     * @return a new non-prioritized applier
+     * @param string the string to transform.
+     * @return a new instance of a simplified {@code StringApplier}.
      */
     static StringApplier simplified(String string) {
         return new StringSimpleApplier(string);
     }
 
     /**
-     * Creates a new applier without prioritization in all its operators.
+     * Creates a simplified {@code StringApplier} by extracting the result from an existing {@code StringApplier}.
      *
-     * <p> Each call of the {@link #apply(ApplierPriority, UnaryOperator)} and {@link #apply(UnaryOperator)}
-     * methods, the operators are applied  directly to the string without any priority.
-     *
-     * @param applier an applier
-     *
-     * @throws NullPointerException if the applier is null
-     * @return a new non-prioritized applier
+     * @param applier the existing {@code StringApplier}.
+     * @return a new instance of a simplified {@code StringApplier} initialized with the result.
      */
     static StringApplier simplified(StringApplier applier) {
         return simplified(Objects.requireNonNull(applier).toString());
     }
 
     /**
-     * Creates a new applier with prioritization for each operator that is being
-     * added to the applier.
+     * Creates a prioritized {@code StringApplier} for the provided string.
      *
-     * <p> The {@link #apply(ApplierPriority, UnaryOperator)} method add the operator with the
-     * defined priority, and the {@link #apply(UnaryOperator)} method add the operator
-     * with the {@link ApplierPriority#NORMAL} priority.
-     *
-     * @param string a string, can be empty/blank
-     *
-     * @throws NullPointerException if the string is null
-     * @return a new prioritized applier
+     * @param string the string to transform.
+     * @return a new instance of a prioritized {@code StringApplier}.
      */
     static StringApplier prioritized(String string) {
         return new StringPriorityApplier(string);
     }
 
     /**
-     * Creates a new applier with prioritization for each operator that is being
-     * added to the applier.
+     * Creates a prioritized {@code StringApplier} by extracting the result from an existing {@code StringApplier}.
      *
-     * <p> The {@link #apply(ApplierPriority, UnaryOperator)} method add the operator with the
-     * defined priority, and the {@link #apply(UnaryOperator)} method add the operator
-     * with the {@link ApplierPriority#NORMAL} priority.
-     *
-     * @param applier an applier
-     *
-     * @throws NullPointerException if the applier is null
-     * @return a new prioritized applier
+     * @param applier the existing {@code StringApplier}.
+     * @return a new instance of a prioritized {@code StringApplier} initialized with the result.
      */
     static StringApplier prioritized(StringApplier applier) {
         return prioritized(Objects.requireNonNull(applier).toString());

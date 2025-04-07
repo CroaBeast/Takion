@@ -6,150 +6,200 @@ import lombok.Getter;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * An object that represents embed messages.
+ * Represents a Discord embed message.
+ * <p>
+ * The {@code EmbedObject} class provides a fluent API for building rich embed messages,
+ * including support for setting the title, description, URL, images, footer, color, and author.
+ * It also supports dynamic token replacement within the text fields.
+ * </p>
+ * <p>
+ * Example usage:
+ * <pre><code>
+ * EmbedObject embed = new EmbedObject("{token}", "Hello, world!")
+ *      .setTitle("My Plugin Title")
+ *      .setDescription("This is a description with {token} replaced.")
+ *      .setUrl("https://example.com")
+ *      .setThumbnail("https://example.com/thumbnail.png")
+ *      .setImage("https://example.com/image.png")
+ *      .setFooter("Footer Text", "https://example.com/footer_icon.png")
+ *      .setColor("#FFAA00")
+ *      .setAuthor("Author Name", "https://example.com", "https://example.com/author_icon.png");
  *
- * @author Kihsomray (forked by CroaBeast)
+ * // Add a field to the embed
+ * embed.addField("Field Name", "Field Value", true);
+ * </code></pre>
+ * </p>
+ *
  * @since 1.1
  */
 @Getter
 public class EmbedObject {
 
     /**
-     * The stored fields of the embed message.
+     * The list of fields contained in the embed.
      */
     private final List<Field> fields = new ArrayList<>();
 
+    /**
+     * The token to be replaced in text fields.
+     */
     @Getter(AccessLevel.PRIVATE)
-    private final String token, message;
-
-    private String
-            title, description, url,
-            image, thumbnail,
-            footerText, footerIcon;
+    private final String token;
 
     /**
-     * The color of the embed message.
+     * The message value that will replace the token.
+     */
+    @Getter(AccessLevel.PRIVATE)
+    private final String message;
+
+    private String title, description, url, image, thumbnail, footerText, footerIcon;
+
+    /**
+     * The color of the embed.
      */
     private Color color;
+
     /**
-     * The author of the embed message.
+     * The author of the embed.
      */
     private Author author;
 
     /**
-     * Constructs an object with a message token and a message.
-     * @param token a token
-     * @param message a message
+     * Constructs a new {@code EmbedObject} with the specified token and message.
+     *
+     * @param token   the token to be replaced in the embed text (must not be {@code null})
+     * @param message the message that replaces the token (must not be {@code null})
      */
     public EmbedObject(String token, String message) {
         this.token = token;
         this.message = message;
     }
 
+    /**
+     * Replaces occurrences of the token in the given string with the message.
+     *
+     * @param string the input string
+     * @return the resulting string after replacement; if the input is blank, it is returned unchanged.
+     */
     @NotNull
     private String replace(String string) {
-        if (StringUtils.isBlank(string))
+        if (StringUtils.isBlank(string)) {
             return string;
-
-        if (token == null || message == null)
+        }
+        // Both token and message must be non-null; if not, return the original string.
+        if (token == null || message == null) {
             return string;
-
+        }
         return string.replace(token, message);
     }
 
     /**
-     * Set the title for the embed object.
-     * @param text a text
-     * @return a reference of this object
+     * Sets the title of the embed.
+     *
+     * @param text the title text
+     * @return this {@code EmbedObject} instance for chaining
      */
     public EmbedObject setTitle(String text) {
-        title = replace(text);
+        this.title = replace(text);
         return this;
     }
 
     /**
-     * Set the description for the embed object.
-     * @param text a text
-     * @return a reference of this object
+     * Sets the description of the embed.
+     *
+     * @param text the description text
+     * @return this {@code EmbedObject} instance for chaining
      */
     public EmbedObject setDescription(String text) {
-        description = replace(text);
+        this.description = replace(text);
         return this;
     }
 
     /**
-     * Set the URL for the embed object.
-     * @param text a text
-     * @return a reference of this object
+     * Sets the URL of the embed.
+     *
+     * @param text the URL as a string
+     * @return this {@code EmbedObject} instance for chaining
      */
     public EmbedObject setUrl(String text) {
-        url = replace(text);
+        this.url = replace(text);
         return this;
     }
 
     /**
-     * Set the thumbnail for the embed object.
-     * @param url an url
-     * @return a reference of this object
+     * Sets the thumbnail URL for the embed.
+     *
+     * @param url the thumbnail URL
+     * @return this {@code EmbedObject} instance for chaining
      */
     public EmbedObject setThumbnail(String url) {
-        thumbnail = replace(url);
+        this.thumbnail = replace(url);
         return this;
     }
 
     /**
-     * Set the image URL for the embed object.
-     * @param url an url
-     * @return a reference of this object
+     * Sets the main image URL for the embed.
+     *
+     * @param url the image URL
+     * @return this {@code EmbedObject} instance for chaining
      */
     public EmbedObject setImage(String url) {
-        image = replace(url);
+        this.image = replace(url);
         return this;
     }
 
     /**
-     * Set the footer for the embed object.
-     * @param text a text
-     * @param icon an icon url
-     * @return a reference of this object
+     * Sets the footer text and icon for the embed.
+     *
+     * @param text the footer text
+     * @param icon the footer icon URL
+     * @return this {@code EmbedObject} instance for chaining
      */
     public EmbedObject setFooter(String text, String icon) {
-        footerText = replace(text);
-        footerIcon = replace(icon);
+        this.footerText = replace(text);
+        this.footerIcon = replace(icon);
         return this;
     }
 
     /**
-     * Set the color for the embed object.
-     * @param color a color
-     * @return a reference of this object
+     * Sets the color of the embed.
+     * <p>
+     * Attempts to decode the provided color string using {@link Color#decode(String)}.
+     * If decoding fails, it attempts to retrieve a color by field name from {@link Color}.
+     * </p>
+     *
+     * @param color the color string (e.g., "#FFAA00" or "RED")
+     * @return this {@code EmbedObject} instance for chaining
      */
     public EmbedObject setColor(String color) {
         Color c = null;
         try {
+            // Try decoding the color from its hexadecimal representation.
+            c = Color.decode(color);
+        } catch (Exception e) {
             try {
-                c = Color.decode(color);
-            } catch (Exception e) {
+                // Fallback: try to get a color by its name via reflection.
                 Class<?> clazz = Class.forName("java.awt.Color");
                 c = (Color) clazz.getField(color).get(null);
-            }
-        } catch (Exception ignored) {}
-
+            } catch (Exception ignored) {}
+        }
+        // Fallback using Color.getColor may return null.
         this.color = c != null ? c : Color.getColor(color);
         return this;
     }
 
     /**
-     * Set the author for the embed object.
-     * @param name a text
-     * @param url an url
-     * @param icon an url icon
-     * @return a reference of this object
+     * Sets the author information for the embed.
+     *
+     * @param name the author's name
+     * @param url  the author's URL
+     * @param icon the author's icon URL
+     * @return this {@code EmbedObject} instance for chaining
      */
     public EmbedObject setAuthor(String name, String url, String icon) {
         this.author = new Author(replace(name), replace(url), replace(icon));
@@ -157,31 +207,35 @@ public class EmbedObject {
     }
 
     /**
-     * Add a field to the embed object.
-     * @param name   a text
-     * @param value  a value
-     * @param inLine if is in line
+     * Adds a field to the embed.
+     *
+     * @param name   the name of the field
+     * @param value  the value of the field
+     * @param inLine {@code true} if the field should be displayed inline; {@code false} otherwise
      */
     public void addField(String name, String value, boolean inLine) {
         this.fields.add(new Field(replace(name), replace(value), inLine));
     }
 
     /**
-     * A field for text in the discord message.
+     * Represents a field in a Discord embed.
      */
     @AllArgsConstructor(access = AccessLevel.PRIVATE)
     @Getter
     static class Field {
-        private final String name, value;
+        private final String name;
+        private final String value;
         private final boolean inLine;
     }
 
     /**
-     * An author for the discord message.
+     * Represents the author information for a Discord embed.
      */
     @AllArgsConstructor(access = AccessLevel.PRIVATE)
     @Getter
     static class Author {
-        private final String name, url, iconUrl;
+        private final String name;
+        private final String url;
+        private final String iconUrl;
     }
 }

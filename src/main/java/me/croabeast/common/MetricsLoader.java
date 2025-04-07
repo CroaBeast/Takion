@@ -31,6 +31,8 @@ public final class MetricsLoader {
      * @return the current {@code MetricsLoader} instance for chaining
      */
     public MetricsLoader addChart(CustomChart chart) {
+        if (chart == null) return this;
+
         metrics.addCustomChart(chart);
         return this;
     }

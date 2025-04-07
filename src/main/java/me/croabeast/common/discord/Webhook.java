@@ -34,7 +34,7 @@ public class Webhook {
      * <p> See {@link RawWebhook} for more info.
      */
     private RawWebhook webhook;
-    private boolean notRegistered = true;
+    private boolean registered = false;
 
     /**
      * Create a Discord webhook setup using a default configuration section.
@@ -94,20 +94,20 @@ public class Webhook {
             return null;
         }
 
-        hook.setContent(sec.getString("content"))
+        hook = hook.setContent(sec.getString("content"))
                 .setTts(sec.getBoolean("tts"))
                 .setAvatarUrl(sec.getString("avatar-url"))
                 .setUsername(sec.getString("username"));
 
         ConfigurationSection s = sec.getConfigurationSection("embeds");
         if (s == null) {
-            notRegistered = false;
+            registered = true;
             return hook;
         }
 
         List<String> keys = new ArrayList<>(s.getKeys(false));
         if (keys.isEmpty()) {
-            notRegistered = false;
+            registered = true;
             return hook;
         }
 
@@ -157,7 +157,7 @@ public class Webhook {
             hook.addEmbed(embed);
         }
 
-        notRegistered = false;
+        registered = true;
         return hook;
     }
 
@@ -173,7 +173,7 @@ public class Webhook {
     public boolean send(String token, String message) {
         if (!enabled) return false;
 
-        if (message != null && notRegistered)
+        if (message != null && !registered)
             webhook = register(token, message);
 
         if (webhook == null) return false;

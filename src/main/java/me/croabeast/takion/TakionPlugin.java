@@ -25,7 +25,8 @@ public final class TakionPlugin extends JavaPlugin {
                         "permissionPlugin", "Permission Plugin",
                         plugin != null ? plugin.getName() : null,
                         "None"
-                );
+                )
+                .addSimplePie("", "").addChart(null);
 
         lib.getLogger().log("&eTakion &7was loaded successfully.");
     }

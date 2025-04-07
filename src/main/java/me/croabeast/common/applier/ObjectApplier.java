@@ -1,122 +1,101 @@
 package me.croabeast.common.applier;
 
 import org.jetbrains.annotations.NotNull;
-
 import java.util.Objects;
 import java.util.function.UnaryOperator;
 
 /**
- * Represents an object that can apply multiple operators to a single object.
+ * Represents a generic applier that allows successive transformations on an object.
+ * <p>
+ * Implementations of {@code ObjectApplier} enable chaining of {@link UnaryOperator} transformations
+ * based on an optional priority. After applying a series of operators, the final result can be obtained
+ * via the {@link #result()} method.
+ * </p>
  *
- * <p> Each operator is applied in the order that they were called, if there is no
- * defined priority to those operators.
- *
- * @param <T> object type
+ * @param <T> the type of the object being transformed.
  */
 public interface ObjectApplier<T> {
 
     /**
-     * Applies the operator with the defined priority if the applier allows
-     * prioritized operators.
+     * Applies the given transformation operator with the specified priority.
      *
-     * <p> If prioritized operators are not allowed, the operator will apply
-     * directly to the current string.
-     *
-     * @param priority the priority
-     * @param operator the operator
-     *
-     * @throws NullPointerException if the operator is null
-     * @return a reference of this applier
+     * @param priority the priority at which to apply the operator.
+     * @param operator the transformation to apply.
+     * @return this {@code ObjectApplier} instance for chaining.
+     * @throws NullPointerException if {@code operator} is {@code null}.
      */
     @NotNull
-    ObjectApplier<T> apply(ApplierPriority priority, UnaryOperator<T> operator);
+    ObjectApplier<T> apply(Priority priority, UnaryOperator<T> operator);
 
     /**
-     * Applies the operator directly to the current object if the applier does
-     * not allow prioritized operators.
+     * Applies the given transformation operator at the default priority (NORMAL).
      *
-     * <p> If prioritized operators are allowed, it will use {@link ApplierPriority#NORMAL}.
-     *
-     * @param operator the operator
-     *
-     * @throws NullPointerException if the operator is null
-     * @return a reference of this applier
+     * @param operator the transformation to apply.
+     * @return this {@code ObjectApplier} instance for chaining.
+     * @throws NullPointerException if {@code operator} is {@code null}.
      */
     @NotNull
     ObjectApplier<T> apply(UnaryOperator<T> operator);
 
     /**
-     * Returns the object after all the operators were applied.
+     * Returns the final result after applying all the transformations.
      *
-     * @return the applied string
+     * @return the transformed object.
      */
     T result();
 
     /**
-     * Creates a new applier without prioritization in all its operators.
+     * Creates a simplified {@code ObjectApplier} for the provided object.
      *
-     * <p> Each call of the {@link #apply(ApplierPriority, UnaryOperator)} and {@link #apply(UnaryOperator)}
-     * methods, the operators are applied  directly to the object without any priority.
-     *
-     * @param object an object
-     * @param <T> object type
-     *
-     * @throws NullPointerException if the object is null
-     * @return a new non-prioritized applier
+     * @param object the object to transform.
+     * @param <T>    the type of the object.
+     * @return a new instance of a simplified {@code ObjectApplier}.
      */
     static <T> ObjectApplier<T> simplified(T object) {
         return new SimpleApplier<>(object);
     }
 
     /**
-     * Creates a new applier without prioritization in all its operators.
+     * Creates a simplified {@code ObjectApplier} by extracting the result from an existing applier.
      *
-     * <p> Each call of the {@link #apply(ApplierPriority, UnaryOperator)} and {@link #apply(UnaryOperator)}
-     * methods, the operators are applied  directly to the object without any priority.
-     *
-     * @param applier an applier
-     * @param <T> object type
-     *
-     * @throws NullPointerException if the applier is null
-     * @return a new non-prioritized applier
+     * @param applier the existing applier.
+     * @param <T>     the type of the object.
+     * @return a new instance of a simplified {@code ObjectApplier} initialized with the result.
      */
     static <T> ObjectApplier<T> simplified(ObjectApplier<T> applier) {
         return simplified(Objects.requireNonNull(applier).result());
     }
 
     /**
-     * Creates a new applier with prioritization for each operator that is being
-     * added to the applier.
+     * Creates a prioritized {@code ObjectApplier} for the provided object.
      *
-     * <p> The {@link #apply(ApplierPriority, UnaryOperator)} method add the operator with the
-     * defined priority, and the {@link #apply(UnaryOperator)} method add the operator
-     * with the {@link ApplierPriority#NORMAL} priority.
-     *
-     * @param object an object
-     * @param <T> object type
-     *
-     * @throws NullPointerException if the object is null
-     * @return a new prioritized applier
+     * @param object the object to transform.
+     * @param <T>    the type of the object.
+     * @return a new instance of a prioritized {@code ObjectApplier}.
      */
     static <T> ObjectApplier<T> prioritized(T object) {
         return new PriorityApplier<>(object);
     }
 
     /**
-     * Creates a new applier with prioritization for each operator that is being
-     * added to the applier.
+     * Creates a prioritized {@code ObjectApplier} by extracting the result from an existing applier.
      *
-     * <p> The {@link #apply(ApplierPriority, UnaryOperator)} method add the operator with the
-     * defined priority, and the {@link #apply(UnaryOperator)} method add the operator
-     * with the {@link ApplierPriority#NORMAL} priority.
-     *
-     * @param applier an applier
-     * @param <T> object type
-     *
-     * @throws NullPointerException if the applier is null
-     * @return a new prioritized applier
+     * @param applier the existing applier.
+     * @param <T>     the type of the object.
+     * @return a new instance of a prioritized {@code ObjectApplier} initialized with the result.
      */
     static <T> ObjectApplier<T> prioritized(ObjectApplier<T> applier) {
         return prioritized(Objects.requireNonNull(applier).result());
+    }
+
+    /**
+     * Represents the priority levels for transformation operators.
+     */
+    enum Priority {
+        LOWEST,
+        LOW,
+        NORMAL,
+        HIGH,
+        HIGHEST
     }
 }

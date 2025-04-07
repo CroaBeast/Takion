@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [ "main" ]
   release:
-    types: [created]
+    types: [ created ]
 
 jobs:
   build:
@@ -89,8 +89,10 @@ jobs:
           # Create directory structure
           mkdir -p maven-repo/me/croabeast/${{ github.event.repository.name }}/${{ env.VERSION }}
           
-          # Copy JAR file
+          # Copy JAR files
           cp target/${{ github.event.repository.name }}-${{ env.VERSION }}.jar maven-repo/me/croabeast/${{ github.event.repository.name }}/${{ env.VERSION }}/
+          cp target/${{ github.event.repository.name }}-${{ env.VERSION }}-javadoc.jar maven-repo/me/croabeast/${{ github.event.repository.name }}/${{ env.VERSION }}/
+          cp target/${{ github.event.repository.name }}-${{ env.VERSION }}-sources.jar maven-repo/me/croabeast/${{ github.event.repository.name }}/${{ env.VERSION }}/
           
           # Create POM file
           cat > maven-repo/me/croabeast/${{ github.event.repository.name }}/${{ env.VERSION }}/${{ github.event.repository.name }}-${{ env.VERSION }}.pom << EOF
