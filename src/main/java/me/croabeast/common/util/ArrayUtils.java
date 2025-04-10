@@ -25,9 +25,6 @@ public class ArrayUtils {
      * @param extraArrays additional arrays to combine with the initial array.
      * @param <T> the type of elements in the arrays.
      *
-     * @author Kihsomray
-     * @since 1.3
-     *
      * @return a new array containing all elements from the input arrays.
      */
     @SafeVarargs

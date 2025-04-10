@@ -1,4 +1,5 @@
-name: Takion
-version: '1.0'
 main: me.croabeast.takion.TakionPlugin
+
+name: Takion
+version: '${project.version}'
 api-version: '1.13'

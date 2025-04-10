@@ -138,7 +138,7 @@ public final class ChatClick implements ChatEvent<ClickEvent> {
         /**
          * Changes the page in a multi-page display.
          */
-        CHANGE_PAGE(ClickEvent.Action.CHANGE_PAGE),
+        CHANGE_PAGE(ClickEvent.Action.CHANGE_PAGE, "page"),
 
         /**
          * Copies text to the clipboard when clicked.

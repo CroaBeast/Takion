@@ -46,6 +46,7 @@
                     <source>1.8</source>
                     <target>1.8</target>
                     <compilerArgs>
+                        <arg>-Xlint:deprecation</arg>
                         <arg>-Xlint:-options</arg>
                     </compilerArgs>
                 </configuration>
@@ -153,11 +154,6 @@
             <id>loohp-repo</id>
             <url>https://repo.loohpjames.com/repository</url>
         </repository>
-
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://www.jitpack.io</url>
-        </repository>
     </repositories>
 
     <dependencies>
@@ -183,108 +179,31 @@
         </dependency>
 
         <dependency>
-            <groupId>me.croabeast</groupId>
-            <artifactId>PrismaticAPI</artifactId>
-            <version>1.0</version>
+            <groupId>org.bstats</groupId>
+            <artifactId>bstats-bukkit</artifactId>
+            <version>3.0.2</version>
             <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>me.croabeast</groupId>
-            <artifactId>PrismaticAPI</artifactId>
-            <version>1.0</version>
-            <scope>compile</scope>
-            <classifier>javadoc</classifier>
-        </dependency>
-        <dependency>
-            <groupId>me.croabeast</groupId>
-            <artifactId>PrismaticAPI</artifactId>
-            <version>1.0</version>
-            <scope>compile</scope>
-            <classifier>sources</classifier>
         </dependency>
 
         <dependency>
             <groupId>me.croabeast</groupId>
-            <artifactId>CommandFramework</artifactId>
+            <artifactId>PrismaticAPI</artifactId>
             <version>1.0</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>me.croabeast</groupId>
-            <artifactId>CommandFramework</artifactId>
-            <version>1.0</version>
-            <scope>compile</scope>
-            <classifier>javadoc</classifier>
-        </dependency>
-        <dependency>
-            <groupId>me.croabeast</groupId>
-            <artifactId>CommandFramework</artifactId>
-            <version>1.0</version>
-            <scope>compile</scope>
-            <classifier>sources</classifier>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>me.croabeast</groupId>
             <artifactId>YAML-API</artifactId>
             <version>1.0</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>me.croabeast</groupId>
-            <artifactId>YAML-API</artifactId>
-            <version>1.0</version>
-            <scope>compile</scope>
-            <classifier>javadoc</classifier>
-        </dependency>
-        <dependency>
-            <groupId>me.croabeast</groupId>
-            <artifactId>YAML-API</artifactId>
-            <version>1.0</version>
-            <scope>compile</scope>
-            <classifier>sources</classifier>
-        </dependency>
-
-        <dependency>
-            <groupId>org.bstats</groupId>
-            <artifactId>bstats-bukkit</artifactId>
-            <version>3.0.2</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.bstats</groupId>
-            <artifactId>bstats-bukkit</artifactId>
-            <version>3.0.2</version>
-            <scope>compile</scope>
-            <classifier>javadoc</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.bstats</groupId>
-            <artifactId>bstats-bukkit</artifactId>
-            <version>3.0.2</version>
-            <scope>compile</scope>
-            <classifier>sources</classifier>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>com.github.stefvanschie.inventoryframework</groupId>
             <artifactId>IF</artifactId>
             <version>0.10.19</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.github.stefvanschie.inventoryframework</groupId>
-            <artifactId>IF</artifactId>
-            <version>0.10.19</version>
-            <scope>compile</scope>
-            <classifier>javadoc</classifier>
-        </dependency>
-        <dependency>
-            <groupId>com.github.stefvanschie.inventoryframework</groupId>
-            <artifactId>IF</artifactId>
-            <version>0.10.19</version>
-            <scope>compile</scope>
-            <classifier>sources</classifier>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
