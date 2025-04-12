@@ -41,7 +41,7 @@ import java.util.logging.Logger;
  * </p>
  * <p>
  * <strong>Usage Example:</strong>
- * <pre>
+ * <pre><code>
  *     TakionLib lib = TakionLib.fromPlugin(myPlugin);
  *     TakionLogger logger = new TakionLogger(lib);
  *     logger.setColored(true).setStripPrefix(false);
@@ -52,8 +52,7 @@ import java.util.logging.Logger;
  *     // Create a Bukkit-compatible logger for integration with other systems
  *     Logger bukkitLogger = TakionLogger.createBukkit(myPlugin);
  *     bukkitLogger.info("Bukkit log message with enhanced formatting!");
- * </pre>
- * </p>
+ * </code></pre></p>
  *
  * @see TakionLib
  * @see LogLevel
@@ -165,10 +164,14 @@ public class TakionLogger {
         try {
             plugin = lib.getPlugin();
         } catch (Exception ignored) {}
-        bukkit = usePlugin && plugin != null ? plugin.getLogger() : Bukkit.getLogger();
-        if (ServerInfoUtils.PAPER_ENABLED && ServerInfoUtils.SERVER_VERSION >= 18.2) {
+
+        usePlugin = usePlugin && plugin != null;
+        bukkit = usePlugin ? plugin.getLogger() : Bukkit.getLogger();
+
+        if (ServerInfoUtils.PAPER_ENABLED &&
+                ServerInfoUtils.SERVER_VERSION >= 18.2) {
             try {
-                paper = new PaperLogger(usePlugin && plugin != null ? plugin.getName() : "");
+                paper = new PaperLogger(usePlugin ? plugin.getName() : "");
             } catch (Exception e) {
                 e.printStackTrace();
             }

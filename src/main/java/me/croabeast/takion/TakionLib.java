@@ -90,12 +90,6 @@ public class TakionLib {
     private TakionLogger logger;
 
     /**
-     * The Vault holder used for integrating with external permission/chat APIs.
-     */
-    @NotNull
-    private final VaultHolder<?> vaultHolder;
-
-    /**
      * Manages communication channels.
      */
     @NotNull
@@ -193,8 +187,6 @@ public class TakionLib {
             }
         };
 
-        vaultHolder = HolderUtils.loadHolder();
-
         channelManager = new ChannelMngr(this);
         placeholderManager = new PlaceholderMngr();
         characterManager = new CharacterMngr(this);
@@ -249,8 +241,7 @@ public class TakionLib {
         smallCapsAction = new StringAction("(?i)<" + s + ">(.+?)</" + s + ">") {
             @NotNull
             public String act(String string) {
-                if (StringUtils.isBlank(string))
-                    return string;
+                if (StringUtils.isBlank(string)) return string;
 
                 Matcher matcher = createMatcher(string);
                 while (matcher.find())

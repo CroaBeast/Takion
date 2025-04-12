@@ -14,6 +14,8 @@ public final class TakionPlugin extends JavaPlugin {
     static final Map<Plugin, TakionLib> libs = new HashMap<>();
     static final TakionLib noPluginInstance = new TakionLib(null);
 
+    @SuppressWarnings("all")
+    private VaultHolder<?> holder;
     private TakionLib lib;
 
     @Override
@@ -22,8 +24,8 @@ public final class TakionPlugin extends JavaPlugin {
         loader.setComplexStructure(false);
 
         for (String artifact : ArrayUtils.toList(
-                "CommandFramework", "AdvancementInfo", "YAML-API",
-                "PrismaticAPI"
+                "CommandFramework", "YAML-API", "PrismaticAPI",
+                "AdvancementInfo"
         ))
             loader.load(
                     "me.croabeast", artifact, "1.0",
@@ -37,7 +39,7 @@ public final class TakionPlugin extends JavaPlugin {
         );
 
         this.lib = new TakionLib(this);
-        final Plugin plugin = lib.getVaultHolder().getPlugin();
+        Plugin plugin = (holder = VaultHolder.loadHolder()).getPlugin();
 
         MetricsLoader.initialize(this, 25287)
                 .addDrillDownPie(

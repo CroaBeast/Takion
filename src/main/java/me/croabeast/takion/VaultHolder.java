@@ -1,5 +1,6 @@
 package me.croabeast.takion;
 
+import me.croabeast.common.util.Exceptions;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -188,4 +189,24 @@ public interface VaultHolder<T> {
      */
     @NotNull
     List<String> getGroups();
+
+    /**
+     * Loads and returns an appropriate {@link VaultHolder} instance based on the enabled plugins.
+     * <p>
+     * This method first checks if LuckPerms is enabled; if so, it returns a new {@link HolderUtils.LuckHolder}.
+     * Otherwise, it attempts to return a {@link HolderUtils.BasicHolder} from Vault's Chat API. If both attempts fail,
+     * it returns a {@link HolderUtils.NoHolder} instance as a fallback.
+     * </p>
+     *
+     * @return a valid {@link VaultHolder} instance, or a fallback {@link HolderUtils.NoHolder} if none is available
+     */
+    static VaultHolder<?> loadHolder() {
+        if (Exceptions.isPluginEnabled("LuckPerms"))
+            return new HolderUtils.LuckHolder();
+
+        if (Exceptions.isPluginEnabled("Vault"))
+            return new HolderUtils.BasicHolder();
+
+        return new HolderUtils.NoHolder();
+    }
 }

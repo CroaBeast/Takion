@@ -32,8 +32,6 @@ import java.util.function.Function;
  *     <li>{@link LuckHolder} – integrates with LuckPerms.</li>
  *     <li>{@link NoHolder} – a fallback implementation when neither Vault nor LuckPerms is available.</li>
  * </ul>
- * The {@link #loadHolder()} method returns a suitable {@link VaultHolder} based on the enabled plugins.
- * </p>
  *
  * @see VaultHolder
  * @see net.milkbowl.vault.chat.Chat
@@ -542,25 +540,5 @@ class HolderUtils {
         public String toString() {
             return "VaultHolder{provider='NONE'}";
         }
-    }
-
-    /**
-     * Loads and returns an appropriate {@link VaultHolder} instance based on the enabled plugins.
-     * <p>
-     * This method first checks if LuckPerms is enabled; if so, it returns a new {@link LuckHolder}.
-     * Otherwise, it attempts to return a {@link BasicHolder} from Vault's Chat API. If both attempts fail,
-     * it returns a {@link NoHolder} instance as a fallback.
-     * </p>
-     *
-     * @return a valid {@link VaultHolder} instance, or a fallback {@link NoHolder} if none is available
-     */
-    VaultHolder<?> loadHolder() {
-        if (Exceptions.isPluginEnabled("LuckPerms"))
-            return new LuckHolder();
-
-        if (Exceptions.isPluginEnabled("Vault"))
-            return new BasicHolder();
-
-        return new NoHolder();
     }
 }

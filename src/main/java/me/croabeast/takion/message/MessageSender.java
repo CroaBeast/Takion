@@ -43,6 +43,7 @@ import java.util.function.UnaryOperator;
  * Example usage:
  * <pre><code>
  * TakionLib lib = TakionLib.fromPlugin(plugin);
+ *
  * MessageSender sender = new MessageSender(lib, player);
  * sender.addPlaceholder("{player}", player.getName())
  *       .addFunctions(s -&gt; s.toUpperCase())
