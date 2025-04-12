@@ -1,3 +1,9 @@
+<p align="center">
+    <a href="https://discord.com/invite/gzzhVqgy3b" alt="Support Server">
+        <img alt="Discord" src="https://img.shields.io/discord/826555143398752286?style=for-the-badge&logo=discord&label=Support%20Server&color=635aea">
+    </a>
+</p>
+
 # Takion
 
 Takion is a comprehensive Spigot library designed to streamline the development of text and chat-related plugins for Minecraft servers. It provides a robust set of tools and utilities to manage messaging, logging, placeholder replacement, and more, making it an essential core for enhancing chat interactions within Minecraft.
