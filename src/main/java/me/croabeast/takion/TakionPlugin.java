@@ -1,7 +1,9 @@
 package me.croabeast.takion;
 
+import me.croabeast.common.CollectionBuilder;
 import me.croabeast.common.DependencyLoader;
 import me.croabeast.common.MetricsLoader;
+import me.croabeast.common.reflect.Reflector;
 import me.croabeast.common.util.ArrayUtils;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -38,17 +40,39 @@ public final class TakionPlugin extends JavaPlugin {
                 DependencyLoader.MAVEN_REPO_URLS[0]
         );
 
-        this.lib = new TakionLib(this);
-        Plugin plugin = (holder = VaultHolder.loadHolder()).getPlugin();
+        holder = VaultHolder.loadHolder();
+        lib = new TakionLib(this);
+
+        lib.getLogger().log("&eTakion &7was loaded successfully.");
+    }
+
+    private static String verifyPluginName(Plugin plugin) {
+        try {
+            boolean b = Reflector.from(() -> plugin).get("allowTakionMetrics");
+            return b ? plugin.getName() : "Not disclosed";
+        }
+        catch (Exception e) {
+            return "Not disclosed";
+        }
+    }
+
+    @Override
+    public void onEnable() {
+        final Plugin plugin = holder.getPlugin();
 
         MetricsLoader.initialize(this, 25287)
                 .addDrillDownPie(
                         "permissionPlugin", "Permission Plugin",
-                        plugin != null ? plugin.getName() : null,
-                        "None"
+                        plugin != null ? plugin.getName() : "None"
+                )
+                .addSingleLine("pluginsCount", libs.size())
+                .addDrillDownPie(
+                        "usagePlugins", "Plugins Using Takion",
+                        CollectionBuilder.of(libs.keySet())
+                                .remove(this)
+                                .map(TakionPlugin::verifyPluginName)
+                                .toList()
                 );
-
-        lib.getLogger().log("&eTakion &7was loaded successfully.");
     }
 
     @Override

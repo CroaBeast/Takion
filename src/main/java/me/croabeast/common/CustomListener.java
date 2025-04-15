@@ -1,5 +1,7 @@
 package me.croabeast.common;
 
+import lombok.AccessLevel;
+import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
@@ -12,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
  * <p>
  * This interface extends both the standard Bukkit {@link Listener} and the {@link Registrable} interface,
  * providing a convenient way to register and unregister event listeners in a Bukkit/Spigot plugin.
- * It also maintains an internal {@code Status} to keep track of the registration state.
+ * It also maintains an internal {@link Status Status} to keep track of the registration state.
  * </p>
  *
  * @see Listener
@@ -57,8 +59,7 @@ public interface CustomListener extends Listener, Registrable {
             return false;
 
         Bukkit.getPluginManager().registerEvents(this, plugin);
-        getStatus().registered = true;
-
+        getStatus().setRegistered(true);
         return true;
     }
 
@@ -89,7 +90,7 @@ public interface CustomListener extends Listener, Registrable {
             return false;
 
         HandlerList.unregisterAll(this);
-        getStatus().registered = false;
+        getStatus().setRegistered(false);
         return true;
     }
 
@@ -100,10 +101,27 @@ public interface CustomListener extends Listener, Registrable {
      * It is automatically used by implementations of {@link CustomListener} to manage their state.
      * </p>
      */
+    @Setter(AccessLevel.PRIVATE)
     final class Status {
+
         /**
          * Indicates whether the listener is currently registered.
          */
         private boolean registered = false;
+
+        /**
+         * Constructs a new {@code Status} with a default unregistered state.
+         */
+        public Status() {}
+
+        /**
+         * Returns a string representation of this status.
+         *
+         * @return a string indicating the registration state.
+         */
+        @Override
+        public String toString() {
+            return "Status{registered=" + registered + '}';
+        }
     }
 }
