@@ -40,9 +40,7 @@ public final class TakionPlugin extends JavaPlugin {
                 DependencyLoader.MAVEN_REPO_URLS[0]
         );
 
-        holder = VaultHolder.loadHolder();
         lib = new TakionLib(this);
-
         lib.getLogger().log("&eTakion &7was loaded successfully.");
     }
 
@@ -58,21 +56,23 @@ public final class TakionPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        final Plugin plugin = holder.getPlugin();
+        final Plugin plugin = (holder = VaultHolder.loadHolder()).getPlugin();
 
-        MetricsLoader.initialize(this, 25287)
-                .addDrillDownPie(
-                        "permissionPlugin", "Permission Plugin",
-                        plugin != null ? plugin.getName() : "None"
-                )
-                .addSingleLine("pluginsCount", libs.size())
-                .addDrillDownPie(
-                        "usagePlugins", "Plugins Using Takion",
-                        CollectionBuilder.of(libs.keySet())
-                                .remove(this)
-                                .map(TakionPlugin::verifyPluginName)
-                                .toList()
-                );
+        getServer().getScheduler().scheduleSyncDelayedTask(this, () ->
+                MetricsLoader.initialize(this, 25287)
+                        .addDrillDownPie(
+                                "permissionPlugin", "Permission Plugin",
+                                plugin != null ? plugin.getName() : "None"
+                        )
+                        .addSingleLine("pluginsCount", libs.size() - 1)
+                        .addDrillDownPie(
+                                "usagePlugins", "Plugins Using Takion",
+                                CollectionBuilder.of(libs.keySet())
+                                        .remove(this)
+                                        .map(TakionPlugin::verifyPluginName)
+                                        .toList()
+                        )
+        );
     }
 
     @Override
