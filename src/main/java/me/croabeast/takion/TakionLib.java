@@ -254,7 +254,7 @@ public class TakionLib {
             }
         };
 
-        TakionPlugin.libs.put(plugin, this);
+        if (plugin != null) TakionPlugin.libs.put(plugin, this);
     }
 
     /**
