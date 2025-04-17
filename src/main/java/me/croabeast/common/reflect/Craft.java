@@ -133,7 +133,7 @@ public class Craft {
         public void syncCommands(Collection<String> collection) {
             if (ServerInfoUtils.SERVER_VERSION < 13.0) return;
             Collection<?> children = Command.Dispatcher.getRoot().getChildren();
-            INSTANCE.call("syncCommands");
+            syncCommands();
             Command.Node root = Command.Dispatcher.getRoot();
             for (Object child : children) {
                 String name = new Command.Node(child).getName();
@@ -141,6 +141,10 @@ public class Craft {
                 if (!collection.contains(name)) root.addChild(child);
             }
             updateCommands();
+        }
+
+        public void syncCommands() {
+            INSTANCE.call("syncCommands");
         }
 
         /**
