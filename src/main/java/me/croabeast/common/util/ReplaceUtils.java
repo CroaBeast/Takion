@@ -72,7 +72,7 @@ public class ReplaceUtils {
      * @return True if the arrays are applicable for replacement, false otherwise
      */
     public <A, B> boolean isApplicable(A[] as, B[] bs) {
-        return (!ArrayUtils.isArrayEmpty(as) && !ArrayUtils.isArrayEmpty(bs)) && (as.length <= bs.length);
+        return (as != null && bs != null) && (as.length <= bs.length);
     }
 
     /**
