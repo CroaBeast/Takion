@@ -1,6 +1,7 @@
 package me.croabeast.common.map;
 
 import me.croabeast.common.CollectionBuilder;
+import me.croabeast.common.util.ReplaceUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,53 +12,54 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
- * A utility class that provides methods for creating and manipulating maps.
+ * A fluent builder for creating and transforming {@link LinkedHashMap} instances.
+ * <p>
+ * The {@code MapBuilder} class wraps an internal {@link LinkedHashMap} and provides
+ * methods for adding, removing, filtering, and mapping entries in a fluent style.
+ * It also supports importing from existing maps or collections of map entries, and
+ * producing immutable copies via {@link #build()}.
+ * </p>
  *
- * <p> It uses a {@link LinkedHashMap} as the underlying data structure and supports
- * various operations such as adding, removing, filtering, applying, and mapping
- * keys and values.
- *
- * @param <K> the type of the keys in the map
- * @param <V> the type of the values in the map
- *
+ * @param <K> the type of keys in the map
+ * @param <V> the type of values in the map
  * @author CroaBeast
- * @version 1.4
+ * @see LinkedHashMap
+ * @see CollectionBuilder
  */
-public class MapBuilder<K, V> implements Iterable<Entry<K, V>> {
+public class MapBuilder<K, V> implements Iterable<Map.Entry<K, V>> {
 
     private final Map<K, V> map = new LinkedHashMap<>();
 
     /**
-     * Creates an empty map builder.
+     * Creates an empty {@code MapBuilder}.
      */
     public MapBuilder() {}
 
     /**
-     * Creates a map builder with the given map as the initial content.
+     * Creates a {@code MapBuilder} initialized with the entries of the given map.
      *
-     * @param map the map to copy from, or null if none
+     * @param map an existing map whose entries will be copied; may be {@code null}
      */
     public MapBuilder(Map<? extends K, ? extends V> map) {
         if (map != null) this.map.putAll(map);
     }
 
     /**
-     * Creates a map builder with the given collection of entries as the initial content.
+     * Creates a {@code MapBuilder} initialized with the entries from the given collection.
      *
-     * @param collection the collection of entries to copy from, or null if none
+     * @param collection a collection of map entries to copy; may be {@code null}
      */
-    public MapBuilder(Collection<Entry<? extends K, ? extends V>> collection) {
+    public MapBuilder(Collection<Map.Entry<? extends K, ? extends V>> collection) {
         if (collection != null)
-            collection.forEach(e -> map.put(e.getKey(), e.getValue()));
+            collection.forEach(e -> this.map.put(e.getKey(), e.getValue()));
     }
 
     /**
-     * Puts a key-value pair into the map builder.
+     * Associates the specified value with the specified key in this builder.
      *
-     * @param key the key to put
-     * @param value the value to put
-     *
-     * @return this map builder
+     * @param key   the key to add
+     * @param value the value to associate
+     * @return this builder (for chaining)
      */
     public MapBuilder<K, V> put(K key, V value) {
         map.put(key, value);
@@ -65,59 +67,54 @@ public class MapBuilder<K, V> implements Iterable<Entry<K, V>> {
     }
 
     /**
-     * Puts an entry into the map builder.
+     * Adds the given entry to this builder.
      *
-     * @param entry the entry to put
-     *
-     * @return this map builder
-     * @throws NullPointerException if the entry is null
+     * @param entry the entry whose key and value to add
+     * @return this builder (for chaining)
      */
-    public MapBuilder<K, V> put(Entry<? extends K, ? extends V> entry) {
+    public MapBuilder<K, V> put(Map.Entry<? extends K, ? extends V> entry) {
         return put(entry.getKey(), entry.getValue());
     }
 
     /**
-     * Puts a map entry into the map builder.
+     * Associates the specified value with the specified key if the key is not already present.
      *
-     * @param entry the map entry to put
-     *
-     * @return this map builder
-     * @throws NullPointerException if the entry is null
+     * @param key   the key to add
+     * @param value the value to associate if absent
+     * @return this builder (for chaining)
      */
-    public MapBuilder<K, V> put(Map.Entry<? extends K, ? extends V> entry) {
-        return put(Entry.of(entry));
-    }
-
     public MapBuilder<K, V> putIfAbsent(K key, V value) {
         map.putIfAbsent(key, value);
         return this;
     }
 
-    public MapBuilder<K, V> putIfAbsent(Entry<? extends K, ? extends V> entry) {
+    /**
+     * Adds the given entry only if its key is not already present.
+     *
+     * @param entry the entry whose key and value to add if absent
+     * @return this builder (for chaining)
+     */
+    public MapBuilder<K, V> putIfAbsent(Map.Entry<? extends K, ? extends V> entry) {
         return putIfAbsent(entry.getKey(), entry.getValue());
     }
 
-    public MapBuilder<K, V> putIfAbsent(Map.Entry<? extends K, ? extends V> entry) {
-        return putIfAbsent(Entry.of(entry));
-    }
-
     /**
-     * Puts all the key-value pairs from the given map into the map builder.
+     * Copies all entries from the given map into this builder.
      *
-     * @param map the map to copy from
-     * @return this map builder
-     * @throws NullPointerException if the map is null
+     * @param map the map whose entries to add (must not be {@code null})
+     * @return this builder (for chaining)
      */
     public MapBuilder<K, V> putAll(Map<? extends K, ? extends V> map) {
-        Objects.requireNonNull(map).forEach(this::put);
+        Objects.requireNonNull(map, "map");
+        map.forEach(this::put);
         return this;
     }
 
     /**
-     * Removes a key and its associated value from the map builder.
+     * Removes the mapping for the specified key if present.
      *
      * @param key the key to remove
-     * @return this map builder
+     * @return this builder (for chaining)
      */
     public MapBuilder<K, V> remove(K key) {
         map.remove(key);
@@ -125,13 +122,11 @@ public class MapBuilder<K, V> implements Iterable<Entry<K, V>> {
     }
 
     /**
-     * Removes a key and its associated value from the map builder if the value
-     * matches the given value.
+     * Removes the entry for the specified key only if it is currently mapped to the given value.
      *
-     * @param key the key to remove
-     * @param value the value to match
-     *
-     * @return this map builder
+     * @param key   the key whose mapping to remove
+     * @param value the value expected to be associated with the key
+     * @return this builder (for chaining)
      */
     public MapBuilder<K, V> remove(K key, V value) {
         map.remove(key, value);
@@ -139,347 +134,431 @@ public class MapBuilder<K, V> implements Iterable<Entry<K, V>> {
     }
 
     /**
-     * Removes all the occurrences of a key and its associated value from the
-     * map builder.
+     * Removes up to {@code counting} entries matching the given key.
+     * If {@code counting} is negative, all matching entries are removed.
      *
-     * @param key the key to remove
-     * @param counting the maximum number of occurrences to remove, or -1 for
-     *                unlimited
-     *
-     * @return this map builder
+     * @param key      the key to remove
+     * @param counting the maximum number of entries to remove, or negative for unlimited
+     * @return this builder (for chaining)
      */
     public MapBuilder<K, V> removeAllByKey(K key, int counting) {
         boolean finite = counting > -1;
+        Iterator<Map.Entry<K, V>> it = map.entrySet().iterator();
 
-        for (Map.Entry<K, V> e : map.entrySet()) {
-            K k = e.getKey();
-
-            if (!Objects.equals(k, key)) continue;
-            map.remove(k);
-
-            if (finite && counting-- < 0) break;
+        while (it.hasNext()) {
+            Map.Entry<K, V> e = it.next();
+            if (Objects.equals(e.getKey(), key)) {
+                it.remove();
+                if (finite && --counting < 0) break;
+            }
         }
-
         return this;
     }
 
     /**
-     * Removes all the occurrences of a value and its associated key from the
-     * map builder.
+     * Removes up to {@code counting} entries matching the given value.
+     * If {@code counting} is negative, all matching entries are removed.
      *
-     * @param value the value to remove
-     * @param counting the maximum number of occurrences to remove, or -1 for
-     *                unlimited
-     *
-     * @return this map builder
+     * @param value    the value to remove
+     * @param counting the maximum number of entries to remove, or negative for unlimited
+     * @return this builder (for chaining)
      */
     public MapBuilder<K, V> removeAllByValue(V value, int counting) {
         boolean finite = counting > -1;
+        Iterator<Map.Entry<K, V>> it = map.entrySet().iterator();
 
-        for (Map.Entry<K, V> e : map.entrySet()) {
-            if (!Objects.equals(e.getValue(), value))
-                continue;
-
-            map.remove(e.getKey());
-            if (finite && counting-- < 0) break;
+        while (it.hasNext()) {
+            Map.Entry<K, V> e = it.next();
+            if (Objects.equals(e.getValue(), value)) {
+                it.remove();
+                if (finite && --counting < 0) break;
+            }
         }
-
         return this;
     }
 
     /**
-     * Filters the key-value pairs in the map builder by applying a predicate
-     * to the keys.
+     * Retains only those entries whose keys match the given predicate.
      *
-     * <p> Only the pairs that satisfy the predicate are kept in the map builder.
-     *
-     * @param predicate the predicate to test the keys
-     *
-     * @return this map builder
-     * @throws NullPointerException if the predicate is null
+     * @param predicate a predicate to test keys
+     * @return this builder (for chaining)
      */
     public MapBuilder<K, V> filterByKey(Predicate<K> predicate) {
         Objects.requireNonNull(predicate);
-
-        map.keySet().removeIf(k -> predicate.negate().test(k));
+        map.keySet().removeIf(predicate.negate());
         return this;
     }
 
     /**
-     * Filters the key-value pairs in the map builder by applying a predicate
-     * to the values.
+     * Retains only those entries whose values match the given predicate.
      *
-     * <p> Only the pairs that satisfy the predicate are kept in the map builder.
-     *
-     * @param predicate the predicate to test the values
-     *
-     * @return this map builder
-     * @throws NullPointerException if the predicate is null
+     * @param predicate a predicate to test values
+     * @return this builder (for chaining)
      */
     public MapBuilder<K, V> filterByValue(Predicate<V> predicate) {
         Objects.requireNonNull(predicate);
-
-        map.values().removeIf(v -> predicate.negate().test(v));
+        map.values().removeIf(predicate.negate());
         return this;
     }
 
+    /**
+     * Retains only those entries for which the given bi-predicate returns {@code true}.
+     *
+     * @param predicate a bi-predicate to test key and value pairs
+     * @return this builder (for chaining)
+     */
     public MapBuilder<K, V> filter(BiPredicate<K, V> predicate) {
         Objects.requireNonNull(predicate);
-
         map.entrySet().removeIf(e -> predicate.negate().test(e.getKey(), e.getValue()));
         return this;
     }
 
     /**
-     * Applies a function to the keys in the map builder and returns a new map
-     * builder with the transformed keys. The values are unchanged.
+     * Transforms all keys using the given function, keeping values unchanged.
      *
-     * @param <A> the type of the transformed keys
-     * @param function the function to apply to the keys
-     *
-     * @return a new map builder with the transformed keys
-     * @throws NullPointerException if the function is null
+     * @param function a function to apply to each key
+     * @param <A>      the new key type
+     * @return a new {@code MapBuilder} with transformed keys
      */
     public <A> MapBuilder<A, V> applyByKey(Function<K, A> function) {
         Objects.requireNonNull(function);
-        List<Entry<A, V>> entries = new LinkedList<>();
+        Map<A, V> entries = new LinkedHashMap<>();
 
-        for (Map.Entry<K, V> entry : map.entrySet()) {
-            A key = function.apply(entry.getKey());
-            V value = entry.getValue();
+        for (Map.Entry<K, V> entry : map.entrySet())
+            entries.put(function.apply(entry.getKey()), entry.getValue());
 
-            entries.add(Entry.of(key, value));
-        }
-
-        MapBuilder<A, V> builder = new MapBuilder<>();
-        entries.forEach(builder::put);
-
-        return builder;
+        return new MapBuilder<>(entries);
     }
 
     /**
-     * Applies a function to the values in the map builder and returns a new map
-     * builder with the transformed values. The keys are unchanged.
+     * Transforms all values using the given function, keeping keys unchanged.
      *
-     * @param <B> the type of the transformed values
-     * @param function the function to apply to the values
-     *
-     * @return a new map builder with the transformed values
-     * @throws NullPointerException if the function is null
+     * @param function a function to apply to each value
+     * @param <B>      the new value type
+     * @return a new {@code MapBuilder} with transformed values
      */
     public <B> MapBuilder<K, B> applyByValue(Function<V, B> function) {
         Objects.requireNonNull(function);
-        List<Entry<K, B>> entries = new LinkedList<>();
-
-        for (Map.Entry<K, V> entry : map.entrySet()) {
-            K key = entry.getKey();
-            B value = function.apply(entry.getValue());
-
-            entries.add(Entry.of(key, value));
-        }
-
-        MapBuilder<K, B> builder = new MapBuilder<>();
-        entries.forEach(builder::put);
-
-        return builder;
-    }
-
-    /**
-     * Applies two functions to the keys and values in the map builder and returns
-     * a new map builder with the transformed pairs.
-     *
-     * @param <A> the type of the transformed keys
-     * @param <B> the type of the transformed values
-     *
-     * @param keyFunction the function to apply to the keys
-     * @param valueFunction the function to apply to the values
-     *
-     * @return a new map builder with the transformed pairs
-     * @throws NullPointerException if either function is null
-     */
-    public <A, B> MapBuilder<A, B> map(Function<K, A> keyFunction, Function<V, B> valueFunction) {
-        Objects.requireNonNull(valueFunction);
-        Objects.requireNonNull(keyFunction);
-
-        List<Entry<A, B>> entries = new LinkedList<>();
+        Map<K, B> entries = new LinkedHashMap<>();
 
         for (Map.Entry<K, V> entry : map.entrySet())
-            entries.add(Entry.of(
-                    keyFunction.apply(entry.getKey()),
-                    valueFunction.apply(entry.getValue())
-            ));
+            entries.put(entry.getKey(), function.apply(entry.getValue()));
 
-        MapBuilder<A, B> builder = new MapBuilder<>();
-        entries.forEach(builder::put);
-
-        return builder;
+        return new MapBuilder<>(entries);
     }
 
     /**
-     * Checks if the map builder contains a given key.
+     * Transforms both keys and values using the given functions.
+     *
+     * @param keyFunction   a function to apply to each key
+     * @param valueFunction a function to apply to each value
+     * @param <A>           the new key type
+     * @param <B>           the new value type
+     * @return a new {@code MapBuilder} with transformed entries
+     */
+    public <A, B> MapBuilder<A, B> map(Function<K, A> keyFunction, Function<V, B> valueFunction) {
+        Objects.requireNonNull(keyFunction);
+        Objects.requireNonNull(valueFunction);
+
+        Map<A, B> entries = new LinkedHashMap<>();
+        for (final Map.Entry<K, V> entry : map.entrySet())
+            entries.put(
+                    keyFunction.apply(entry.getKey()),
+                    valueFunction.apply(entry.getValue())
+            );
+
+        return new MapBuilder<>(entries);
+    }
+
+    /**
+     * Checks if the specified key is present.
      *
      * @param key the key to check
-     * @return true if the map builder contains the key, false otherwise
+     * @return {@code true} if present, {@code false} otherwise
      */
     public boolean containsKey(K key) {
         return map.containsKey(key);
     }
 
     /**
-     * Checks if the map builder contains a given value.
+     * Checks if the specified value is present.
      *
      * @param value the value to check
-     * @return true if the map builder contains the value, false otherwise
+     * @return {@code true} if present, {@code false} otherwise
      */
     public boolean containsValue(V value) {
         return map.containsValue(value);
     }
 
     /**
-     * Gets the value associated with a given key from the map builder, or a default
-     * value if the key is not found.
+     * Returns the value to which the specified key is mapped, or the default if none.
      *
-     * @param key the key to look up
-     * @param def the default value to return if the key is not found
-     *
-     * @return the value associated with the key, or the default value
+     * @param key the key
+     * @param def the default value to return if key is absent
+     * @return the mapped or default value
      */
     public V get(K key, V def) {
         return map.getOrDefault(key, def);
     }
 
     /**
-     * Gets the value associated with a given key from the map builder, or null
-     * if the key is not found.
+     * Returns the value to which the specified key is mapped, or {@code null} if none.
      *
-     * @param key the key to look up
-     * @return the value associated with the key, or null
+     * @param key the key
+     * @return the mapped value, or {@code null}
      */
     public V get(K key) {
         return map.get(key);
     }
 
     /**
-     * Clears the map builder of all the key-value pairs.
+     * Removes all mappings.
      */
     public void clear() {
         map.clear();
     }
 
     /**
-     * Returns the size of the map builder, i.e. the number of key-value pairs.
+     * Returns the number of entries.
      *
-     * @return the size of the map builder
+     * @return the map size
      */
     public int size() {
         return map.size();
     }
 
+    /**
+     * Finds the first key associated with the given value, or returns the default if none.
+     *
+     * @param value the value to search for
+     * @param def   the default key if not found
+     * @return the found key or {@code def}
+     */
     public K fromValue(V value, K def) {
         for (Map.Entry<K, V> e : map.entrySet())
             if (Objects.equals(e.getValue(), value))
                 return e.getKey();
-
         return def;
     }
 
+    /**
+     * Finds the first key associated with the given value, or {@code null} if none.
+     *
+     * @param value the value to search for
+     * @return the found key or {@code null}
+     */
     @Nullable
     public K fromValue(V value) {
         return fromValue(value, null);
     }
 
+    /**
+     * Finds the first key matching the given predicate, or returns the default if none.
+     *
+     * @param predicate a predicate to test keys
+     * @param def       the default key if not found
+     * @return the found key or {@code def}
+     */
     public K findFirstKey(Predicate<K> predicate, K def) {
         Objects.requireNonNull(predicate);
 
-        for (K object : map.keySet())
-            if (predicate.test(object)) return object;
-
+        for (K k : map.keySet())
+            if (predicate.test(k)) return k;
         return def;
     }
 
+    /**
+     * Finds the first key matching the given predicate, or {@code null} if none.
+     *
+     * @param predicate a predicate to test keys
+     * @return the found key or {@code null}
+     */
     @Nullable
     public K findFirstKey(Predicate<K> predicate) {
         return findFirstKey(predicate, null);
     }
 
+    /**
+     * Finds the first value matching the given predicate, or returns the default if none.
+     *
+     * @param predicate a predicate to test values
+     * @param def       the default value if not found
+     * @return the found value or {@code def}
+     */
     public V findFirstValue(Predicate<V> predicate, V def) {
         Objects.requireNonNull(predicate);
 
-        for (V object : map.values())
-            if (predicate.test(object)) return object;
-
+        for (V v : map.values())
+            if (predicate.test(v)) return v;
         return def;
     }
 
+    /**
+     * Finds the first value matching the given predicate, or {@code null} if none.
+     *
+     * @param predicate a predicate to test values
+     * @return the found value or {@code null}
+     */
     @Nullable
     public V findFirstValue(Predicate<V> predicate) {
         return findFirstValue(predicate, null);
     }
 
     /**
-     * Returns a list of the keys in the map builder.
+     * Returns a {@link List} of all keys, preserving insertion order.
      *
-     * @return a list of the keys in the map builder
+     * @return a list of keys
      */
     public List<K> keys() {
         return CollectionBuilder.of(map.keySet()).toList();
     }
 
     /**
-     * Returns a list of the values in the map builder.
+     * Returns a {@link List} of all values, preserving insertion order.
      *
-     * @return a list of the values in the map builder
+     * @return a list of values
      */
     public List<V> values() {
         return CollectionBuilder.of(map.values()).toList();
     }
 
     /**
-     * Returns a list of the entries in the map builder.
+     * Returns a {@link List} of all entries, preserving insertion order.
      *
-     * @return a list of the entries in the map builder
+     * @return a list of map entries
      */
-    public List<Entry<K, V>> entries() {
-        return CollectionBuilder.of(map.entrySet()).map(Entry::of).toList();
+    public List<Map.Entry<K, V>> entries() {
+        return CollectionBuilder.of(map.entrySet()).toList();
     }
 
+    /**
+     * Returns an iterator over the entries in this builder.
+     *
+     * @return an iterator of map entries
+     */
     @NotNull
-    public Iterator<Entry<K, V>> iterator() {
+    public Iterator<Map.Entry<K, V>> iterator() {
         return entries().iterator();
     }
 
+    /**
+     * Performs the given action for each entry in this builder.
+     *
+     * @param consumer a bi-consumer accepting key and value
+     */
     public void forEach(BiConsumer<K, V> consumer) {
         map.forEach(consumer);
     }
 
     /**
-     * Returns a map that contains the same key-value pairs as the map builder.
+     * Builds and returns a new {@link LinkedHashMap} containing the current entries.
      *
-     * @return a map that contains the same key-value pairs as the map builder
+     * @return an immutable copy of the internal map
      */
     public Map<K, V> build() {
         return new LinkedHashMap<>(map);
     }
 
     /**
-     * Checks if the map builder is empty, i.e. has no key-value pairs.
+     * Checks whether this builder contains no entries.
      *
-     * @return true if the map builder is empty, false otherwise
+     * @return {@code true} if empty, {@code false} otherwise
      */
     public boolean isEmpty() {
         return map.isEmpty();
     }
 
     /**
-     * Returns a string representation of the map builder.
+     * Creates a singleton map containing the given key-value pair.
      *
-     * @return a string representation of the map builder
+     * @param key   the single key
+     * @param value the single value
+     * @param <K>   the key type
+     * @param <V>   the value type
+     * @return a map with exactly one entry
      */
+    public static <K, V> Map<K, V> singleton(K key, V value) {
+        return new MapBuilder<K, V>()
+                .put(key, value)
+                .build();
+    }
+
+    /**
+     * Returns a string representation of the internal map.
+     *
+     * @return a string representation of the internal map
+     */
+    @Override
     public String toString() {
         return map.toString();
     }
 
-    public static <K, V> Map<K, V> singleton(K key, V value) {
-        return new MapBuilder<K, V>().put(key, value).build();
+    /**
+     * Creates a {@link Map} by pairing elements from two collections: one of keys and one of values.
+     * <p>
+     * Each element in the {@code keys} collection is associated with the element at the same index
+     * in the {@code values} collection. The iteration order of the returned map follows the iteration
+     * order of the {@code keys} collection.
+     * </p>
+     *
+     * @param <K>    the type of the map keys
+     * @param <V>    the type of the map values
+     * @param keys   the collection of keys (must not be {@code null})
+     * @param values the collection of values (must not be {@code null}), must have the same size as {@code keys}
+     * @return a new {@code LinkedHashMap} containing each key mapped to its corresponding value
+     * @throws NullPointerException      if either {@code keys} or {@code values} is {@code null}
+     * @throws IndexOutOfBoundsException if {@code keys.size() != values.size()}
+     */
+    public static <K, V> Map<K, V> mapOf(Collection<K> keys, Collection<V> values) {
+        Objects.requireNonNull(keys, "keys collection must not be null");
+        Objects.requireNonNull(values, "values collection must not be null");
+
+        if (keys.size() != values.size())
+            throw new IndexOutOfBoundsException(
+                    "Keys and values must have the same length: "
+                    + keys.size() + " != " + values.size()
+            );
+
+        List<K> resultKeys = new ArrayList<>(keys);
+        List<V> resultValues = new ArrayList<>(values);
+
+        Map<K, V> builder = new LinkedHashMap<>();
+        for (int i = 0; i < keys.size(); i++)
+            builder.put(resultKeys.get(i), resultValues.get(i));
+
+        return builder;
+    }
+
+    /**
+     * Creates a {@link Map} by pairing elements from two arrays: one of keys and one of values.
+     * <p>
+     * Each element in the {@code keys} array is associated with the element at the same index
+     * in the {@code values} array. The iteration order of the returned map follows the order
+     * of the {@code keys} array.
+     * </p>
+     *
+     * @param <K>    the type of the map keys
+     * @param <V>    the type of the map values
+     * @param keys   the array of keys (must not be {@code null})
+     * @param values the array of values (must not be {@code null}), must have the same length as {@code keys}
+     * @return a new {@code LinkedHashMap} containing each key mapped to its corresponding value
+     * @throws NullPointerException      if either {@code keys} or {@code values} is {@code null}
+     * @throws IndexOutOfBoundsException if {@code keys.length != values.length}
+     * @see ReplaceUtils#isApplicable(Object[], Object[])
+     */
+    @SafeVarargs
+    public static <K, V> Map<K, V> mapOf(K[] keys, V... values) {
+        Objects.requireNonNull(keys, "keys array must not be null");
+        Objects.requireNonNull(values, "values array must not be null");
+
+        if (!ReplaceUtils.isApplicable(keys, values))
+            throw new IndexOutOfBoundsException(
+                    "Keys and values must have the same length: "
+                    + keys.length + " != " + values.length
+            );
+
+        Map<K, V> map = new LinkedHashMap<>();
+        for (int i = 0; i < keys.length; i++) map.put(keys[i], values[i]);
+        return map;
     }
 }
