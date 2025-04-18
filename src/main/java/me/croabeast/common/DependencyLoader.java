@@ -50,7 +50,7 @@ import java.util.logging.Level;
  * loader.load("com.example", "my-library", "${version}", DependencyLoader.MAVEN_REPO_URLS[0], false);
  *
  * // Alternatively, load dependencies from a YAML configuration file:
- * loader.loadFromYAML(new File(getDataFolder(), "libraries.yml"));
+ * loader.loadFromYAML(new File(getDataFolder(), "dependencies.yml"));
  * }</pre>
  * </p>
  *
@@ -252,6 +252,39 @@ public class DependencyLoader {
     }
 
     /**
+     * Loads dependencies from a given {@link FileConfiguration}.
+     * <p>
+     * The configuration should contain a list of dependency maps under the key {@code dependencies}.
+     * </p>
+     *
+     * @param c the {@code FileConfiguration} containing dependency definitions.
+     * @return {@code true} if at least one dependency was loaded successfully; {@code false} otherwise.
+     */
+    public boolean loadFromConfiguration(FileConfiguration c) {
+        List<Map<?, ?>> dependencies = c.getMapList("dependencies");
+        boolean loadAtLeastOne = false;
+
+        for (Map<?, ?> map : dependencies) {
+            String group = (String) map.get("group");
+            String artifact = (String) map.get("artifact");
+            String version = (String) map.get("version");
+
+            if (group == null || artifact == null || version == null) {
+                log(Log.BAD, "Invalid dependency: " + map);
+                continue;
+            }
+
+            Boolean replace = (Boolean) map.get("replace");
+            loadAtLeastOne = load(
+                    group, artifact, version, (String) map.get("repo"),
+                    replace != null && replace
+            );
+        }
+
+        return loadAtLeastOne;
+    }
+
+    /**
      * Loads dependencies specified in a YAML file.
      * <p>
      * The YAML file must have a <code>.yml</code> extension and contain dependency definitions.
@@ -260,7 +293,7 @@ public class DependencyLoader {
      * @param file the YAML file containing dependency definitions.
      * @return {@code true} if dependencies were loaded successfully; {@code false} otherwise.
      */
-    public boolean loadFromYAML(File file) {
+    public boolean loadFromFile(File file) {
         if (!file.getAbsolutePath().endsWith(".yml")) {
             log(Log.BAD, file + " isn't a valid .yml file.");
             return false;
@@ -283,39 +316,6 @@ public class DependencyLoader {
      */
     public boolean loadFromYAML(YAMLFile file) {
         return loadFromConfiguration(file.getConfiguration());
-    }
-
-    /**
-     * Loads dependencies from a given {@link FileConfiguration}.
-     * <p>
-     * The configuration should contain a list of dependency maps under the key {@code dependencies}.
-     * </p>
-     *
-     * @param c the {@code FileConfiguration} containing dependency definitions.
-     * @return {@code true} if at least one dependency was loaded successfully; {@code false} otherwise.
-     */
-    private boolean loadFromConfiguration(FileConfiguration c) {
-        List<Map<?, ?>> dependencies = c.getMapList("dependencies");
-        boolean loadAtLeastOne = false;
-
-        for (Map<?, ?> map : dependencies) {
-            String group = (String) map.get("group");
-            String artifact = (String) map.get("artifact");
-            String version = (String) map.get("version");
-
-            if (group == null || artifact == null || version == null) {
-                log(Log.BAD, "Invalid dependency: " + map);
-                continue;
-            }
-
-            Boolean replace = (Boolean) map.get("replace");
-            loadAtLeastOne = load(
-                    group, artifact, version, (String) map.get("repo"),
-                    replace != null && replace
-            );
-        }
-
-        return loadAtLeastOne;
     }
 
     /**
