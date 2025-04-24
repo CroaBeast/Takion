@@ -3,3 +3,7 @@ main: me.croabeast.takion.TakionPlugin
 name: Takion
 version: '${project.version}'
 api-version: '1.13'
+
+permissions:
+  takion.update:
+    default: op
