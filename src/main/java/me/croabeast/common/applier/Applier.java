@@ -14,7 +14,7 @@ import java.util.function.UnaryOperator;
  *
  * @param <T> the type of the object being transformed.
  */
-public interface ObjectApplier<T> {
+public interface Applier<T> {
 
     /**
      * Applies the given transformation operator with the specified priority.
@@ -25,7 +25,7 @@ public interface ObjectApplier<T> {
      * @throws NullPointerException if {@code operator} is {@code null}.
      */
     @NotNull
-    ObjectApplier<T> apply(Priority priority, UnaryOperator<T> operator);
+    Applier<T> apply(Priority priority, UnaryOperator<T> operator);
 
     /**
      * Applies the given transformation operator at the default priority (NORMAL).
@@ -35,7 +35,7 @@ public interface ObjectApplier<T> {
      * @throws NullPointerException if {@code operator} is {@code null}.
      */
     @NotNull
-    ObjectApplier<T> apply(UnaryOperator<T> operator);
+    Applier<T> apply(UnaryOperator<T> operator);
 
     /**
      * Returns the final result after applying all the transformations.
@@ -51,7 +51,7 @@ public interface ObjectApplier<T> {
      * @param <T>    the type of the object.
      * @return a new instance of a simplified {@code ObjectApplier}.
      */
-    static <T> ObjectApplier<T> simplified(T object) {
+    static <T> Applier<T> simplified(T object) {
         return new SimpleApplier<>(object);
     }
 
@@ -62,7 +62,7 @@ public interface ObjectApplier<T> {
      * @param <T>     the type of the object.
      * @return a new instance of a simplified {@code ObjectApplier} initialized with the result.
      */
-    static <T> ObjectApplier<T> simplified(ObjectApplier<T> applier) {
+    static <T> Applier<T> simplified(Applier<T> applier) {
         return simplified(Objects.requireNonNull(applier).result());
     }
 
@@ -73,7 +73,7 @@ public interface ObjectApplier<T> {
      * @param <T>    the type of the object.
      * @return a new instance of a prioritized {@code ObjectApplier}.
      */
-    static <T> ObjectApplier<T> prioritized(T object) {
+    static <T> Applier<T> prioritized(T object) {
         return new PriorityApplier<>(object);
     }
 
@@ -84,7 +84,7 @@ public interface ObjectApplier<T> {
      * @param <T>     the type of the object.
      * @return a new instance of a prioritized {@code ObjectApplier} initialized with the result.
      */
-    static <T> ObjectApplier<T> prioritized(ObjectApplier<T> applier) {
+    static <T> Applier<T> prioritized(Applier<T> applier) {
         return prioritized(Objects.requireNonNull(applier).result());
     }
 

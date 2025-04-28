@@ -5,14 +5,14 @@ import java.util.Objects;
 import java.util.function.UnaryOperator;
 
 /**
- * A specialization of {@link ObjectApplier} for handling String transformations.
+ * A specialization of {@link Applier} for handling String transformations.
  * <p>
  * The {@code StringApplier} interface provides a fluent API to apply successive string operations,
- * such as formatting, replacement, or any other transformation. It extends {@link ObjectApplier} with methods
+ * such as formatting, replacement, or any other transformation. It extends {@link Applier} with methods
  * that are specific to strings.
  * </p>
  */
-public interface StringApplier extends ObjectApplier<String> {
+public interface StringApplier extends Applier<String> {
 
     /**
      * Applies a transformation to the string with the specified priority.

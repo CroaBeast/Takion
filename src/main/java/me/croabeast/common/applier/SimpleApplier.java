@@ -5,7 +5,7 @@ import java.util.Objects;
 import java.util.function.UnaryOperator;
 
 /**
- * A simple implementation of {@link ObjectApplier} that applies transformations sequentially.
+ * A simple implementation of {@link Applier} that applies transformations sequentially.
  * <p>
  * {@code SimpleApplier} stores an object of type {@code T} and allows modifications via
  * chained {@link UnaryOperator} calls. The final result can be retrieved using {@link #result()}.
@@ -13,7 +13,7 @@ import java.util.function.UnaryOperator;
  *
  * @param <T> the type of the object being transformed.
  */
-class SimpleApplier<T> implements ObjectApplier<T> {
+class SimpleApplier<T> implements Applier<T> {
 
     private T object;
 

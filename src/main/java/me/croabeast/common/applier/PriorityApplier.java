@@ -5,7 +5,7 @@ import java.util.*;
 import java.util.function.UnaryOperator;
 
 /**
- * An implementation of {@link ObjectApplier} that supports prioritizing transformation operators.
+ * An implementation of {@link Applier} that supports prioritizing transformation operators.
  * <p>
  * {@code PriorityApplier} maintains a map of transformation operators grouped by their assigned priority.
  * When {@link #result()} is called, it applies the operators in order of descending priority (from highest to lowest)
@@ -14,7 +14,7 @@ import java.util.function.UnaryOperator;
  *
  * @param <T> the type of the object being transformed.
  */
-class PriorityApplier<T> implements ObjectApplier<T> {
+class PriorityApplier<T> implements Applier<T> {
 
     private final Map<Priority, Set<UnaryOperator<T>>> os = new TreeMap<>(Comparator.reverseOrder());
     private final T object;
