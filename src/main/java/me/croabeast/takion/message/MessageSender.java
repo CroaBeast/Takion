@@ -7,6 +7,7 @@ import me.croabeast.common.CollectionBuilder;
 import me.croabeast.common.Copyable;
 import me.croabeast.takion.TakionLib;
 import me.croabeast.takion.channel.Channel;
+import me.croabeast.takion.format.ContextualFormat;
 import me.croabeast.takion.placeholder.Placeholder;
 import me.croabeast.common.PlayerFormatter;
 import me.croabeast.common.applier.StringApplier;
@@ -374,8 +375,9 @@ public class MessageSender implements Copyable<MessageSender> {
                 continue;
             }
 
-            if (lib.getBlankSpacesAction().act(targets, message.message)
-                    && !message.isAllowed()) continue;
+            ContextualFormat<Boolean> format = lib.getFormatManager().get("BLANK_SPACES");
+            if (format.accept(targets, message.message) && !message.isAllowed())
+                continue;
 
             boolean wasSent = false, wasLogged = false;
             for (Player target : targets) {

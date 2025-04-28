@@ -8,7 +8,7 @@ import lombok.experimental.UtilityClass;
 import me.croabeast.file.Configurable;
 import me.croabeast.takion.TakionLib;
 import me.croabeast.common.util.ArrayUtils;
-import me.croabeast.common.util.TextUtils;
+import me.croabeast.takion.format.PlainFormat;
 import org.bukkit.Bukkit;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
@@ -151,7 +151,7 @@ public class AnimatedBossbar {
         syncElements = new HashSet<>();
 
         // Remove any unnecessary leading spaces from messages.
-        this.messages.replaceAll(TextUtils.STRIP_FIRST_SPACES);
+        this.messages.replaceAll(PlainFormat.TRIM_START_SPACES::accept);
         CACHE.put(uuid, this);
     }
 
@@ -217,7 +217,7 @@ public class AnimatedBossbar {
      */
     public AnimatedBossbar setMessages(List<String> messages) {
         Objects.requireNonNull(messages);
-        messages.replaceAll(TextUtils.STRIP_FIRST_SPACES);
+        messages.replaceAll(PlainFormat.TRIM_START_SPACES::accept);
         this.messages.clear();
         this.messages.addAll(messages);
         return this;

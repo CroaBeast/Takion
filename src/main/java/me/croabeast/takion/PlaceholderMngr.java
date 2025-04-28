@@ -47,12 +47,16 @@ final class PlaceholderMngr implements PlaceholderManager {
 
     private Placeholder<?> remove0(String key) {
         Placeholder<?> result = null;
+
         for (Placeholder<?> replacer : placeholders) {
             if (!replacer.getKey().equals(key))
                 continue;
-            placeholders.remove(result = replacer);
+
+            result = replacer;
             break;
         }
+
+        if (result != null) placeholders.remove(result);
         return result;
     }
 

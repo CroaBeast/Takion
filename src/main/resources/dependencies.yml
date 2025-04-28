@@ -22,4 +22,3 @@ dependencies:
   - group: "com.github.stefvanschie.inventoryframework"
     artifact: "IF"
     version: "0.10.19"
-    replace: true

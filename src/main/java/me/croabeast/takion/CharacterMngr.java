@@ -2,12 +2,13 @@ package me.croabeast.takion;
 
 import me.croabeast.common.applier.StringApplier;
 import me.croabeast.common.util.ArrayUtils;
-import me.croabeast.common.util.TextUtils;
 import me.croabeast.prismatic.PrismaticAPI;
 import me.croabeast.takion.character.CharacterInfo;
 import me.croabeast.takion.character.CharacterManager;
 import me.croabeast.takion.character.DefaultCharacter;
 import me.croabeast.takion.character.SmallCaps;
+import me.croabeast.takion.chat.MultiComponent;
+import me.croabeast.takion.format.StringFormat;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.LinkedHashMap;
@@ -55,8 +56,11 @@ final class CharacterMngr implements CharacterManager {
         String before = string.replace(prefix, "");
         String temp = StringApplier.simplified(before)
                 .apply(PrismaticAPI::stripAll)
-                .apply(TextUtils.STRIP_JSON)
-                .apply(lib.getCharacterAction()::act).toString();
+                .apply(MultiComponent.DEFAULT_FORMAT::removeFormat)
+                .apply(s -> {
+                    StringFormat format = lib.getFormatManager().get("character");
+                    return format.accept(s);
+                }).toString();
 
         int size = 0;
         boolean previousCode = false;

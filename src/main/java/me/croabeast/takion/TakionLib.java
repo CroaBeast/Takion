@@ -7,14 +7,15 @@ import me.croabeast.common.Regex;
 import me.croabeast.common.util.Exceptions;
 import me.croabeast.takion.channel.ChannelManager;
 import me.croabeast.takion.character.CharacterManager;
-import me.croabeast.takion.character.SmallCaps;
+import me.croabeast.takion.format.FormatManager;
+import me.croabeast.takion.format.PlainFormat;
+import me.croabeast.takion.format.StringFormat;
 import me.croabeast.takion.logger.TakionLogger;
 import me.croabeast.takion.message.MessageSender;
 import me.croabeast.takion.message.TitleManager;
 import me.croabeast.takion.placeholder.PlaceholderManager;
 import me.croabeast.common.PlayerFormatter;
 import me.croabeast.common.applier.StringApplier;
-import me.croabeast.common.util.TextUtils;
 import me.croabeast.prismatic.PrismaticAPI;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.configuration.ConfigurationSection;
@@ -23,10 +24,8 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
 import java.util.Objects;
 import java.util.TreeMap;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -113,6 +112,9 @@ public class TakionLib {
     @NotNull
     private final CharacterManager characterManager;
 
+    @NotNull
+    private final FormatManager formatManager;
+
     /**
      * The language prefix displayed in messages.
      */
@@ -138,27 +140,6 @@ public class TakionLib {
     private String centerPrefix = "[C]";
 
     /**
-     * Action to be performed when blank spaces are detected in a message.
-     * <p>
-     * This is a {@link PatternAction} that, when triggered, can insert additional spaces.
-     * </p>
-     */
-    @NotNull
-    private final PatternAction<Boolean> blankSpacesAction;
-
-    /**
-     * Action to be applied for character modifications in messages.
-     */
-    @NotNull
-    private final PatternAction<String> characterAction;
-
-    /**
-     * Action to be applied for converting text to small capital letters.
-     */
-    @NotNull
-    private final PatternAction<String> smallCapsAction;
-
-    /**
      * A preloaded instance of {@link MessageSender} used as a template.
      */
     @Getter(AccessLevel.NONE)
@@ -181,79 +162,20 @@ public class TakionLib {
 
             @Override
             public Builder builder(String message) {
-                Exceptions.validate(StringUtils::isNotBlank, message);
+                Exceptions.validate(message, StringUtils::isNotBlank);
                 String[] array = splitString(message, 2);
                 return builder(array[0], array.length == 2 ? array[1] : null);
             }
         };
 
-        channelManager = new ChannelMngr(this);
+        formatManager = new FormatMngr();
         placeholderManager = new PlaceholderMngr();
+        channelManager = new ChannelMngr(this);
         characterManager = new CharacterMngr(this);
 
-        langPrefix = "&e " + (plugin != null ? plugin.getName() : "Plugin") + " &8»&7";
-
-        blankSpacesAction = new PatternAction<Boolean>("(?i)<add_space:(\\d+)>") {
-            @Override
-            public @NotNull Boolean act(Collection<? extends Player> targets, String string) {
-                if ((targets == null ||
-                        targets.isEmpty()) || StringUtils.isBlank(string))
-                    return false;
-
-                Matcher matcher = createMatcher(string);
-                if (!matcher.find()) return false;
-
-                int count = 0;
-                try {
-                    count = Integer.parseInt(matcher.group(1));
-                } catch (Exception ignored) {}
-                if (count <= 0) return false;
-
-                boolean atLeastOneIsSent = false;
-                for (Player player : targets) {
-                    if (player == null) continue;
-
-                    for (int i = 0; i < count; i++)
-                        player.sendMessage("");
-
-                    if (!atLeastOneIsSent)
-                        atLeastOneIsSent = true;
-                }
-
-                return atLeastOneIsSent;
-            }
-        };
-        characterAction = new StringAction("<[Uu]:([a-fA-F\\d]{4})>") {
-            @NotNull
-            public String act(String string) {
-                if (StringUtils.isBlank(string)) return string;
-
-                Matcher m = createMatcher(string);
-                while (m.find()) {
-                    char c = (char) Integer.parseInt(m.group(1), 16);
-                    string = string.replace(m.group(), c + "");
-                }
-
-                return string;
-            }
-        };
-        @Regex String s = "(small_caps|sc)";
-        smallCapsAction = new StringAction("(?i)<" + s + ">(.+?)</" + s + ">") {
-            @NotNull
-            public String act(String string) {
-                if (StringUtils.isBlank(string)) return string;
-
-                Matcher matcher = createMatcher(string);
-                while (matcher.find())
-                    string = string.replace(
-                            matcher.group(),
-                            SmallCaps.toSmallCaps(matcher.group(2))
-                    );
-
-                return string;
-            }
-        };
-
+        langPrefix = "&e " +
+                (plugin != null ? plugin.getName() : "Plugin") +
+                " &8»&7";
         if (plugin != null) TakionPlugin.libs.put(plugin, this);
     }
 
@@ -372,11 +294,13 @@ public class TakionLib {
      * @return the processed string after placeholder and function application
      */
     public String replace(Player parser, String string) {
-        PlayerFormatter papi = TextUtils.PARSE_PLACEHOLDER_API;
         return StringApplier.simplified(string)
                 .apply(s -> placeholderManager.replace(parser, s))
-                .apply(s -> papi.apply(parser, s))
-                .apply(characterAction::act).toString();
+                .apply(s -> PlainFormat.PLACEHOLDER_API.accept(parser, s))
+                .apply(s -> {
+                    StringFormat format = formatManager.get("character");
+                    return format.accept(s);
+                }).toString();
     }
 
     /**
@@ -479,38 +403,5 @@ public class TakionLib {
         } catch (Exception e) {
             return null;
         }
-    }
-
-    /**
-     * A private abstract class for performing string-based actions via regular expressions.
-     * <p>
-     * {@code StringAction} extends {@link PatternAction} to allow actions that operate on strings,
-     * such as converting text to small caps or processing Unicode values.
-     * </p>
-     */
-    private static abstract class StringAction extends PatternAction<String> {
-
-        StringAction(@Regex String pattern) {
-            super(pattern);
-        }
-
-        @Override
-        public @NotNull String act(Collection<? extends Player> players, String string) {
-            return act(string);
-        }
-
-        @Override
-        public @NotNull String act(Player player, String string) {
-            return act(string);
-        }
-
-        /**
-         * Processes the input string and returns the modified string.
-         *
-         * @param string the input string to process
-         * @return the modified string after action is applied
-         */
-        @NotNull
-        public abstract String act(String string);
     }
 }

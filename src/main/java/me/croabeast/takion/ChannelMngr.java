@@ -4,13 +4,13 @@ import lombok.Getter;
 import lombok.Setter;
 import me.croabeast.common.Regex;
 import me.croabeast.common.discord.Webhook;
-import me.croabeast.common.util.TextUtils;
 import me.croabeast.takion.channel.Channel;
 import me.croabeast.takion.channel.ChannelManager;
+import me.croabeast.takion.chat.MultiComponent;
+import me.croabeast.takion.format.PlainFormat;
 import me.croabeast.takion.message.AnimatedBossbar;
 import me.croabeast.takion.message.MessageUtils;
 import me.croabeast.takion.message.TitleManager;
-import me.croabeast.takion.message.chat.ChatComponent;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.chat.ComponentSerializer;
 import org.apache.commons.lang.StringUtils;
@@ -66,7 +66,7 @@ final class ChannelMngr implements ChannelManager {
         channels.put("chat", new ChannelImpl("chat") {
             @Override
             public String formatString(Player target, Player parser, String string) {
-                return lib.colorize(target, parser, TextUtils.PARSE_INTERACTIVE_CHAT.apply(parser, string));
+                return lib.colorize(target, parser, PlainFormat.INTERACTIVE_CHAT.accept(parser, string));
             }
 
             @Override
@@ -92,24 +92,22 @@ final class ChannelMngr implements ChannelManager {
                     Player ps = parser == null ? p : parser;
                     String s = formatString(p, ps, temp);
 
-                    if (!TextUtils.IS_JSON.test(temp)) {
+                    if (!MultiComponent.DEFAULT_FORMAT.isFormatted(temp)) {
                         p.sendMessage(s);
-                        if (!atLeastOneIsSent)
-                            atLeastOneIsSent = true;
+                        if (!atLeastOneIsSent) atLeastOneIsSent = true;
                         continue;
                     }
 
                     BaseComponent[] components;
                     try {
-                        components = ChatComponent.fromText(ps, s);
+                        components = MultiComponent.fromString(lib, s).compile(ps);
                     } catch (Exception e) {
                         e.printStackTrace();
                         continue;
                     }
 
                     p.spigot().sendMessage(components);
-                    if (!atLeastOneIsSent)
-                        atLeastOneIsSent = true;
+                    if (!atLeastOneIsSent) atLeastOneIsSent = true;
                 }
 
                 return atLeastOneIsSent;
@@ -158,8 +156,7 @@ final class ChannelMngr implements ChannelManager {
                             ))
                             .setStay(time);
 
-                    if (b.send(p) && !atLeastOneIsSent)
-                        atLeastOneIsSent = true;
+                    if (b.send(p) && !atLeastOneIsSent) atLeastOneIsSent = true;
                 }
 
                 return atLeastOneIsSent;
@@ -260,8 +257,7 @@ final class ChannelMngr implements ChannelManager {
                     }
 
                     p.spigot().sendMessage(components);
-                    if (!atLeastOneIsSent)
-                        atLeastOneIsSent = true;
+                    if (!atLeastOneIsSent) atLeastOneIsSent = true;
                 }
 
                 return atLeastOneIsSent;

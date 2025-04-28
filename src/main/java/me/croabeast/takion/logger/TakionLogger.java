@@ -9,8 +9,8 @@ import me.croabeast.common.CollectionBuilder;
 import me.croabeast.common.applier.StringApplier;
 import me.croabeast.common.util.ArrayUtils;
 import me.croabeast.common.util.ServerInfoUtils;
-import me.croabeast.common.util.TextUtils;
 import me.croabeast.prismatic.PrismaticAPI;
+import me.croabeast.takion.chat.MultiComponent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
@@ -185,7 +185,7 @@ public class TakionLogger {
                         return s.replaceAll(split, "&f" + split.replaceAll(r, ""));
                     })
                     .apply(l.getCharacterManager()::align)
-                    .apply(TextUtils.STRIP_JSON)
+                    .apply(MultiComponent.DEFAULT_FORMAT::removeFormat)
                     .apply(b ? PrismaticAPI::colorize : PrismaticAPI::stripAll)
                     .toString();
 
