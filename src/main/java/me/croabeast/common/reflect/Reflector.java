@@ -458,7 +458,7 @@ public final class Reflector {
      * @throws IllegalStateException if the class cannot be found
      */
     public static Reflector of(String path) {
-        Exceptions.validate(StringUtils::isNotBlank, path);
+        Exceptions.validate(path, StringUtils::isNotBlank);
         Class<?> clazz;
         try {
             clazz = Class.forName(path);

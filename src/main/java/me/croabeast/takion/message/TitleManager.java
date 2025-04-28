@@ -76,13 +76,13 @@ public interface TitleManager {
      */
     default void setTicks(int fadeIn, int stay, int fadeOut) {
         try {
-            setFadeInTicks(Exceptions.validate(i -> i >= 0, fadeIn));
+            setFadeInTicks(Exceptions.validate(fadeIn, i -> i >= 0));
         } catch (Exception ignored) {}
         try {
-            setStayTicks(Exceptions.validate(i -> i > 0, stay));
+            setStayTicks(Exceptions.validate(stay, i -> i > 0));
         } catch (Exception ignored) {}
         try {
-            setFadeOutTicks(Exceptions.validate(i -> i >= 0, fadeOut));
+            setFadeOutTicks(Exceptions.validate(fadeOut, i -> i >= 0));
         } catch (Exception ignored) {}
     }
 
@@ -159,13 +159,13 @@ public interface TitleManager {
          */
         public Builder setTicks(int fadeIn, int stay, int fadeOut) {
             try {
-                this.fadeIn = Exceptions.validate(i -> i >= 0, fadeIn);
+                this.fadeIn = Exceptions.validate(fadeIn, i -> i >= 0);
             } catch (Exception ignored) {}
             try {
-                this.stay = Exceptions.validate(i -> i > 0, stay);
+                this.stay = Exceptions.validate(stay, i -> i > 0);
             } catch (Exception ignored) {}
             try {
-                this.fadeOut = Exceptions.validate(i -> i >= 0, fadeOut);
+                this.fadeOut = Exceptions.validate(fadeOut, i -> i >= 0);
             } catch (Exception ignored) {}
             return this;
         }

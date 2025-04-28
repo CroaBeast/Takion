@@ -123,7 +123,7 @@ public class TimeValues {
      */
     public TimeValues setSplitter(String splitter) {
         checkModification();
-        this.splitter = Exceptions.validate(StringUtils::isNotBlank, splitter);
+        this.splitter = Exceptions.validate(splitter, StringUtils::isNotBlank);
         return this;
     }
 
@@ -135,7 +135,7 @@ public class TimeValues {
      */
     public TimeValues setSecondsFormat(String secondsFormat) {
         checkModification();
-        this.secondsFormat = Exceptions.validate(StringUtils::isNotBlank, secondsFormat);
+        this.secondsFormat = Exceptions.validate(secondsFormat, StringUtils::isNotBlank);
         return this;
     }
 
@@ -147,7 +147,7 @@ public class TimeValues {
      */
     public TimeValues setMinutesFormat(String minutesFormat) {
         checkModification();
-        this.minutesFormat = Exceptions.validate(StringUtils::isNotBlank, minutesFormat);
+        this.minutesFormat = Exceptions.validate(minutesFormat, StringUtils::isNotBlank);
         return this;
     }
 
@@ -159,7 +159,7 @@ public class TimeValues {
      */
     public TimeValues setHoursFormat(String hoursFormat) {
         checkModification();
-        this.hoursFormat = Exceptions.validate(StringUtils::isNotBlank, hoursFormat);
+        this.hoursFormat = Exceptions.validate(hoursFormat, StringUtils::isNotBlank);
         return this;
     }
 
@@ -171,7 +171,7 @@ public class TimeValues {
      */
     public TimeValues setDaysFormat(String daysFormat) {
         checkModification();
-        this.daysFormat = Exceptions.validate(StringUtils::isNotBlank, daysFormat);
+        this.daysFormat = Exceptions.validate(daysFormat, StringUtils::isNotBlank);
         return this;
     }
 
@@ -183,7 +183,7 @@ public class TimeValues {
      */
     public TimeValues setWeeksFormat(String weeksFormat) {
         checkModification();
-        this.weeksFormat = Exceptions.validate(StringUtils::isNotBlank, weeksFormat);
+        this.weeksFormat = Exceptions.validate(weeksFormat, StringUtils::isNotBlank);
         return this;
     }
 
@@ -195,7 +195,7 @@ public class TimeValues {
      */
     public TimeValues setMonthsFormat(String monthsFormat) {
         checkModification();
-        this.monthsFormat = Exceptions.validate(StringUtils::isNotBlank, monthsFormat);
+        this.monthsFormat = Exceptions.validate(monthsFormat, StringUtils::isNotBlank);
         return this;
     }
 
@@ -207,7 +207,7 @@ public class TimeValues {
      */
     public TimeValues setYearsFormat(String yearsFormat) {
         checkModification();
-        this.yearsFormat = Exceptions.validate(StringUtils::isNotBlank, yearsFormat);
+        this.yearsFormat = Exceptions.validate(yearsFormat, StringUtils::isNotBlank);
         return this;
     }
 

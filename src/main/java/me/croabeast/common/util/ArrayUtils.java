@@ -9,23 +9,40 @@ import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 /**
- * Utility class for common array operations.
- *
- * <p> This class provides a variety of methods for manipulating and converting arrays,
- * as well as performing operations on collections.
+ * Utility methods for working with Java arrays and converting them to collections.
+ * <p>
+ * Provides operations such as combining multiple arrays, checking for emptiness,
+ * validating array contents, converting arrays to lists or sets, and applying
+ * transformations to array elements.
+ * </p>
  */
 @SuppressWarnings("unchecked")
 @UtilityClass
 public class ArrayUtils {
 
     /**
-     * Combines multiple arrays into a single array.
+     * Checks whether the given array is null or contains no elements.
      *
-     * @param array the initial array.
-     * @param extraArrays additional arrays to combine with the initial array.
-     * @param <T> the type of elements in the arrays.
+     * @param  <T>   the component type of the array
+     * @param  array the array to check
+     * @return       {@code true} if {@code array} is null or has length zero; {@code false} otherwise
+     */
+    @SafeVarargs
+    public <T> boolean isArrayEmpty(T... array) {
+        return array == null || array.length < 1;
+    }
+
+    /**
+     * Combines a base array with one or more additional arrays into a single array.
+     * <p>
+     * Null or empty extra arrays are ignored. The resulting array is of the same
+     * component type as the base array.
+     * </p>
      *
-     * @return a new array containing all elements from the input arrays.
+     * @param  <T>         the component type of the arrays
+     * @param  array       the base array (must not be null)
+     * @param  extraArrays zero or more additional arrays to append
+     * @return             a new array containing all elements of {@code array} followed by all elements of each {@code extraArrays}
      */
     @SafeVarargs
     public <T> T[] combineArrays(@NotNull T[] array, T[]... extraArrays) {
@@ -35,56 +52,43 @@ public class ArrayUtils {
         Collections.addAll(resultList, array);
 
         for (T[] a : extraArrays)
-            if (a != null) Collections.addAll(resultList, a);
+            if (!isArrayEmpty(a)) Collections.addAll(resultList, a);
 
-        Class<?> clazz = array.getClass().getComponentType();
-        T[] resultArray = (T[]) Array.newInstance(clazz, 0);
-
-        return resultList.toArray(resultArray);
+        Class<?> componentType = array.getClass().getComponentType();
+        T[] result = (T[]) Array.newInstance(componentType, 0);
+        return resultList.toArray(result);
     }
 
     /**
-     * Checks if an array is empty.
+     * Validates that the array is not empty and returns it.
+     * <p>
+     * Throws an exception if the array is null or empty.
+     * </p>
      *
-     * @param array the array to check.
-     * @param <T> the type of elements in the array.
-     *
-     * @return true if the array is null or has no elements, false otherwise.
-     */
-    @SafeVarargs
-    public <T> boolean isArrayEmpty(T... array) {
-        return array == null || array.length < 1;
-    }
-
-    /**
-     * Validates that an array is not empty.
-     *
-     * @param array the array to check.
-     * @param <T> the type of elements in the array.
-     *
-     * @return the input array if it is not empty.
-     * @throws IllegalArgumentException if the array is empty.
+     * @param  <T>   the component type of the array
+     * @param  array the array to validate
+     * @return       the same array if it is not empty
+     * @throws IllegalArgumentException if the array is null or empty
      */
     @SafeVarargs
     public <T> T[] checkArray(T... array) {
-        return Exceptions.validate(ArrayUtils::isArrayEmpty, array, "Array should be declared");
+        return Exceptions.validate(array, ArrayUtils::isArrayEmpty, "Array should be declared");
     }
 
     /**
-     * Converts an array to a collection, applying a function to each element.
+     * Converts the given varargs array into the provided collection, optionally applying
+     * a transformation function to each element.
      *
-     * @param collection the collection to populate.
-     * @param function the function to apply to each element.
-     * @param array the array to convert.
-     *
-     * @param <T> the type of elements in the array.
-     * @param <I> the type of the collection.
-     *
-     * @return the populated collection.
+     * @param  <T>        the element type
+     * @param  <I>        the type of the target collection
+     * @param  collection the collection to populate (must not be null)
+     * @param  function   an optional transformation to apply to each element (may be null)
+     * @param  array      the source array of elements
+     * @return            the populated collection
      */
     @SafeVarargs
     public <T, I extends Collection<T>> I toCollection(I collection, UnaryOperator<T> function, T... array) {
-        Objects.requireNonNull(collection);
+        Objects.requireNonNull(collection, "Target collection must not be null");
 
         if (isArrayEmpty(array)) return collection;
 
@@ -97,15 +101,13 @@ public class ArrayUtils {
     }
 
     /**
-     * Converts an array to a collection without applying any function.
+     * Converts the given varargs array into the provided collection without transformations.
      *
-     * @param collection the collection to populate.
-     * @param array the array to convert.
-     *
-     * @param <T> the type of elements in the array.
-     * @param <I> the type of the collection.
-     *
-     * @return the populated collection.
+     * @param  <T>        the element type
+     * @param  <I>        the type of the target collection
+     * @param  collection the collection to populate (must not be null)
+     * @param  array      the source array of elements
+     * @return            the populated collection
      */
     @SafeVarargs
     public <T, I extends Collection<T>> I toCollection(I collection, T... array) {
@@ -113,13 +115,12 @@ public class ArrayUtils {
     }
 
     /**
-     * Converts an array to a list, applying a function to each element.
+     * Converts the given array into a {@link List}, applying an optional transformation to each element.
      *
-     * @param operator the function to apply to each element.
-     * @param array the array to convert.
-     * @param <T> the type of elements in the array.
-     *
-     * @return a list containing the transformed elements.
+     * @param  <T>      the element type
+     * @param  operator the transformation function to apply to each element (may be null)
+     * @param  array    the source array
+     * @return          a new {@link List} containing the (possibly transformed) elements
      */
     @SafeVarargs
     @NotNull
@@ -128,12 +129,11 @@ public class ArrayUtils {
     }
 
     /**
-     * Converts an array to a list without applying any function.
+     * Converts the given array into a {@link List} without transformations.
      *
-     * @param array the array to convert.
-     * @param <T> the type of elements in the array.
-     *
-     * @return a list containing the elements of the array.
+     * @param  <T>   the element type
+     * @param  array the source array
+     * @return       a new {@link List} containing the elements
      */
     @SafeVarargs
     @NotNull
@@ -141,6 +141,13 @@ public class ArrayUtils {
         return toCollection(new ArrayList<>(), array);
     }
 
+    /**
+     * Converts the given array into a {@link Set}.
+     *
+     * @param  <T>   the element type
+     * @param  array the source array
+     * @return       a new {@link Set} containing the elements
+     */
     @SafeVarargs
     @NotNull
     public <T> Set<T> toSet(T... array) {
@@ -148,35 +155,41 @@ public class ArrayUtils {
     }
 
     /**
-     * Applies a series of functions to each element in an array.
+     * Applies a sequence of {@link UnaryOperator} transformations to each element of the array in place.
      *
-     * @param array the array to transform.
-     * @param operators the functions to apply to each element.
-     * @param <T> the type of elements in the array.
-     *
-     * @return the transformed array.
+     * @param  <T>       the element type
+     * @param  array     the array whose elements will be transformed (must not be null)
+     * @param  operators the operators to apply in order to each element
+     * @return           the same array instance with transformed elements
      */
     @SafeVarargs
     @NotNull
     public <T> T[] applyToArray(T[] array, UnaryOperator<T>... operators) {
-        Objects.requireNonNull(array);
+        Objects.requireNonNull(array, "Array must not be null");
 
         for (int i = 0; i < array.length; i++) {
             T temp = array[i];
-
             for (UnaryOperator<T> o : toList(operators))
                 temp = o.apply(temp);
-
             array[i] = temp;
         }
 
         return array;
     }
 
+    /**
+     * Applies a mapping function to each element of the source array and returns a new array of the results.
+     *
+     * @param  <T>      the source element type
+     * @param  <U>      the target element type
+     * @param  array    the source array (must not be null)
+     * @param  function the mapping function to apply to each element (must not be null)
+     * @return          a new array containing the mapped elements
+     */
     @NotNull
     public <T, U> U[] applyToArray(T[] array, Function<T, U> function) {
-        Objects.requireNonNull(function);
-        Objects.requireNonNull(array);
+        Objects.requireNonNull(array, "Array must not be null");
+        Objects.requireNonNull(function, "Function must not be null");
 
         List<U> result = new ArrayList<>();
         for (T t : array)
@@ -186,25 +199,23 @@ public class ArrayUtils {
     }
 
     /**
-     * Checks if an array contains a specific element.
+     * Checks whether the given array contains the specified element.
      *
-     * @param array the array to check.
-     * @param object the element to search for.
-     * @param <T> the type of elements in the array.
-     *
-     * @return true if the array contains the element, false otherwise.
+     * @param  <T>    the element type
+     * @param  array  the array to search
+     * @param  object the element to look for
+     * @return        {@code true} if {@code object} is found in {@code array}; {@code false} otherwise
      */
     public <T> boolean contains(T[] array, T object) {
         return toList(array).contains(object);
     }
 
     /**
-     * Checks if an iterable is empty.
+     * Determines if an {@link Iterable} is null or contains no elements.
      *
-     * @param iterable the iterable to check.
-     * @param <T> the type of elements in the iterable.
-     *
-     * @return true if the iterable is null or has no elements, false otherwise.
+     * @param  <T>      the element type
+     * @param  iterable the iterable to check
+     * @return          {@code true} if {@code iterable} is null or has no elements; {@code false} otherwise
      */
     public <T> boolean isIterableEmpty(Iterable<T> iterable) {
         return iterable == null || !iterable.iterator().hasNext();
