@@ -12,13 +12,13 @@ import me.croabeast.common.util.ServerInfoUtils;
 import me.croabeast.prismatic.PrismaticAPI;
 import me.croabeast.takion.chat.MultiComponent;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginLogger;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.logging.LogRecord;
@@ -79,8 +79,7 @@ public class TakionLogger {
      */
     static final class PaperLogger implements Loggable {
 
-        private final Class<?> clazz;
-        private final Object logger;
+        private final ComponentLogger logger;
 
         /**
          * Constructs a new {@code PaperLogger} instance that routes log output
@@ -91,10 +90,7 @@ public class TakionLogger {
          */
         @SneakyThrows
         PaperLogger(String name) {
-            logger = Class.forName("net.kyori.adventure.text.logger.slf4j.ComponentLogger")
-                    .getMethod("logger", String.class)
-                    .invoke(null, name);
-            clazz = logger.getClass();
+            logger = ComponentLogger.logger(name);
         }
 
         /**
@@ -116,13 +112,25 @@ public class TakionLogger {
         @Override
         public void log(LogLevel level, String string) {
             level = level != null ? level : LogLevel.INFO;
-            try {
-                Method method = clazz.getMethod(level.getName(), Component.class);
-                method.setAccessible(true);
-                method.invoke(logger, deserialize(string));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            Component component = deserialize(string);
+
+            switch (level) {
+                case DEBUG:
+                    logger.debug(component);
+                    break;
+                case TRACE:
+                    logger.trace(component);
+                    break;
+                case WARN:
+                    logger.warn(component);
+                    break;
+                case ERROR:
+                    logger.error(component);
+                    break;
+                case INFO: default:
+                    logger.info(component);
+                    break;
+            };
         }
     }
 

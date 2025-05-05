@@ -51,6 +51,15 @@ public interface ChatComponent<C extends ChatComponent<C>> extends BaseBuilder<C
     @NotNull
     String getMessage();
 
+    /**
+     * Set the raw chat text of this component, replacing any existing content.
+     * <p>
+     * This method mutates the component in place and returns {@code this} for chaining.
+     * </p>
+     *
+     * @param message the new message text (never {@code null})
+     * @return this component, with the new message set
+     */
     @NotNull
     C setMessage(@NotNull String message);
 
@@ -134,10 +143,17 @@ public interface ChatComponent<C extends ChatComponent<C>> extends BaseBuilder<C
     C setHover(String string);
 
     /**
+     * Check if this component has any click or hover events attached.
+     *
+     * @return {@code true} if events are present, {@code false} otherwise
+     */
+    boolean hasEvents();
+
+    /**
      * Compile this component into an array of BungeeCord {@link BaseComponent}
      * suitable for sending via the Spigot API (e.g. {@code player.spigot().sendMessage(...)}).
      *
-     * @param player the target {@link Player} context for placeholder resolution (may be {@code null})
+     * @param player the target {@link Player} context for placeholder resolution (might be {@code null})
      * @return the compiled {@link BaseComponent} array
      */
     @NotNull

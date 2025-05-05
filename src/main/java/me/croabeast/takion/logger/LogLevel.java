@@ -80,7 +80,7 @@ public enum LogLevel {
      * @param level The Java logging level to map.
      * @return The corresponding {@code LogLevel}, or {@link #DEBUG} if no match is found.
      */
-    public static LogLevel from(Level level) {
+    public static LogLevel fromJava(Level level) {
         if (level == null) return DEBUG;
 
         for (LogLevel l : values())

@@ -72,9 +72,8 @@ public interface Format<T> {
     default String removeFormat(String string) {
         if (StringUtils.isBlank(string)) return string;
         Matcher m = matcher(string);
-        while (m.find()) {
+        while (m.find())
             string = string.replace(m.group(), "");
-        }
         return string;
     }
 
@@ -101,5 +100,22 @@ public interface Format<T> {
     @NotNull
     default T accept(String string) {
         return accept(null, string);
+    }
+
+    /**
+     * Convert the given result into a formatted representation.
+     * <p>
+     * This method is intended to be overridden by subclasses to provide
+     * specific formatting logic. The default implementation throws an
+     * {@link UnsupportedOperationException}.
+     * </p>
+     *
+     * @param result the object to format (never {@code null})
+     * @return the formatted string
+     * @throws UnsupportedOperationException if not overridden
+     */
+    @NotNull
+    default String toFormattedString(T result) {
+        throw new UnsupportedOperationException("toFormattedString() not implemented");
     }
 }

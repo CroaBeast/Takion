@@ -54,10 +54,8 @@ public final class UpdateResult {
      * @param throwable any exception encountered during the check, or {@code null} if the check completed normally
      */
     UpdateResult(
-            UpdateChecker checker,
-            @NotNull Reason reason,
-            @NotNull String fetched,
-            @Nullable Throwable throwable
+            UpdateChecker checker, @NotNull Reason reason,
+            @NotNull String fetched, @Nullable Throwable throwable
     ) {
         this.reason    = reason;
         this.local     = checker.pluginVersion;

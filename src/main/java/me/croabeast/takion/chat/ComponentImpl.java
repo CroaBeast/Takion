@@ -25,8 +25,8 @@ class ComponentImpl implements ChatComponent<ComponentImpl> {
     @NotNull
     private String message;
 
-    ClickHolder clickEvent;
-    HoverHolder hoverEvent;
+    ClickHolder clickEvent = null;
+    HoverHolder hoverEvent = null;
 
     @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
     class ClickHolder {
@@ -84,6 +84,19 @@ class ComponentImpl implements ChatComponent<ComponentImpl> {
         return setHover(lib.splitString(string));
     }
 
+    boolean hasClick() {
+        return clickEvent != null && (clickEvent.click != null || StringUtils.isNotBlank(clickEvent.input));
+    }
+
+    boolean hasHover() {
+        return hoverEvent != null && (hoverEvent.list != null && !hoverEvent.list.isEmpty());
+    }
+
+    @Override
+    public boolean hasEvents() {
+        return hasClick() || hasHover();
+    }
+
     @NotNull
     public BaseComponent[] compile(Player player) {
         Matcher urlMatch = URL_PATTERN.matcher(message);
@@ -100,6 +113,14 @@ class ComponentImpl implements ChatComponent<ComponentImpl> {
         if (hoverEvent != null)
             comp.setHoverEvent(hoverEvent.create(player));
         return new BaseComponent[] {comp};
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (BaseComponent component : compile(null))
+            sb.append(component.toLegacyText());
+        return sb.toString();
     }
 
     @NotNull

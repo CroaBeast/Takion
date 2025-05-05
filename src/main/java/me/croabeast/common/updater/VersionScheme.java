@@ -45,7 +45,6 @@ public interface VersionScheme {
         }
     };
 
-
     /**
      * Compares two version identifiers according to a custom scheme.
      *

@@ -81,23 +81,30 @@ class MultiCompImpl implements MultiComponent {
         @Getter
         final String regex = DEFAULT_REGEX;
 
+        private void setAction(ComponentImpl component, String action, String argument) {
+            if (action.matches("(?i)hover")) {
+                component.setHover(argument);
+            } else {
+                component.setClick(action, argument);
+            }
+        }
+
         @NotNull
-        public ComponentImpl accept(Player player, String string) {
+        public ChatComponent<?> accept(Player player, String string) {
             ComponentImpl component = new ComponentImpl(lib, string);
 
-            Matcher matcher = format.matcher(string);
+            final Matcher matcher = matcher(string);
             if (matcher.find()) {
-                String[] args = matcher.group(1).split("[|]", 2);
+                component = new ComponentImpl(lib, matcher.group(5));
 
-                String h = null, c = null;
-                for (String s : args) {
-                    Matcher m = Pattern.compile("(?i)hover").matcher(s);
-                    if (m.find()) h = s; else c = s;
-                }
+                String firstAction = matcher.group(1);
+                String firstArgument = matcher.group(2);
+                setAction(component, firstAction, firstArgument);
 
-                component = new ComponentImpl(lib, matcher.group(20));
-                if (c != null) component.setClick(c);
-                if (h != null) component.setHover(h);
+                String secondAction = matcher.group(3);
+                String secondArgument = matcher.group(4);
+                if (secondAction != null && secondArgument != null)
+                    setAction(component, secondAction, secondArgument);
             }
 
             return component;
@@ -108,8 +115,83 @@ class MultiCompImpl implements MultiComponent {
             string = stripLegacyFormat(string);
             Matcher matcher = format.matcher(string);
             while (matcher.find())
-                string = string.replace(matcher.group(), matcher.group(20));
+                string = string.replace(matcher.group(), matcher.group(5));
             return string;
+        }
+
+        @NotNull
+        public String toFormattedString(ChatComponent<?> component) {
+            if (component instanceof MultiCompImpl) {
+                List<Segment> segments = ((MultiCompImpl) component).list;
+                if (segments.isEmpty()) return "";
+
+                final StringBuilder result = new StringBuilder();
+                for (Segment segment : segments) {
+                    ChatComponent<?> comp = segment.component;
+                    if (comp instanceof ComponentImpl) {
+                        StringBuilder builder = new StringBuilder();
+
+                        ComponentImpl impl = (ComponentImpl) comp;
+                        if (impl.hasEvents()) {
+                            builder.append('<');
+
+                            if (impl.hasClick())
+                                builder.append(impl.clickEvent.click)
+                                        .append(":\"")
+                                        .append(impl.clickEvent.input)
+                                        .append('"');
+
+                            if (impl.hasHover())
+                                builder.append(String.join(
+                                        lib.getLineSeparator(),
+                                        impl.hoverEvent.list
+                                ));
+
+                            builder.append('>');
+                        }
+
+                        builder.append(impl.getMessage());
+                        if (impl.hasEvents()) builder.append("</text>");
+
+                        result.append(builder);
+                        continue;
+                    }
+
+                    result.append(comp.getMessage());
+                }
+
+                return result.toString();
+            }
+
+            if (component instanceof ComponentImpl) {
+                StringBuilder builder = new StringBuilder();
+                ComponentImpl impl = (ComponentImpl) component;
+
+                if (impl.hasEvents()) {
+                    builder.append('<');
+
+                    if (impl.hasClick())
+                        builder.append(impl.clickEvent.click)
+                                .append(":\"")
+                                .append(impl.clickEvent.input)
+                                .append('"');
+
+                    if (impl.hasHover())
+                        builder.append(String.join(
+                                lib.getLineSeparator(),
+                                impl.hoverEvent.list
+                        ));
+
+                    builder.append('>');
+                }
+
+                builder.append(impl.getMessage());
+                if (impl.hasEvents()) builder.append("</text>");
+
+                return builder.toString();
+            }
+
+            return component.getMessage();
         }
     };
 
@@ -178,6 +260,14 @@ class MultiCompImpl implements MultiComponent {
     public MultiComponent setFormat(@NotNull Format<ChatComponent<?>> format) {
         this.format = format;
         return instance();
+    }
+
+    @Override
+    public boolean hasEvents() {
+        for (Segment segment : list)
+            if (segment.component.hasEvents()) return true;
+
+        return false;
     }
 
     @NotNull

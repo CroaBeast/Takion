@@ -35,7 +35,7 @@ public interface MultiComponent extends ChatComponent<MultiComponent>, Copyable<
      * </p>
      */
     @Regex
-    String CLICK_REGEX = "execute|click|(run|suggest)(_command)?|(open_)?(url|file)|(change_)?page|copy|(copy_to_)?clipboard";
+    String CLICK_REGEX = "execute|click|(?:run|suggest)(?:_command)?|(?:open_)?(?:url|file)|(?:change_)?page|copy|(?:copy_to_)?clipboard";
 
     /**
      * Default format pattern for parsing text with optional hover and click directives.
@@ -45,7 +45,7 @@ public interface MultiComponent extends ChatComponent<MultiComponent>, Copyable<
      * </p>
      */
     @Regex
-    String DEFAULT_REGEX = "(?i)<((hover|" + CLICK_REGEX + "):\"(.[^|]*?)\"([|]((hover|" + CLICK_REGEX + "):\"(.[^|]*?)\"))?)>(.+?)</text>";
+    String DEFAULT_REGEX = "(?i)<(?:(hover|" + CLICK_REGEX + "):\"(.[^|]*?)\"(?:[|](?:(hover|" + CLICK_REGEX + "):\"(.[^|]*?)\"))?)>(.+?)</text>";
 
     /**
      * The default {@link Format} instance used by new {@code MultiComponent} objects.
@@ -80,6 +80,14 @@ public interface MultiComponent extends ChatComponent<MultiComponent>, Copyable<
      */
     @NotNull
     MultiComponent setFormat(@NotNull Format<ChatComponent<?>> format);
+
+    /**
+     * Checks if this component has any segments with events (click or hover).
+     *
+     * @return {@code true} if any segments have events, {@code false} otherwise
+     */
+    @Override
+    boolean hasEvents();
 
     /**
      * Appends a raw text segment to this component.
@@ -177,6 +185,19 @@ public interface MultiComponent extends ChatComponent<MultiComponent>, Copyable<
      */
     @NotNull
     MultiComponent setHoverToAll(String string);
+
+    /**
+     * Converts this multi-component into a single formatted string.
+     * <p>
+     * The string is generated using the current {@linkplain #getFormat() format}.
+     * </p>
+     *
+     * @return the formatted string representation of this component
+     */
+    @NotNull
+    default String toFormattedString() {
+        return getFormat().toFormattedString(this);
+    }
 
     /**
      * Creates a new {@link MultiComponent} from the given raw message,

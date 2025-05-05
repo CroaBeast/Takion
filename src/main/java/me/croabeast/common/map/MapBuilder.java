@@ -469,6 +469,16 @@ public class MapBuilder<K, V> implements Iterable<Map.Entry<K, V>> {
     }
 
     /**
+     * Returns a string representation of the internal map.
+     *
+     * @return a string representation of the internal map
+     */
+    @Override
+    public String toString() {
+        return map.toString();
+    }
+
+    /**
      * Creates a singleton map containing the given key-value pair.
      *
      * @param key   the single key
@@ -478,19 +488,7 @@ public class MapBuilder<K, V> implements Iterable<Map.Entry<K, V>> {
      * @return a map with exactly one entry
      */
     public static <K, V> Map<K, V> singleton(K key, V value) {
-        return new MapBuilder<K, V>()
-                .put(key, value)
-                .build();
-    }
-
-    /**
-     * Returns a string representation of the internal map.
-     *
-     * @return a string representation of the internal map
-     */
-    @Override
-    public String toString() {
-        return map.toString();
+        return new MapBuilder<K, V>().put(key, value).build();
     }
 
     /**
