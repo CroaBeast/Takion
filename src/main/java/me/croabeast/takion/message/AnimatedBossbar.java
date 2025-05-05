@@ -16,6 +16,7 @@ import org.bukkit.boss.BossBar;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.*;
 
@@ -639,14 +640,27 @@ public class AnimatedBossbar {
     }
 
     /**
-     * Unregisters all players and deletes all AnimatedBossbar instances.
+     * Unregisters all AnimatedBossbar instances associated with a specific plugin.
      * <p>
-     * This method clears the global cache and removes all active BossBars.
+     * This method clears the cache and deletes all AnimatedBossbar instances.
+     * </p>
+     *
+     * @param plugin the plugin whose bossbars should be unregistered
+     */
+    public static void unregisterAll(Plugin plugin) {
+        CACHE.values().forEach(b -> {
+            if (Objects.equals(b.plugin, plugin)) b.deleteBossBar();
+        });
+    }
+
+    /**
+     * Unregisters all AnimatedBossbar instances associated with the Takion plugin.
+     * <p>
+     * This method clears the cache and deletes all AnimatedBossbar instances.
      * </p>
      */
     public static void unregisterAll() {
-        CACHE.values().forEach(AnimatedBossbar::deleteBossBar);
-        CACHE.clear();
+        unregisterAll(JavaPlugin.getProvidingPlugin(AnimatedBossbar.class));
     }
 
     @UtilityClass

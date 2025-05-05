@@ -87,7 +87,7 @@ public final class TakionPlugin extends JavaPlugin {
                             prefix + " &7Remember, old versions won't receive any support.",
                             prefix + " &7New version:" +
                                     " &6" + latest + "&7, Current version: " + current,
-                            prefix + " &7Link:&b https://www.spigotmc.org/resources/96378/"
+                            prefix + " &7Link:&b https://modrinth.com/plugin/takion"
                     );
                     break;
                 case UP_TO_DATE:
@@ -113,7 +113,7 @@ public final class TakionPlugin extends JavaPlugin {
         };
         getServer().getScheduler().scheduleSyncDelayedTask(this, () -> {
             if (getConfig().getBoolean("updater.on-start"))
-                updater.requestCheck(123156, Platform.SPIGOT)
+                updater.requestCheck("takion", Platform.MODRINTH)
                         .whenComplete((result, e) -> consumer.accept(null, result));
 
             MetricsLoader.initialize(this, 25287)
