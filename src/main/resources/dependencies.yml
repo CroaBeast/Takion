@@ -6,7 +6,7 @@ dependencies:
     replace: true
   - group: "me.croabeast"
     artifact: "PrismaticAPI"
-    version: "1.0"
+    version: "1.1"
     repo: "https://croabeast.github.io/repo/"
     replace: true
   - group: "me.croabeast"
@@ -21,4 +21,4 @@ dependencies:
     replace: true
   - group: "com.github.stefvanschie.inventoryframework"
     artifact: "IF"
-    version: "0.10.19"
+    version: "0.11.0"

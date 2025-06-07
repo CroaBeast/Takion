@@ -42,7 +42,7 @@ public final class TakionPlugin extends JavaPlugin {
         try {
             YamlConfiguration c = new YamlConfiguration();
 
-            saveResource("dependencies.yml", false);
+            saveResource("dependencies.yml", true);
             c.load(new File(getDataFolder(), "dependencies.yml"));
 
             if (!loader.loadFromConfiguration(c))
@@ -113,7 +113,7 @@ public final class TakionPlugin extends JavaPlugin {
         };
         getServer().getScheduler().scheduleSyncDelayedTask(this, () -> {
             if (getConfig().getBoolean("updater.on-start"))
-                updater.requestCheck("takion", Platform.MODRINTH)
+                updater.requestCheck(123156, Platform.SPIGOT)
                         .whenComplete((result, e) -> consumer.accept(null, result));
 
             MetricsLoader.initialize(this, 25287)
@@ -171,7 +171,7 @@ public final class TakionPlugin extends JavaPlugin {
             private void onJoin(PlayerJoinEvent event) {
                 if (!getConfig().getBoolean("updater.send-op")) return;
 
-                updater.requestCheck("takion", Platform.MODRINTH)
+                updater.requestCheck(123156, Platform.SPIGOT)
                         .whenComplete((r, e) ->
                                 consumer.accept(event.getPlayer(), r));
             }
