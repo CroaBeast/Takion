@@ -113,6 +113,8 @@ class MultiCompImpl implements MultiComponent {
         @Override
         public String removeFormat(String string) {
             string = stripLegacyFormat(string);
+            if (StringUtils.isBlank(string)) return string;
+
             Matcher matcher = format.matcher(string);
             while (matcher.find())
                 string = string.replace(matcher.group(), matcher.group(5));
