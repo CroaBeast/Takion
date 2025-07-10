@@ -64,6 +64,41 @@
                                 <exclude>META-INF/**</exclude>
                             </excludes>
                         </filter>
+
+                        <filter>
+                            <artifact>me.croabeast:AdvancementInfo</artifact>
+                            <excludes>
+                                <exclude>**/AInfoPlugin**</exclude>
+                                <exclude>plugin.yml</exclude>
+                            </excludes>
+                        </filter>
+
+                        <filter>
+                            <artifact>me.croabeast:PrismaticAPI</artifact>
+                            <excludes>
+                                <exclude>**/PrismaticPlugin**</exclude>
+                                <exclude>plugin.yml</exclude>
+                            </excludes>
+                        </filter>
+
+                        <filter>
+                            <artifact>me.croabeast:CommandFramework</artifact>
+                            <excludes>
+                                <exclude>**/CFPlugin**</exclude>
+                                <exclude>plugin.yml</exclude>
+                                <exclude>me/croabeast/common/Registrable**</exclude>
+                            </excludes>
+                        </filter>
+
+                        <filter>
+                            <artifact>me.croabeast:YAML-API</artifact>
+                            <excludes>
+                                <exclude>**/YAMLPlugin**</exclude>
+                                <exclude>plugin.yml</exclude>
+                                <exclude>me/croabeast/common/builder/BaseBuilder**</exclude>
+                                <exclude>me/croabeast/common/Copyable**</exclude>
+                            </excludes>
+                        </filter>
                     </filters>
                 </configuration>
             </plugin>
@@ -141,30 +176,37 @@
 
         <dependency>
             <groupId>me.croabeast</groupId>
+            <artifactId>AdvancementInfo</artifactId>
+            <version>1.0</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>me.croabeast</groupId>
             <artifactId>PrismaticAPI</artifactId>
             <version>1.1</version>
-            <scope>provided</scope>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>me.croabeast</groupId>
             <artifactId>CommandFramework</artifactId>
             <version>1.0</version>
-            <scope>provided</scope>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>me.croabeast</groupId>
             <artifactId>YAML-API</artifactId>
             <version>1.0</version>
-            <scope>provided</scope>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>com.github.stefvanschie.inventoryframework</groupId>
             <artifactId>IF</artifactId>
             <version>0.11.1</version>
-            <scope>provided</scope>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>

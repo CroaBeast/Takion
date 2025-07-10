@@ -102,6 +102,28 @@
             <artifactId>Takion-shaded</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>me.croabeast</groupId>
+                    <artifactId>AdvancementInfo</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>me.croabeast</groupId>
+                    <artifactId>PrismaticAPI</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>me.croabeast</groupId>
+                    <artifactId>CommandFramework</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>me.croabeast</groupId>
+                    <artifactId>YAML-API</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.github.stefvanschie.inventoryframework</groupId>
+                    <artifactId>IF</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -127,8 +149,36 @@
 
         <dependency>
             <groupId>me.croabeast</groupId>
+            <artifactId>AdvancementInfo</artifactId>
+            <version>1.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>me.croabeast</groupId>
             <artifactId>PrismaticAPI</artifactId>
             <version>1.1</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>me.croabeast</groupId>
+            <artifactId>CommandFramework</artifactId>
+            <version>1.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>me.croabeast</groupId>
+            <artifactId>YAML-API</artifactId>
+            <version>1.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.stefvanschie.inventoryframework</groupId>
+            <artifactId>IF</artifactId>
+            <version>0.11.1</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
