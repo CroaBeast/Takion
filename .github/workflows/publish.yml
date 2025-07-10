@@ -95,7 +95,8 @@ jobs:
             cp $module/target/$ART-javadoc.jar maven-repo/me/croabeast/$ARTIFACT_ID/${{ env.VERSION }}/ || true
 
             # Create minimal POM
-            cat > maven-repo/me/croabeast/$ARTIFACT_ID/${{ env.VERSION }}/$ART.jar.pom <<EOF
+            cat > maven-repo/me/croabeast/$ARTIFACT_ID/${{ env.VERSION }}/$ART.pom << EOF
+            <?xml version="1.0" encoding="UTF-8"?>
             <project>
               <modelVersion>4.0.0</modelVersion>
               <groupId>me.croabeast</groupId>
@@ -106,7 +107,8 @@ jobs:
             EOF
             
             # Update metadata
-            cat > maven-repo/me/croabeast/$ARTIFACT_ID/maven-metadata.xml <<EOF
+            cat > maven-repo/me/croabeast/$ARTIFACT_ID/maven-metadata.xml << EOF
+            <?xml version="1.0" encoding="UTF-8"?>
             <metadata>
               <groupId>me.croabeast</groupId>
               <artifactId>$ARTIFACT_ID</artifactId>
