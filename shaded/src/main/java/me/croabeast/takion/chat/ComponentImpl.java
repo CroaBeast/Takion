@@ -112,6 +112,7 @@ class ComponentImpl implements ChatComponent<ComponentImpl> {
             comp.setClickEvent(clickEvent.create(player));
         if (hoverEvent != null)
             comp.setHoverEvent(hoverEvent.create(player));
+
         return new BaseComponent[] {comp};
     }
 

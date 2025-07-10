@@ -130,7 +130,7 @@ public class TakionLogger {
                 case INFO: default:
                     logger.info(component);
                     break;
-            };
+            }
         }
     }
 

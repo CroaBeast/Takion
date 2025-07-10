@@ -79,6 +79,9 @@ public class AnimatedBossbar {
      */
     private final Plugin plugin;
 
+    @Getter(AccessLevel.NONE)
+    private final TakionLib lib;
+
     /**
      * A mapping between players and their associated BossBar objects.
      */
@@ -144,6 +147,8 @@ public class AnimatedBossbar {
      */
     public AnimatedBossbar(Plugin plugin, List<String> messages, List<BarColor> colors, List<BarStyle> styles) {
         this.plugin = Objects.requireNonNull(plugin);
+        this.lib = TakionLib.fromPlugin(plugin);
+
         this.messages = messages;
         this.colors = colors;
         this.styles = styles;
@@ -560,7 +565,7 @@ public class AnimatedBossbar {
                         String message = isRandom("messages") ?
                                 messages.get(random.nextInt(messages.size())) :
                                 messages.get(isSync("messages") ? index : tick % messages.size());
-                        bossBar.setTitle(TakionLib.fromPlugin(plugin).colorize(player, message));
+                        bossBar.setTitle(lib.colorize(player, message));
                     }
                     if (colors != null && !colors.isEmpty()) {
                         BarColor color = isRandom("colors") ?

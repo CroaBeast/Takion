@@ -1,10 +1,7 @@
 package me.croabeast.takion.format;
 
-import me.croabeast.common.util.ArrayUtils;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Collection;
 
 /**
  * A {@link Format} specialization that applies formatting based on both

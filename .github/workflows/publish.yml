@@ -25,15 +25,17 @@ jobs:
       - name: Build with Maven
         run: mvn clean package
 
-      - name: Upload plugin artifact
+      - name: Upload all module artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Plugin
-          path: target/${{ github.event.repository.name }}-*.jar
+          name: Takion-artifacts
+          path: |
+            shaded/target/Takion-shaded-*.jar
+            plugin/target/Takion-*.jar
 
       - name: Get Plugin Version
         id: version
-        run: echo "VERSION=$(basename $(ls target/${{ github.event.repository.name }}-*.jar | grep -vE '(-sources|-javadoc).jar') .jar | sed 's/${{ github.event.repository.name }}-//')" >> $GITHUB_ENV
+        run: echo "VERSION=$(basename $(ls plugin/target/Takion-*.jar | grep -vE '(-sources|-javadoc).jar') .jar | sed 's/Takion-//')" >> $GITHUB_ENV
 
       - name: Delete existing GitHub release (if exists)
         run: |
@@ -55,10 +57,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Rename & Upload Latest Release
+      - name: Rename & Prepare Release Artifacts
         run: |
-          JAR_FILE=$(ls target/${{ github.event.repository.name }}-*.jar | grep -vE '(-sources|-javadoc).jar' | head -n 1)
-          cp "$JAR_FILE" target/${{ github.event.repository.name }}-latest.jar
+          # Copy the first non-sources/javadoc jar from each module
+          cp shaded/target/Takion-shaded-${{ env.VERSION }}.jar target/Takion-shaded-${{ env.VERSION }}.jar
+          cp plugin/target/Takion-${{ env.VERSION }}.jar      target/Takion-${{ env.VERSION }}.jar
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
@@ -68,7 +71,8 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            target/${{ github.event.repository.name }}-latest.jar
+            target/Takion-shaded-${{ env.VERSION }}.jar
+            target/Takion-${{ env.VERSION }}.jar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -84,50 +88,48 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
 
-      - name: Deploy to Maven repository
+      - name: Deploy both artifacts to Maven repository
         run: |
-          # Create directory structure
-          mkdir -p maven-repo/me/croabeast/${{ github.event.repository.name }}/${{ env.VERSION }}
+          for module in shaded plugin; do
+            ART=$(basename $(ls $module/target/*.jar | grep -vE '(-sources|-javadoc).jar') .jar)
+            ARTIFACT_ID=${ART%-${{ env.VERSION }}}
+            mkdir -p maven-repo/me/croabeast/$ARTIFACT_ID/${{ env.VERSION }}
           
-          # Copy JAR files
-          cp target/${{ github.event.repository.name }}-${{ env.VERSION }}.jar maven-repo/me/croabeast/${{ github.event.repository.name }}/${{ env.VERSION }}/
-          cp target/${{ github.event.repository.name }}-${{ env.VERSION }}-javadoc.jar maven-repo/me/croabeast/${{ github.event.repository.name }}/${{ env.VERSION }}/
-          cp target/${{ github.event.repository.name }}-${{ env.VERSION }}-sources.jar maven-repo/me/croabeast/${{ github.event.repository.name }}/${{ env.VERSION }}/
-          
-          # Create POM file
-          cat > maven-repo/me/croabeast/${{ github.event.repository.name }}/${{ env.VERSION }}/${{ github.event.repository.name }}-${{ env.VERSION }}.pom << EOF
-          <?xml version="1.0" encoding="UTF-8"?>
-          <project>
-              <modelVersion>4.0.0</modelVersion>
-              <groupId>me.croabeast</groupId>
-              <artifactId>${{ github.event.repository.name }}</artifactId>
-              <version>${{ env.VERSION }}</version>
-              <packaging>jar</packaging>
-          </project>
-          EOF
-          
-          # Update or create maven-metadata.xml
-          cat > maven-repo/me/croabeast/${{ github.event.repository.name }}/maven-metadata.xml << EOF
-          <?xml version="1.0" encoding="UTF-8"?>
-          <metadata>
-            <groupId>me.croabeast</groupId>
-            <artifactId>${{ github.event.repository.name }}</artifactId>
-            <versioning>
-              <latest>${{ env.VERSION }}</latest>
-              <release>${{ env.VERSION }}</release>
-              <versions>
-                <version>${{ env.VERSION }}</version>
-              </versions>
-              <lastUpdated>$(date +%Y%m%d%H%M%S)</lastUpdated>
-            </versioning>
-          </metadata>
-          EOF
-          
-          # Commit and push changes
-          cd maven-repo
-          git add .
-          git commit -m "Deploy ${{ github.event.repository.name }} ${{ env.VERSION }}"
-          git push
+            # Copy JAR, sources and javadoc if exist
+            cp $module/target/$ART.jar maven-repo/me/croabeast/$ARTIFACT_ID/${{ env.VERSION }}/
+            cp $module/target/$ART-sources.jar maven-repo/me/croabeast/$ARTIFACT_ID/${{ env.VERSION }}/ || true
+            cp $module/target/$ART-javadoc.jar maven-repo/me/croabeast/$ARTIFACT_ID/${{ env.VERSION }}/ || true
 
-env:
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            # Create minimal POM
+            cat > maven-repo/me/croabeast/$ARTIFACT_ID/${{ env.VERSION }}/$ART.jar.pom << EOF
+            <project>
+            <modelVersion>4.0.0</modelVersion>
+            <groupId>me.croabeast</groupId>
+            <artifactId>$ARTIFACT_ID</artifactId>
+            <version>${{ env.VERSION }}</version>
+            <packaging>jar</packaging>
+            </project>
+            EOF
+            
+            # Update metadata
+            cat > maven-repo/me/croabeast/$ARTIFACT_ID/maven-metadata.xml << EOF
+            <metadata>
+            <groupId>me.croabeast</groupId>
+            <artifactId>$ARTIFACT_ID</artifactId>
+            <versioning>
+            <latest>${{ env.VERSION }}</latest>
+            <release>${{ env.VERSION }}</release>
+            <versions>
+            <version>${{ env.VERSION }}</version>
+            </versions>
+            <lastUpdated>$(date +%Y%m%d%H%M%S)</lastUpdated>
+            </versioning>
+            </metadata>
+            EOF
+            done
+            cd maven-repo
+            git add .
+            git commit -m "Deploy Takion modules ${{ env.VERSION }}"
+            git push
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
