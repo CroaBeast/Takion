@@ -71,6 +71,12 @@
                                 <exclude>me/croabeast/takion/FormatMngr**</exclude>
                                 <exclude>me/croabeast/takion/PlaceholderMngr**</exclude>
                                 <exclude>me/croabeast/takion/TakionLib**</exclude>
+                                <exclude>com/github/stefvanschie/inventoryframework/**</exclude>
+                                <exclude>fonts/**</exclude>
+                                <exclude>me/croabeast/advancement/**</exclude>
+                                <exclude>me/croabeast/prismatic/**</exclude>
+                                <exclude>me/croabeast/file/**</exclude>
+                                <exclude>me/croabeast/command/**</exclude>
                             </excludes>
                         </filter>
                     </filters>
@@ -105,19 +111,7 @@
             <exclusions>
                 <exclusion>
                     <groupId>me.croabeast</groupId>
-                    <artifactId>AdvancementInfo</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>me.croabeast</groupId>
-                    <artifactId>PrismaticAPI</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>me.croabeast</groupId>
-                    <artifactId>CommandFramework</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>me.croabeast</groupId>
-                    <artifactId>YAML-API</artifactId>
+                    <artifactId>*</artifactId>
                 </exclusion>
                 <exclusion>
                     <groupId>com.github.stefvanschie.inventoryframework</groupId>
