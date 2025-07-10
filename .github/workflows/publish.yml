@@ -57,22 +57,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Rename & Prepare Release Artifacts
-        run: |
-          # Copy the first non-sources/javadoc jar from each module
-          cp shaded/target/Takion-shaded-${{ env.VERSION }}.jar target/Takion-shaded-${{ env.VERSION }}.jar
-          cp plugin/target/Takion-${{ env.VERSION }}.jar      target/Takion-${{ env.VERSION }}.jar
-
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ env.VERSION }}
           name: Release ${{ env.VERSION }}
-          draft: false
-          prerelease: false
           files: |
-            target/Takion-shaded-${{ env.VERSION }}.jar
-            target/Takion-${{ env.VERSION }}.jar
+            shaded/target/Takion-shaded-${{ env.VERSION }}.jar
+            plugin/target/Takion-${{ env.VERSION }}.jar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

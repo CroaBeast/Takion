@@ -32,3 +32,7 @@ replay_pid*
 *.iml
 out
 gen
+
+# Eclipse project files
+/plugin/target/
+/shaded/target/
