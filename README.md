@@ -54,7 +54,13 @@ To include Takion in your project, add the following repository and dependency t
     <dependency>
         <groupId>me.croabeast</groupId>
         <artifactId>Takion</artifactId>
-        <version>1.0</version>
+        <version>1.2</version>
+    </dependency>
+
+    <dependency>
+        <groupId>me.croabeast</groupId>
+        <artifactId>Takion-shaded</artifactId> <!-- Optional if you want a shaded version with all its dependencies compiled -->
+        <version>1.2</version>
     </dependency>
 </dependencies>
 ```
@@ -71,7 +77,8 @@ repositories {
 }
 
 dependencies {
-    implementation 'me.croabeast:Takion:1.0'
+    implementation 'me.croabeast:Takion:1.2'
+    implementation 'me.croabeast:Takion-shaded:1.2' // Optional if you want a shaded version with all its dependencies compiled
 }
 ```
 
