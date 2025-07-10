@@ -89,9 +89,9 @@ jobs:
           mkdir -p maven-repo/me/croabeast/$ARTIFACT_ID/${{ env.VERSION }}
 
           # Copy JAR, sources and javadoc if exist
-          cp $module/target/$ART.jar maven-repo/me/croabeast/$ARTIFACT_ID/${{ env.VERSION }}/
-          cp $module/target/$ART-sources.jar maven-repo/me/croabeast/$ARTIFACT_ID/${{ env.VERSION }}/
-          cp $module/target/$ART-javadoc.jar maven-repo/me/croabeast/$ARTIFACT_ID/${{ env.VERSION }}/
+          cp shaded/target/$ART.jar maven-repo/me/croabeast/$ARTIFACT_ID/${{ env.VERSION }}/
+          cp shaded/target/$ART-sources.jar maven-repo/me/croabeast/$ARTIFACT_ID/${{ env.VERSION }}/
+          cp shaded/target/$ART-javadoc.jar maven-repo/me/croabeast/$ARTIFACT_ID/${{ env.VERSION }}/
 
           # Create minimal POM
           cat > maven-repo/me/croabeast/$ARTIFACT_ID/${{ env.VERSION }}/$ART.pom << EOF
@@ -136,9 +136,9 @@ jobs:
           mkdir -p maven-repo/me/croabeast/$ARTIFACT_ID/${{ env.VERSION }}
 
           # Copy JAR, sources and javadoc if exist
-          cp $module/target/$ART.jar maven-repo/me/croabeast/$ARTIFACT_ID/${{ env.VERSION }}/
-          cp $module/target/$ART-sources.jar maven-repo/me/croabeast/$ARTIFACT_ID/${{ env.VERSION }}/
-          cp $module/target/$ART-javadoc.jar maven-repo/me/croabeast/$ARTIFACT_ID/${{ env.VERSION }}/
+          cp plugin/target/$ART.jar maven-repo/me/croabeast/$ARTIFACT_ID/${{ env.VERSION }}/
+          cp plugin/target/$ART-sources.jar maven-repo/me/croabeast/$ARTIFACT_ID/${{ env.VERSION }}/
+          cp plugin/target/$ART-javadoc.jar maven-repo/me/croabeast/$ARTIFACT_ID/${{ env.VERSION }}/
 
           # Create minimal POM
           cat > maven-repo/me/croabeast/$ARTIFACT_ID/${{ env.VERSION }}/$ART.pom << EOF
