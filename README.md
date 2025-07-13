@@ -57,10 +57,17 @@ To include Takion in your project, add the following repository and dependency t
         <version>1.2</version>
     </dependency>
 
+    <!-- If you want a shaded version with all its dependencies compiled, select this -->
     <dependency>
         <groupId>me.croabeast</groupId>
-        <artifactId>Takion-shaded</artifactId> <!-- Optional if you want a shaded version with all its dependencies compiled -->
+        <artifactId>Takion-shaded</artifactId> 
         <version>1.2</version>
+        <exclusions>
+            <exclusion>
+                <groupId>*</groupId>
+                <artifactId>*</artifactId>
+            </exclusion>
+        </exclusions>
     </dependency>
 </dependencies>
 ```
@@ -78,7 +85,8 @@ repositories {
 
 dependencies {
     implementation 'me.croabeast:Takion:1.2'
-    implementation 'me.croabeast:Takion-shaded:1.2' // Optional if you want a shaded version with all its dependencies compiled
+    // If you want a shaded version with all its dependencies compiled, select this
+    implementation 'me.croabeast:Takion-shaded:1.2'
 }
 ```
 
@@ -133,10 +141,11 @@ player.sendMessage(String.join(", ", list));
 
 ## Dependencies
 
-Takion includes several dependencies that are compiled and included within the library, so you don't need to add them separately. The primary dependencies are:
+Takion includes several dependencies that are included within the library (compiled in the shaded version), so you don't need to add them separately. The primary dependencies are:
 
 - [**PrismaticAPI**](https://github.com/CroaBeast/PrismaticAPI): For colorization and text modifications.
 - [**CommandFramework**](https://github.com/CroaBeast/CommandFramework): For handling commands.
+- [**AdvancementInfo**](https://github.com/CroaBeast/AdvancementInfo): For handling advancement information.
 - [**YAML-API**](https://github.com/CroaBeast/YAML-API): For YAML configuration support.
 - [**InventoryFramework**](https://github.com/stefvanschie/IF): For managing and interacting with Minecraft inventories.
 > Note: UpdateChecker was originally created by Choco. For more details, see [this post](https://www.spigotmc.org/threads/an-actually-decent-plugin-update-checker.344327/).

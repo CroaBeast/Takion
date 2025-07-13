@@ -20,8 +20,7 @@ import java.util.Objects;
  * Example usage:
  * <pre><code>
  * ChestBuilder chest = new ChestBuilder(4, "&aMy Chest GUI");
- * chest.setDisplayedPage(2)
- *      .showGui(player);
+ * chest.setDisplayedPage(2).showGui(player);
  * </code></pre>
  * </p>
  *

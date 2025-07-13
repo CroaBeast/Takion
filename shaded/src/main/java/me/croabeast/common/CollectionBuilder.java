@@ -166,6 +166,17 @@ public final class CollectionBuilder<T> implements Iterable<T>, Copyable<Collect
     }
 
     /**
+     * Removes all elements in the specified array from this builder.
+     *
+     * @param elements the array of elements to remove
+     * @return this builder instance for method chaining
+     */
+    @SafeVarargs
+    public final CollectionBuilder<T> removeAll(T... elements) {
+        return removeAll(ArrayUtils.toList(elements));
+    }
+
+    /**
      * Sorts the elements in this builder using the provided comparator.
      *
      * @param comparator the comparator to determine the order of the elements
