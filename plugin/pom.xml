@@ -12,6 +12,7 @@
     </parent>
 
     <artifactId>Takion</artifactId>
+    <version>1.2</version>
     <packaging>jar</packaging>
 
     <build>
