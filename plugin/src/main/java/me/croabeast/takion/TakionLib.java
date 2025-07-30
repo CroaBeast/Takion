@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import me.croabeast.common.Regex;
 import me.croabeast.common.util.Exceptions;
+import me.croabeast.scheduler.GlobalScheduler;
 import me.croabeast.takion.channel.ChannelManager;
 import me.croabeast.takion.character.CharacterManager;
 import me.croabeast.takion.format.FormatManager;
@@ -77,6 +78,26 @@ public class TakionLib {
      * The plugin instance associated with this TakionLib.
      */
     private final Plugin plugin;
+
+    /**
+     * The global scheduler used for scheduling tasks across the server.
+     *
+     * <p> This scheduler is used for managing asynchronous tasks and periodic operations
+     * that need to run independently of the plugin's lifecycle.
+     *
+     * <p> Example usage:
+     * <pre><code>
+     * // Schedule a task to run after 5 seconds:
+     * TakionLib.getLib().getScheduler().runTaskLater(() -> {
+     *     // Your task code here
+     * }, 100L); // 100 ticks = 5 seconds
+     * </code></pre>
+     *
+     * Note: This field can be {@code null} if the plugin is not set or if the scheduler is not available.
+     * It is recommended to check for null before using the scheduler.
+     * @see GlobalScheduler
+     */
+    private GlobalScheduler scheduler = null;
 
     /**
      * The logger for server-level logs (configured to not use plugin logger).
@@ -155,6 +176,9 @@ public class TakionLib {
 
         this.serverLogger = new TakionLogger(this, false);
         this.logger = new TakionLogger(this);
+
+        if (plugin != null)
+            this.scheduler = GlobalScheduler.getScheduler(plugin);
 
         titleManager = new TitleManager() {
             @Setter @Getter
@@ -338,25 +362,6 @@ public class TakionLib {
     }
 
     /**
-     * Sets the TakionLib instance of the target plugin to that of the source plugin.
-     *
-     * @param source the plugin whose TakionLib instance should be used
-     * @param target the plugin to set with the source's TakionLib instance
-     */
-    public static void setLibFromSource(Plugin source, Plugin target) {
-        TakionPlugin.libs.put(target, TakionPlugin.libs.get(source));
-    }
-
-    /**
-     * Sets the default TakionLib instance for the specified plugin.
-     *
-     * @param plugin the plugin for which to set the default TakionLib instance
-     */
-    public static void setLibAsDefault(Plugin plugin) {
-        TakionPlugin.libs.put(plugin, TakionPlugin.noPluginInstance);
-    }
-
-    /**
      * Retrieves the TakionLib instance associated with the given plugin.
      *
      * @param plugin the plugin for which to retrieve the TakionLib instance
@@ -370,6 +375,8 @@ public class TakionLib {
 
     /**
      * Retrieves the TakionLib instance associated with the providing plugin (determined from the call stack).
+     *
+     * <p> Not recommended for use in any context other than the main plugin class.
      *
      * @return the TakionLib instance, or the default instance if none is found
      */

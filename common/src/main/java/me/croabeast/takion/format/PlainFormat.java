@@ -76,6 +76,13 @@ public interface PlainFormat<T> extends Format<T> {
         }
     };
 
+    /**
+     * A {@link PlainFormat} implementation that trims leading spaces from the input string.
+     * <p>
+     * If the input {@code string} is non‑blank, it removes all leading spaces
+     * and returns the trimmed result; otherwise, it returns the original text.
+     * </p>
+     */
     PlainFormat<String> TRIM_START_SPACES = (player, string) -> {
         if (StringUtils.isBlank(string)) return string;
         String startLine = string;

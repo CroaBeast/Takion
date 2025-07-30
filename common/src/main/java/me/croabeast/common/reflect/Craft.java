@@ -27,9 +27,9 @@ import java.util.function.Supplier;
  * The class is organized into nested utility classes that group functionality:
  * </p>
  * <ul>
- *   <li>{@link Craft.Server}: Contains methods for server-related tasks such as loading icons,
+ *   <li>{@link Server}: Contains methods for server-related tasks such as loading icons,
  *       retrieving configuration files, and updating commands.</li>
- *   <li>{@link Craft.Command}: Provides access to command dispatching and manipulation,
+ *   <li>{@link Command}: Provides access to command dispatching and manipulation,
  *       including removal and synchronization of commands.</li>
  * </ul>
  */

@@ -16,7 +16,6 @@ import static java.lang.annotation.ElementType.*;
  * @see java.util.regex.Pattern
  * @see Language
  */
-
 @Target({ METHOD, FIELD, PARAMETER, LOCAL_VARIABLE, ANNOTATION_TYPE })
 @Language("RegExp")
 public @interface Regex {}

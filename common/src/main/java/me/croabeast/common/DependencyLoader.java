@@ -54,6 +54,9 @@ import java.util.logging.Level;
  * }</pre>
  * </p>
  *
+ * Warning: This class doesn't work if you're using paper-plugin.yml to load the plugin.
+ * It requires the plugin to be loaded via the standard Bukkit/Spigot/Paper loading mechanism.
+ *
  * @see YAMLFile
  * @see YamlConfiguration
  */
@@ -322,7 +325,7 @@ public class DependencyLoader {
      * Creates a new {@code DependencyLoader} instance for the specified folder and subfolder.
      *
      * @param librariesFolder the base folder containing dependency libraries.
-     * @param folderName      the subfolder name to use (may be {@code null}).
+     * @param folderName      the subfolder name to use (maybe {@code null}).
      * @return a new {@code DependencyLoader} instance.
      */
     public static DependencyLoader fromFolder(File librariesFolder, String folderName) {

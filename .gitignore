@@ -34,5 +34,6 @@ out
 gen
 
 # Eclipse project files
-/plugin/target/
+/common/target/
 /shaded/target/
+/plugin/target/

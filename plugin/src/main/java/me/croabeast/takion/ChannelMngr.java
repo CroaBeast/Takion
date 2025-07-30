@@ -8,7 +8,7 @@ import me.croabeast.takion.channel.Channel;
 import me.croabeast.takion.channel.ChannelManager;
 import me.croabeast.takion.chat.MultiComponent;
 import me.croabeast.takion.format.PlainFormat;
-import me.croabeast.takion.message.AnimatedBossbar;
+import me.croabeast.takion.bossbar.AnimatedBossbar;
 import me.croabeast.takion.message.MessageUtils;
 import me.croabeast.takion.message.TitleManager;
 import net.md_5.bungee.api.chat.BaseComponent;

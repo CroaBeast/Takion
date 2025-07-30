@@ -26,7 +26,7 @@ class MultiCompImpl implements MultiComponent {
 
     private final LinkedList<Segment> list = new LinkedList<>();
 
-    private class Segment {
+    private final class Segment {
 
         final ChatComponent<?> component;
         String lastColor;

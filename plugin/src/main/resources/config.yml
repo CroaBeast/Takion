@@ -1,5 +1,1 @@
 metrics-advise: true
-
-updater:
-  on-start: true
-  send-op: true

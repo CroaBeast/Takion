@@ -124,7 +124,7 @@ jobs:
 
           cd maven-repo
           git add .
-          git commit -m "Deploy $ART"
+          git commit -m "Deploy $ARTIFACT_ID ${{ env.VERSION }}"
           git push
 
       - name: Deploy plugin to Maven repository
@@ -171,5 +171,5 @@ jobs:
 
           cd maven-repo
           git add .
-          git commit -m "Deploy $ART"
+          git commit -m "Deploy $ARTIFACT_ID ${{ env.VERSION }}"
           git push

@@ -7,7 +7,7 @@ import java.util.Objects;
 /**
  * A builder interface for managing and modifying three related values in a fluent, chainable manner.
  * <p>
- * The {@code TriBuilder} interface extends {@link BaseBuilder} and provides access to three distinct elements:
+ * The {@code TriBuilder} interface extends {@link me.croabeast.common.builder.BaseBuilder} and provides access to three distinct elements:
  * the first, second, and third values. It supports modifications through a {@link TriConsumer},
  * allowing you to perform operations on all three elements at once.
  * </p>
@@ -16,7 +16,7 @@ import java.util.Objects;
  * @param <U> the type of the second element
  * @param <V> the type of the third element
  * @param <B> the concrete builder type for fluent chaining
- * @see BaseBuilder
+ * @see me.croabeast.common.builder.BaseBuilder
  */
 public interface TriBuilder<T, U, V, B extends TriBuilder<T, U, V, B>> extends BaseBuilder<B> {
 

@@ -4,10 +4,8 @@ import com.google.common.base.Preconditions;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonReader;
-
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;

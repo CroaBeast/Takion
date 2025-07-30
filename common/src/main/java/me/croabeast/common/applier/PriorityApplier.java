@@ -1,6 +1,7 @@
 package me.croabeast.common.applier;
 
 import org.jetbrains.annotations.NotNull;
+
 import java.util.*;
 import java.util.function.UnaryOperator;
 
