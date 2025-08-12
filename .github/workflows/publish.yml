@@ -80,96 +80,54 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
 
-      - name: Deploy shaded to Maven repository
+      - name: Deploy all modules to Maven repository
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ART="Takion-shaded-${{ env.VERSION }}"
-          ARTIFACT_ID="Takion-shaded"
-          mkdir -p maven-repo/me/croabeast/$ARTIFACT_ID/${{ env.VERSION }}
-
-          # Copy JAR, sources and javadoc if exist
-          cp shaded/target/$ART.jar maven-repo/me/croabeast/$ARTIFACT_ID/${{ env.VERSION }}/
-          cp shaded/target/$ART-sources.jar maven-repo/me/croabeast/$ARTIFACT_ID/${{ env.VERSION }}/
-          cp shaded/target/$ART-javadoc.jar maven-repo/me/croabeast/$ARTIFACT_ID/${{ env.VERSION }}/
-
-          # Create minimal POM
-          cat > maven-repo/me/croabeast/$ARTIFACT_ID/${{ env.VERSION }}/$ART.pom << EOF
+          deploy_module() {
+            ARTIFACT_ID="$1"
+            TARGET_DIR="$2"
+            VERSION="${{ env.VERSION }}"
+            ART="$ARTIFACT_ID-$VERSION"
+            mkdir -p maven-repo/me/croabeast/$ARTIFACT_ID/$VERSION
+          
+            cp $TARGET_DIR/target/$ART.jar maven-repo/me/croabeast/$ARTIFACT_ID/$VERSION/ || true
+            cp $TARGET_DIR/target/$ART-sources.jar maven-repo/me/croabeast/$ARTIFACT_ID/$VERSION/ || true
+            cp $TARGET_DIR/target/$ART-javadoc.jar maven-repo/me/croabeast/$ARTIFACT_ID/$VERSION/ || true
+          
+            cat > maven-repo/me/croabeast/$ARTIFACT_ID/$VERSION/$ART.pom << EOF
           <?xml version="1.0" encoding="UTF-8"?>
           <project>
             <modelVersion>4.0.0</modelVersion>
             <groupId>me.croabeast</groupId>
             <artifactId>$ARTIFACT_ID</artifactId>
-            <version>${{ env.VERSION }}</version>
+            <version>$VERSION</version>
             <packaging>jar</packaging>
           </project>
           EOF
-
-          # Update metadata
-          cat > maven-repo/me/croabeast/$ARTIFACT_ID/maven-metadata.xml << EOF
+          
+            cat > maven-repo/me/croabeast/$ARTIFACT_ID/maven-metadata.xml << EOF
           <?xml version="1.0" encoding="UTF-8"?>
           <metadata>
             <groupId>me.croabeast</groupId>
             <artifactId>$ARTIFACT_ID</artifactId>
             <versioning>
-              <latest>${{ env.VERSION }}</latest>
-              <release>${{ env.VERSION }}</release>
+              <latest>$VERSION</latest>
+              <release>$VERSION</release>
               <versions>
-                <version>${{ env.VERSION }}</version>
+                <version>$VERSION</version>
               </versions>
               <lastUpdated>$(date +%Y%m%d%H%M%S)</lastUpdated>
             </versioning>
           </metadata>
           EOF
-
+          }
+          
+          deploy_module "takion-common" "common"
+          deploy_module "Takion-shaded" "shaded"
+          deploy_module "Takion" "plugin"
+          
           cd maven-repo
           git add .
-          git commit -m "Deploy $ARTIFACT_ID ${{ env.VERSION }}"
-          git push
-
-      - name: Deploy plugin to Maven repository
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          ART="Takion-${{ env.VERSION }}"
-          ARTIFACT_ID="Takion"
-          mkdir -p maven-repo/me/croabeast/$ARTIFACT_ID/${{ env.VERSION }}
-
-          # Copy JAR, sources and javadoc if exist
-          cp plugin/target/$ART.jar maven-repo/me/croabeast/$ARTIFACT_ID/${{ env.VERSION }}/
-          cp plugin/target/$ART-sources.jar maven-repo/me/croabeast/$ARTIFACT_ID/${{ env.VERSION }}/
-          cp plugin/target/$ART-javadoc.jar maven-repo/me/croabeast/$ARTIFACT_ID/${{ env.VERSION }}/
-
-          # Create minimal POM
-          cat > maven-repo/me/croabeast/$ARTIFACT_ID/${{ env.VERSION }}/$ART.pom << EOF
-          <?xml version="1.0" encoding="UTF-8"?>
-          <project>
-            <modelVersion>4.0.0</modelVersion>
-            <groupId>me.croabeast</groupId>
-            <artifactId>$ARTIFACT_ID</artifactId>
-            <version>${{ env.VERSION }}</version>
-            <packaging>jar</packaging>
-          </project>
-          EOF
-
-          # Update metadata
-          cat > maven-repo/me/croabeast/$ARTIFACT_ID/maven-metadata.xml << EOF
-          <?xml version="1.0" encoding="UTF-8"?>
-          <metadata>
-            <groupId>me.croabeast</groupId>
-            <artifactId>$ARTIFACT_ID</artifactId>
-            <versioning>
-              <latest>${{ env.VERSION }}</latest>
-              <release>${{ env.VERSION }}</release>
-              <versions>
-                <version>${{ env.VERSION }}</version>
-              </versions>
-              <lastUpdated>$(date +%Y%m%d%H%M%S)</lastUpdated>
-            </versioning>
-          </metadata>
-          EOF
-
-          cd maven-repo
-          git add .
-          git commit -m "Deploy $ARTIFACT_ID ${{ env.VERSION }}"
+          git commit -m "Deploy modules of Takion ${{ env.VERSION }}"
           git push
