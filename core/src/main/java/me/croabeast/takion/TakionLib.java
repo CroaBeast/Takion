@@ -23,7 +23,6 @@ import org.apache.commons.lang.StringUtils;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -44,10 +43,6 @@ import java.util.regex.Pattern;
  *   <li><b>Messaging:</b> Facilitated by {@link MessageSender} for sending formatted messages to players.</li>
  *   <li><b>Text Processing:</b> Utilizes {@link PrismaticAPI}, {@link StringApplier}, and related utilities for colorization and string modifications.</li>
  * </ul>
- * </p>
- * <p>
- * The library is designed to be initialized by a plugin. Instances of {@code TakionLib} are managed in a global map
- * (via {@code TakionPlugin}) and can be retrieved using static methods such as {@link #fromPlugin(Plugin)} and {@link #getLib()}.
  * </p>
  * <p>
  * Example usage:
@@ -75,9 +70,11 @@ import java.util.regex.Pattern;
 @Getter @Setter
 public class TakionLib {
 
+    private static final TakionLib NO_PLUGIN = new TakionLib(null);
+    private static TakionLib instance = NO_PLUGIN;
+
     /**
-     * The plugin instance associated with this TakionLib.
-     */
+     * The plugin instance associated with this TakionLib.*/
     private final Plugin plugin;
 
     /**
@@ -205,7 +202,7 @@ public class TakionLib {
         langPrefix = "&e " +
                 (plugin != null ? plugin.getName() : "Plugin") +
                 " &8»&7";
-        if (plugin != null) TakionPlugin.libs.put(plugin, this);
+        if (plugin != null && instance != null) instance = this;
     }
 
     /**
@@ -366,54 +363,20 @@ public class TakionLib {
         return colorize(null, string);
     }
 
-    /**
-     * Retrieves the TakionLib instance associated with the given plugin.
-     *
-     * @param plugin the plugin for which to retrieve the TakionLib instance
-     * @return the corresponding TakionLib instance, or the default if not found
-     */
     public static TakionLib fromPlugin(Plugin plugin) {
-        return plugin != null ?
-                TakionPlugin.libs.getOrDefault(plugin, TakionPlugin.noPluginInstance) :
-                TakionPlugin.noPluginInstance;
+        return plugin != null ? (instance.plugin == plugin ? instance : new TakionLib(plugin)) : NO_PLUGIN;
     }
 
     /**
-     * Retrieves the TakionLib instance associated with the providing plugin (determined from the call stack).
+     * Returns the singleton instance of TakionLib.
+     * <p>
+     * This method is used to access the library from anywhere in the codebase.
+     * </p>
      *
-     * <p> Not recommended for use in any context other than the main plugin class.
-     *
-     * @return the TakionLib instance, or the default instance if none is found
+     * @return the singleton instance of TakionLib
      */
     @NotNull
     public static TakionLib getLib() {
-        return fromPlugin(getProvidingPlugin());
-    }
-
-    /**
-     * Retrieves the plugin that provided the call to TakionLib.
-     * <p>
-     * This method examines the call stack to determine the plugin responsible for the call,
-     * then returns the plugin using {@link JavaPlugin#getProvidingPlugin(Class)}.
-     * </p>
-     *
-     * @return the providing plugin, or {@code null} if not determinable
-     */
-    static Plugin getProvidingPlugin() {
-        try {
-            StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-            Class<?> thisClass = TakionLib.class, result = TakionLib.class;
-            for (int i = 2; i < stackTrace.length; i++) {
-                final StackTraceElement stack = stackTrace[i];
-                if (stack.getClassName().equals(thisClass.getName()))
-                    continue;
-                try {
-                    result = Class.forName(stack.getClassName());
-                } catch (Exception ignored) {}
-            }
-            return JavaPlugin.getProvidingPlugin(result);
-        } catch (Exception e) {
-            return null;
-        }
+        return instance;
     }
 }

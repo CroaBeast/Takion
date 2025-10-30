@@ -16,33 +16,51 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up JDK 21
-        uses: actions/setup-java@v3
+      - name: Set up JDK (Temurin 21)
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Build with Maven
-        run: mvn clean package
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Make gradlew executable
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        run: |
+          ./gradlew --no-daemon clean :core:build :shaded:shadowJar :plugin:shadowJar
+
+      - name: Get Version from Gradle
+        id: version
+        run: |
+          VER=$(./gradlew -q properties | awk -F': ' '/^version:/ {print $2; exit}')
+          echo "VERSION=$VER" >> $GITHUB_ENV
+          echo "version=$VER" >> $GITHUB_OUTPUT
 
       - name: Upload all module artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Takion-artifacts
+          name: Takion-artifacts-${{ env.VERSION }}
           path: |
-            shaded/target/Takion-shaded-*.jar
-            plugin/target/Takion-*.jar
-
-      - name: Get Plugin Version
-        id: version
-        run: echo "VERSION=$(basename $(ls plugin/target/Takion-*.jar | grep -vE '(-sources|-javadoc).jar') .jar | sed 's/Takion-//')" >> $GITHUB_ENV
+            core/build/libs/*-${{ env.VERSION }}.jar
+            core/build/libs/*-${{ env.VERSION }}-sources.jar
+            core/build/libs/*-${{ env.VERSION }}-javadoc.jar
+            shaded/build/libs/*-${{ env.VERSION }}.jar
+            shaded/build/libs/*-${{ env.VERSION }}-sources.jar
+            shaded/build/libs/*-${{ env.VERSION }}-javadoc.jar
+            plugin/build/libs/*-${{ env.VERSION }}.jar
+            plugin/build/libs/*-${{ env.VERSION }}-sources.jar
+            plugin/build/libs/*-${{ env.VERSION }}-javadoc.jar
+          if-no-files-found: ignore
 
       - name: Delete existing GitHub release (if exists)
         run: |
-          RELEASE_ID=$(gh release view ${{ env.VERSION }} --json id -q '.id' || echo "")
+          RELEASE_ID=$(gh release view "${{ env.VERSION }}" --json id -q '.id' || echo "")
           if [ -n "$RELEASE_ID" ]; then
             echo "Deleting existing release..."
-            gh release delete ${{ env.VERSION }} --yes
+            gh release delete "${{ env.VERSION }}" --yes
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -51,20 +69,21 @@ jobs:
         run: |
           if git rev-parse "${{ env.VERSION }}" >/dev/null 2>&1; then
             echo "Deleting existing tag..."
-            git tag -d ${{ env.VERSION }}
+            git tag -d "${{ env.VERSION }}"
             git push origin :refs/tags/${{ env.VERSION }}
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.VERSION }}
           name: Release ${{ env.VERSION }}
           files: |
-            shaded/target/Takion-shaded-${{ env.VERSION }}.jar
-            plugin/target/Takion-${{ env.VERSION }}.jar
+            core/build/libs/*-${{ env.VERSION }}.jar
+            shaded/build/libs/*-${{ env.VERSION }}.jar
+            plugin/build/libs/*-${{ env.VERSION }}.jar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -80,36 +99,48 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
 
-      - name: Deploy all modules to Maven repository
+      - name: Deploy all modules to Maven repository (group me.croabeast.takion)
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ env.VERSION }}
         run: |
-          deploy_module() {
-            ARTIFACT_ID="$1"
-            TARGET_DIR="$2"
-            VERSION="${{ env.VERSION }}"
+          set -e
+
+          deploy_module () {
+            MODULE_DIR="$1"        # core | shaded | plugin
+            ARTIFACT_ID="$2"       # core | shaded | plugin
+
+            SRC_DIR="$MODULE_DIR/build/libs"
+            DEST_DIR="maven-repo/me/croabeast/takion/$ARTIFACT_ID/$VERSION"
             ART="$ARTIFACT_ID-$VERSION"
-            mkdir -p maven-repo/me/croabeast/$ARTIFACT_ID/$VERSION
-          
-            cp $TARGET_DIR/target/$ART.jar maven-repo/me/croabeast/$ARTIFACT_ID/$VERSION/ || true
-            cp $TARGET_DIR/target/$ART-sources.jar maven-repo/me/croabeast/$ARTIFACT_ID/$VERSION/ || true
-            cp $TARGET_DIR/target/$ART-javadoc.jar maven-repo/me/croabeast/$ARTIFACT_ID/$VERSION/ || true
-          
-            cat > maven-repo/me/croabeast/$ARTIFACT_ID/$VERSION/$ART.pom << EOF
+
+            mkdir -p "$DEST_DIR"
+
+            MAIN_JAR=$(ls "$SRC_DIR"/*-"$VERSION".jar | grep -vE '(-sources|-javadoc).jar' | head -n1 || true)
+            [ -n "$MAIN_JAR" ] && cp "$MAIN_JAR" "$DEST_DIR/$ART.jar" || true
+
+            SRC_JAR=$(ls "$SRC_DIR"/*-"$VERSION"-sources.jar 2>/dev/null | head -n1 || true)
+            [ -n "$SRC_JAR" ] && cp "$SRC_JAR" "$DEST_DIR/$ART-sources.jar" || true
+
+            DOC_JAR=$(ls "$SRC_DIR"/*-"$VERSION"-javadoc.jar 2>/dev/null | head -n1 || true)
+            [ -n "$DOC_JAR" ] && cp "$DOC_JAR" "$DEST_DIR/$ART-javadoc.jar" || true
+
+            cat > "$DEST_DIR/$ART.pom" << EOF
           <?xml version="1.0" encoding="UTF-8"?>
           <project>
             <modelVersion>4.0.0</modelVersion>
-            <groupId>me.croabeast</groupId>
+            <groupId>me.croabeast.takion</groupId>
             <artifactId>$ARTIFACT_ID</artifactId>
             <version>$VERSION</version>
             <packaging>jar</packaging>
           </project>
           EOF
-          
-            cat > maven-repo/me/croabeast/$ARTIFACT_ID/maven-metadata.xml << EOF
+
+            META_DIR="maven-repo/me/croabeast/takion/$ARTIFACT_ID"
+            mkdir -p "$META_DIR"
+            cat > "$META_DIR/maven-metadata.xml" << EOF
           <?xml version="1.0" encoding="UTF-8"?>
           <metadata>
-            <groupId>me.croabeast</groupId>
+            <groupId>me.croabeast.takion</groupId>
             <artifactId>$ARTIFACT_ID</artifactId>
             <versioning>
               <latest>$VERSION</latest>
@@ -117,17 +148,17 @@ jobs:
               <versions>
                 <version>$VERSION</version>
               </versions>
-              <lastUpdated>$(date +%Y%m%d%H%M%S)</lastUpdated>
+              <lastUpdated>$(date -u +%Y%m%d%H%M%S)</lastUpdated>
             </versioning>
           </metadata>
           EOF
           }
-          
-          deploy_module "takion-common" "common"
-          deploy_module "Takion-shaded" "shaded"
-          deploy_module "Takion" "plugin"
-          
+
+          deploy_module core   core
+          deploy_module shaded shaded
+          deploy_module plugin plugin
+
           cd maven-repo
           git add .
-          git commit -m "Deploy modules of Takion ${{ env.VERSION }}"
+          git commit -m "Deploy Takion $VERSION" || echo "No changes to commit"
           git push

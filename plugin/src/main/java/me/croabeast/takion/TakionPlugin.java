@@ -1,9 +1,12 @@
 package me.croabeast.takion;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import me.croabeast.common.CollectionBuilder;
 import me.croabeast.common.DependencyLoader;
 import me.croabeast.common.MetricsLoader;
 import me.croabeast.common.reflect.Reflector;
+import me.croabeast.vault.ChatAdapter;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.Plugin;
@@ -18,8 +21,8 @@ public final class TakionPlugin extends JavaPlugin {
     static final TakionLib noPluginInstance = new TakionLib(null);
     static final Map<Plugin, TakionLib> libs = new HashMap<>();
 
-    @SuppressWarnings("all")
-    private VaultHolder<?> holder;
+    @Getter(AccessLevel.NONE)
+    private ChatAdapter<?> holder;
     TakionLib lib;
 
     @Override
@@ -49,7 +52,7 @@ public final class TakionPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        Plugin plugin = (holder = VaultHolder.loadHolder()).getPlugin();
+        Plugin plugin = (holder = ChatAdapter.create()).getPlugin();
 
         lib.getScheduler().runTaskLater(() -> {
             MetricsLoader.initialize(this, 25287)

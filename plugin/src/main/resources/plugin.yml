@@ -9,3 +9,6 @@ permissions:
     default: op
 
 folia-supported: true
+
+libraries:
+  - com.github.stefvanschie.inventoryframework:IF:0.11.5
