@@ -1,2 +1,2 @@
 rootProject.name = "Takion"
-include("core", "shaded", "plugin")
+include("core", "shaded", "shaded-all", "plugin")

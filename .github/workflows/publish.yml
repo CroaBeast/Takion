@@ -30,7 +30,7 @@ jobs:
 
       - name: Build with Gradle
         run: |
-          ./gradlew --no-daemon clean :core:build :shaded:shadowJar :plugin:shadowJar
+          ./gradlew --no-daemon clean :core:build :shaded:shadowJar :shaded-all:shadowJar :plugin:shadowJar
 
       - name: Get Version from Gradle
         id: version
@@ -47,6 +47,9 @@ jobs:
             core/build/libs/*-${{ env.VERSION }}.jar
             core/build/libs/*-${{ env.VERSION }}-sources.jar
             core/build/libs/*-${{ env.VERSION }}-javadoc.jar
+            shaded-all/build/libs/*-${{ env.VERSION }}.jar
+            shaded-all/build/libs/*-${{ env.VERSION }}-sources.jar
+            shaded-all/build/libs/*-${{ env.VERSION }}-javadoc.jar
             shaded/build/libs/*-${{ env.VERSION }}.jar
             shaded/build/libs/*-${{ env.VERSION }}-sources.jar
             shaded/build/libs/*-${{ env.VERSION }}-javadoc.jar
@@ -82,6 +85,7 @@ jobs:
           name: Release ${{ env.VERSION }}
           files: |
             core/build/libs/*-${{ env.VERSION }}.jar
+            shaded-all/build/libs/*-${{ env.VERSION }}.jar
             shaded/build/libs/*-${{ env.VERSION }}.jar
             plugin/build/libs/*-${{ env.VERSION }}.jar
         env:
@@ -106,8 +110,8 @@ jobs:
           set -e
 
           deploy_module () {
-            MODULE_DIR="$1"        # core | shaded | plugin
-            ARTIFACT_ID="$2"       # core | shaded | plugin
+            MODULE_DIR="$1"
+            ARTIFACT_ID="$2"
 
             SRC_DIR="$MODULE_DIR/build/libs"
             DEST_DIR="maven-repo/me/croabeast/takion/$ARTIFACT_ID/$VERSION"
@@ -155,6 +159,7 @@ jobs:
           }
 
           deploy_module core   core
+          deploy_module shaded-all shaded-all
           deploy_module shaded shaded
           deploy_module plugin plugin
 
