@@ -3,6 +3,7 @@ package me.croabeast.common.gui;
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.github.stefvanschie.inventoryframework.pane.component.ToggleButton;
 import com.github.stefvanschie.inventoryframework.pane.util.Slot;
+import me.croabeast.takion.TakionLib;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -34,7 +35,7 @@ public final class ButtonBuilder extends PaneBuilder<ToggleButton, ButtonBuilder
      * @param value the initial state of the toggle button (true for enabled, false for disabled)
      */
     ButtonBuilder(Slot slot, boolean value) {
-        super(new ToggleButton(slot, 1, 1, value));
+        super(new ToggleButton(slot, 1, 1, value, TakionLib.getLib().getPlugin()));
     }
 
     /**

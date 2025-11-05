@@ -3,6 +3,7 @@ package me.croabeast.common.gui;
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
 import com.github.stefvanschie.inventoryframework.pane.PaginatedPane;
 import me.croabeast.prismatic.PrismaticAPI;
+import me.croabeast.takion.TakionLib;
 import org.bukkit.entity.HumanEntity;
 import org.jetbrains.annotations.NotNull;
 
@@ -41,7 +42,7 @@ public final class ChestBuilder extends GuiBuilder<ChestGui, ChestBuilder> {
      * @param name the display name of the GUI
      */
     ChestBuilder(int rows, String name) {
-        super(new PaginatedPane(0, 0, 9, rows), new ChestGui(rows, PrismaticAPI.colorize(name)));
+        super(new PaginatedPane(0, 0, 9, rows), new ChestGui(rows, PrismaticAPI.colorize(name), TakionLib.getLib().getPlugin()));
     }
 
     /**

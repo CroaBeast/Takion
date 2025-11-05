@@ -3,6 +3,7 @@ package me.croabeast.common.gui;
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import me.croabeast.common.util.ArrayUtils;
 import me.croabeast.prismatic.PrismaticAPI;
+import me.croabeast.takion.TakionLib;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
@@ -153,7 +154,7 @@ public final class ItemCreator {
      * @return the constructed {@link GuiItem}
      */
     public GuiItem create() {
-        GuiItem guiItem = new GuiItem(this.item);
+        GuiItem guiItem = new GuiItem(this.item, TakionLib.getLib().getPlugin());
         if (consumer != null)
             guiItem.setAction(consumer);
         return guiItem;
