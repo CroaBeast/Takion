@@ -5,6 +5,7 @@ import com.github.stefvanschie.inventoryframework.pane.PaginatedPane;
 import me.croabeast.prismatic.PrismaticAPI;
 import me.croabeast.takion.TakionLib;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -32,17 +33,8 @@ public final class ChestBuilder extends GuiBuilder<ChestGui, ChestBuilder> {
 
     private boolean loaded = false;
 
-    /**
-     * Constructs a new {@code ChestBuilder} with the specified number of rows and GUI title.
-     * <p>
-     * The title is colorized using {@link PrismaticAPI#colorize(String)}.
-     * </p>
-     *
-     * @param rows the number of rows in the chest GUI
-     * @param name the display name of the GUI
-     */
-    ChestBuilder(int rows, String name) {
-        super(new PaginatedPane(0, 0, 9, rows), new ChestGui(rows, PrismaticAPI.colorize(name), TakionLib.getLib().getPlugin()));
+    ChestBuilder(Plugin plugin, int rows, String name) {
+        super(new PaginatedPane(0, 0, 9, rows), new ChestGui(rows, PrismaticAPI.colorize(name), plugin));
     }
 
     /**
@@ -94,7 +86,12 @@ public final class ChestBuilder extends GuiBuilder<ChestGui, ChestBuilder> {
     }
 
     @NotNull
+    public static ChestBuilder of(Plugin plugin, int rows, String name) {
+        return new ChestBuilder(plugin, rows, Objects.requireNonNull(name));
+    }
+
+    @NotNull
     public static ChestBuilder of(int rows, String name) {
-        return new ChestBuilder(rows, Objects.requireNonNull(name));
+        return of(TakionLib.getLib().getPlugin(), rows, name);
     }
 }

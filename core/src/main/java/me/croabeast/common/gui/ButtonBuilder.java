@@ -4,6 +4,7 @@ import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.github.stefvanschie.inventoryframework.pane.component.ToggleButton;
 import com.github.stefvanschie.inventoryframework.pane.util.Slot;
 import me.croabeast.takion.TakionLib;
+import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -28,14 +29,8 @@ import org.jetbrains.annotations.NotNull;
  */
 public final class ButtonBuilder extends PaneBuilder<ToggleButton, ButtonBuilder> {
 
-    /**
-     * Constructs a new {@code ButtonBuilder} with the given slot and initial toggle value.
-     *
-     * @param slot  the slot position for the button
-     * @param value the initial state of the toggle button (true for enabled, false for disabled)
-     */
-    ButtonBuilder(Slot slot, boolean value) {
-        super(new ToggleButton(slot, 1, 1, value, TakionLib.getLib().getPlugin()));
+    ButtonBuilder(Plugin plugin, Slot slot, boolean value) {
+        super(new ToggleButton(slot, 1, 1, value, plugin));
     }
 
     /**
@@ -72,12 +67,39 @@ public final class ButtonBuilder extends PaneBuilder<ToggleButton, ButtonBuilder
     /**
      * Creates a new {@code ButtonBuilder} using the specified slot and initial value.
      *
+     * @param plugin the plugin instance
+     * @param slot  the slot where the button will be placed
+     * @param value the initial toggle state
+     *
+     * @return a new {@code ButtonBuilder} instance
+     */
+    public static ButtonBuilder of(Plugin plugin, Slot slot, boolean value) {
+        return new ButtonBuilder(plugin, slot, value);
+    }
+
+    /**
+     * Creates a new {@code ButtonBuilder} using the specified slot and initial value.
+     *
      * @param slot  the slot where the button will be placed
      * @param value the initial toggle state
      * @return a new {@code ButtonBuilder} instance
      */
     public static ButtonBuilder of(Slot slot, boolean value) {
-        return new ButtonBuilder(slot, value);
+        return of(TakionLib.getLib().getPlugin(), slot, value);
+    }
+
+    /**
+     * Creates a new {@code ButtonBuilder} using the specified x and y coordinates and initial value.
+     *
+     * @param plugin the plugin instance
+     * @param x     the x-coordinate of the slot
+     * @param y     the y-coordinate of the slot
+     * @param value the initial toggle state
+     *
+     * @return a new {@code ButtonBuilder} instance
+     */
+    public static ButtonBuilder of(Plugin plugin, int x, int y, boolean value) {
+        return of(plugin, Slot.fromXY(x, y), value);
     }
 
     /**

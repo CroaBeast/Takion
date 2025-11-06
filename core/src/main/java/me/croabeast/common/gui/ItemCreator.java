@@ -8,6 +8,7 @@ import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.Plugin;
 
 import java.util.List;
 import java.util.Objects;
@@ -151,13 +152,27 @@ public final class ItemCreator {
      * click action (if any) to it.
      * </p>
      *
+     * @param plugin the plugin instance associated with the GUI item
      * @return the constructed {@link GuiItem}
      */
-    public GuiItem create() {
-        GuiItem guiItem = new GuiItem(this.item, TakionLib.getLib().getPlugin());
+    public GuiItem create(Plugin plugin) {
+        GuiItem guiItem = new GuiItem(this.item, plugin);
         if (consumer != null)
             guiItem.setAction(consumer);
         return guiItem;
+    }
+
+    /**
+     * Finalizes the creation of the GUI item.
+     * <p>
+     * This method wraps the customized {@link ItemStack} in a {@link GuiItem} and assigns the configured
+     * click action (if any) to it.
+     * </p>
+     *
+     * @return the constructed {@link GuiItem}
+     */
+    public GuiItem create() {
+        return create(TakionLib.getLib().getPlugin());
     }
 
     /**
