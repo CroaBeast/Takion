@@ -5,17 +5,11 @@ plugins {
     id("com.gradleup.shadow")
 }
 
-java {
-    toolchain { languageVersion.set(JavaLanguageVersion.of(8)) }
-    withSourcesJar()
-    withJavadocJar()
-}
-
 dependencies {
     implementation(project(":core"))
 
     implementation("me.croabeast:YAML-API:1.1")
-    implementation("me.croabeast:GlobalScheduler:1.0")
+    implementation("me.croabeast:GlobalScheduler:1.1")
     implementation("me.croabeast:PrismaticAPI:1.1")
     implementation("me.croabeast:UpdateChecker:1.0")
     implementation("me.croabeast:VaultAdapter:1.1")

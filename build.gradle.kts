@@ -3,7 +3,6 @@ plugins {
     id("java-library")
     id("io.freefair.lombok") version "8.10"
     id("com.gradleup.shadow") version "8.3.0"
-    id("xyz.jpenilla.run-paper") version "2.3.1"
 }
 
 allprojects {
@@ -71,10 +70,10 @@ subprojects {
         compileOnly("net.luckperms:api:5.5")
         compileOnly("com.loohp:InteractiveChat:4.3.3.0")
         compileOnly("org.bstats:bstats-bukkit:3.0.2")
-        compileOnly("com.github.stefvanschie.inventoryframework:IF:0.11.5")
+        compileOnly("com.github.stefvanschie.inventoryframework:IF:0.11.6")
 
         compileOnly("me.croabeast:YAML-API:1.1")
-        compileOnly("me.croabeast:GlobalScheduler:1.0")
+        compileOnly("me.croabeast:GlobalScheduler:1.1")
         compileOnly("me.croabeast:PrismaticAPI:1.1")
     }
 }
