@@ -1,7 +1,7 @@
 package me.croabeast.takion;
 
 import lombok.RequiredArgsConstructor;
-import me.croabeast.scheduler.RunnableTask;
+import me.croabeast.scheduler.GlobalTask;
 import me.croabeast.takion.rule.GameRule;
 import me.croabeast.takion.rule.GameRuleManager;
 import org.bukkit.Bukkit;
@@ -17,7 +17,7 @@ final class GameRuleManagerImpl implements GameRuleManager {
     final Map<World, Map<GameRule<?>, Object>> data = new ConcurrentHashMap<>();
 
     private final TakionLib library;
-    private RunnableTask task = null;
+    private GlobalTask task = null;
 
     @Override
     public boolean isLoaded() {

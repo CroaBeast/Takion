@@ -7,7 +7,7 @@ import lombok.experimental.Accessors;
 import lombok.experimental.UtilityClass;
 import me.croabeast.common.util.ArrayUtils;
 import me.croabeast.file.Configurable;
-import me.croabeast.scheduler.RunnableTask;
+import me.croabeast.scheduler.GlobalTask;
 import me.croabeast.takion.TakionLib;
 import me.croabeast.takion.format.PlainFormat;
 import org.bukkit.Bukkit;
@@ -91,7 +91,7 @@ public class AnimatedBossbar {
     /**
      * The task ID of the currently running animation scheduler, or -1 if no animation is active.
      */
-    private RunnableTask task = null;
+    private GlobalTask task = null;
 
     /**
      * The list of messages to be displayed on the BossBar.
