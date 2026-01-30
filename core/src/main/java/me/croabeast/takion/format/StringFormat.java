@@ -11,4 +11,7 @@ package me.croabeast.takion.format;
  *
  * @see TextFormat
  */
-public interface StringFormat extends TextFormat<String> {}
+public interface StringFormat extends TextFormat<String> {
+
+    StringFormat PLAYER_HEAD_FORMAT = PlayerHeadUtils.FORMAT;
+}

@@ -45,7 +45,7 @@ public interface MultiComponent extends ChatComponent<MultiComponent>, Copyable<
      * </p>
      */
     @Regex
-    String DEFAULT_REGEX = "(?i)<(?:(hover|" + CLICK_REGEX + "):\"(.[^|]*?)\"(?:[|](?:(hover|" + CLICK_REGEX + "):\"(.[^|]*?)\"))?)>(.+?)</text>";
+    String DEFAULT_REGEX = "(?i)<(?:(hover_item|hover|" + CLICK_REGEX + "):\"(.[^|]*?)\"(?:[|](?:(hover_item|hover|" + CLICK_REGEX + "):\"(.[^|]*?)\"))?)>(.+?)</text>";
 
     /**
      * The default {@link Format} instance used by new {@code MultiComponent} objects.

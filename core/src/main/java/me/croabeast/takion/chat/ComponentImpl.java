@@ -5,10 +5,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import me.croabeast.common.util.Exceptions;
 import me.croabeast.takion.TakionLib;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.*;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -19,6 +16,7 @@ import java.util.regex.Pattern;
 
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 @Getter
+@SuppressWarnings("deprecation")
 class ComponentImpl implements ChatComponent<ComponentImpl> {
 
     private final TakionLib lib;
@@ -27,6 +25,7 @@ class ComponentImpl implements ChatComponent<ComponentImpl> {
 
     ClickHolder clickEvent = null;
     HoverHolder hoverEvent = null;
+    HoverItemHolder hoverItemEvent = null;
 
     @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
     class ClickHolder {
@@ -39,7 +38,6 @@ class ComponentImpl implements ChatComponent<ComponentImpl> {
     }
 
     @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-    @SuppressWarnings("deprecation")
     class HoverHolder {
         final List<String> list;
 
@@ -57,6 +55,19 @@ class ComponentImpl implements ChatComponent<ComponentImpl> {
         }
     }
 
+    @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+    static class HoverItemHolder {
+        final String itemJson;
+        final String serializedJson;
+
+        HoverEvent create() {
+            return new HoverEvent(
+                    HoverEvent.Action.SHOW_ITEM,
+                    new ComponentBuilder(itemJson).create()
+            );
+        }
+    }
+
     @NotNull
     public ComponentImpl setMessage(@NotNull String message) {
         this.message = Exceptions.validate(message, StringUtils::isNotBlank);
@@ -71,6 +82,7 @@ class ComponentImpl implements ChatComponent<ComponentImpl> {
 
     @NotNull
     public ComponentImpl setHover(List<String> list) {
+        hoverItemEvent = null;
         hoverEvent = new HoverHolder(list);
         return instance();
     }
@@ -84,6 +96,16 @@ class ComponentImpl implements ChatComponent<ComponentImpl> {
         return setHover(lib.splitString(string));
     }
 
+    @NotNull
+    public ComponentImpl setHoverItem(String json) {
+        if (StringUtils.isBlank(json)) return instance();
+
+        String unescaped = json.replace("\\\\", "\\").replace("\\\"", "\"");
+        hoverEvent = null;
+        hoverItemEvent = new HoverItemHolder(unescaped, json);
+        return instance();
+    }
+
     boolean hasClick() {
         return clickEvent != null && (clickEvent.click != null || StringUtils.isNotBlank(clickEvent.input));
     }
@@ -92,10 +114,15 @@ class ComponentImpl implements ChatComponent<ComponentImpl> {
         return hoverEvent != null && (hoverEvent.list != null && !hoverEvent.list.isEmpty());
     }
 
+    boolean hasHoverItem() {
+        return hoverItemEvent != null && StringUtils.isNotBlank(hoverItemEvent.itemJson);
+    }
+
     @Override
     public boolean hasEvents() {
-        return hasClick() || hasHover();
+        return hasClick() || hasHover() || hasHoverItem();
     }
+
 
     @NotNull
     public BaseComponent[] compile(Player player) {
@@ -110,7 +137,10 @@ class ComponentImpl implements ChatComponent<ComponentImpl> {
 
         if (clickEvent != null)
             comp.setClickEvent(clickEvent.create(player));
-        if (hoverEvent != null)
+
+        if (hoverItemEvent != null)
+            comp.setHoverEvent(hoverItemEvent.create());
+        else if (hoverEvent != null)
             comp.setHoverEvent(hoverEvent.create(player));
 
         return new BaseComponent[] {comp};

@@ -322,6 +322,10 @@ public class TakionLib {
     public String replace(Player parser, String string) {
         return StringApplier.simplified(string)
                 .apply(s -> placeholderManager.replace(parser, s))
+                .apply(s -> {
+                    StringFormat format = formatManager.get("PLAYER_HEAD");
+                    return format.accept(parser, s);
+                })
                 .apply(s -> PlainFormat.PLACEHOLDER_API.accept(parser, s))
                 .apply(s -> {
                     StringFormat format = formatManager.get("character");

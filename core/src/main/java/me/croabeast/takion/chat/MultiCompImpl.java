@@ -82,11 +82,17 @@ class MultiCompImpl implements MultiComponent {
         final String regex = DEFAULT_REGEX;
 
         private void setAction(ComponentImpl component, String action, String argument) {
+            if (action.matches("(?i)hover_item")) {
+                component.setHoverItem(argument);
+                return;
+            }
+
             if (action.matches("(?i)hover")) {
                 component.setHover(argument);
-            } else {
-                component.setClick(action, argument);
+                return;
             }
+
+            component.setClick(action, argument);
         }
 
         @NotNull
@@ -143,11 +149,13 @@ class MultiCompImpl implements MultiComponent {
                                         .append(impl.clickEvent.input)
                                         .append('"');
 
-                            if (impl.hasHover())
-                                builder.append(String.join(
-                                        lib.getLineSeparator(),
-                                        impl.hoverEvent.list
-                                ));
+                            if (impl.hasHoverItem())
+                                builder.append("hover_item:\"")
+                                        .append(impl.hoverItemEvent.serializedJson)
+                                        .append('"');
+
+                            else if (impl.hasHover())
+                                builder.append(String.join(lib.getLineSeparator(), impl.hoverEvent.list));
 
                             builder.append('>');
                         }
@@ -178,11 +186,13 @@ class MultiCompImpl implements MultiComponent {
                                 .append(impl.clickEvent.input)
                                 .append('"');
 
-                    if (impl.hasHover())
-                        builder.append(String.join(
-                                lib.getLineSeparator(),
-                                impl.hoverEvent.list
-                        ));
+                    if (impl.hasHoverItem())
+                        builder.append("hover_item:\"")
+                                .append(impl.hoverItemEvent.serializedJson)
+                                .append('"');
+
+                    else if (impl.hasHover())
+                        builder.append(String.join(lib.getLineSeparator(), impl.hoverEvent.list));
 
                     builder.append('>');
                 }

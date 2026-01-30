@@ -7,7 +7,7 @@ plugins {
 
 allprojects {
     group = "me.croabeast.takion"
-    version = "1.3"
+    version = "1.4"
 
     repositories {
         mavenCentral()
@@ -24,6 +24,7 @@ allprojects {
 
 subprojects {
     apply(plugin = "java-library")
+    apply(plugin = "com.gradleup.shadow")
     apply(plugin = "io.freefair.lombok")
 
     java {
@@ -49,6 +50,7 @@ subprojects {
         options.encoding = "UTF-8"
         sourceCompatibility = "1.8"
         targetCompatibility = "1.8"
+        options.compilerArgs.add("-Xlint:-options")
     }
 
     dependencies {
@@ -71,6 +73,7 @@ subprojects {
         compileOnly("com.loohp:InteractiveChat:4.3.3.0")
         compileOnly("org.bstats:bstats-bukkit:3.0.2")
         compileOnly("com.github.stefvanschie.inventoryframework:IF:0.11.6")
+        compileOnly("com.mojang:authlib:1.5.25")
 
         compileOnly("me.croabeast:YAML-API:1.1")
         compileOnly("me.croabeast:GlobalScheduler:1.1")

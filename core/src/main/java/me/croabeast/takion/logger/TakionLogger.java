@@ -21,6 +21,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
@@ -85,8 +86,7 @@ public class TakionLogger {
          * Constructs a new {@code PaperLogger} instance that routes log output
          * through Adventure's SLF4J ComponentLogger.
          *
-         * @param name the logger name (usually the plugin name)
-         * @throws Exception if the Paper ComponentLogger class cannot be found or invoked
+         * @param name the logger name (usually the plugin name)=
          */
         @SneakyThrows
         PaperLogger(String name) {
@@ -221,7 +221,12 @@ public class TakionLogger {
 
         if (ServerInfoUtils.PAPER_ENABLED && ServerInfoUtils.SERVER_VERSION >= 18.2) {
             try {
-                paper = new PaperLogger(usePlugin ? plugin.getName() : "");
+                paper = new PaperLogger(usePlugin ?
+                        ((Function<Plugin, String>) p -> {
+                            String prefix = p.getDescription().getPrefix();
+                            return prefix == null ? p.getName() : prefix;
+                        }).apply(plugin) :
+                        "");
             } catch (Exception e) {
                 e.printStackTrace();
             }

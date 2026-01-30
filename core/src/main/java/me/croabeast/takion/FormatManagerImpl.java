@@ -110,6 +110,7 @@ final class FormatManagerImpl implements FormatManager {
                 return atLeastOneIsSent;
             }
         });
+        formats.put("PLAYER_HEAD", StringFormat.PLAYER_HEAD_FORMAT);
     }
 
     @Override
