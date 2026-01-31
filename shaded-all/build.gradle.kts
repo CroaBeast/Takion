@@ -23,6 +23,7 @@ tasks.named<ShadowJar>("shadowJar") {
     archiveClassifier.set("")
     exclude(
         "META-INF/**", "org/apache/commons/**", "org/intellij/**", "org/jetbrains/**",
-        "me/croabeast/file/plugin/YAMLPlugin.*", "plugin.yml"
+        "com/google/**", "javax/**", "org/apache/logging/**", "**/**.xsd", "**/**.dtd",
+        "fonts/**", "**/**.der", "me/croabeast/*/plugin/**", "plugin.yml"
     )
 }

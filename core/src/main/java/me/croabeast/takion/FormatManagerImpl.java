@@ -123,11 +123,9 @@ final class FormatManagerImpl implements FormatManager {
         return formats.remove(id.toUpperCase(Locale.ENGLISH)) != null;
     }
 
-    @Override
+    @SuppressWarnings("all")
     public <T> boolean editFormat(String id, Format<T> newFormat) {
-        id = id.toUpperCase(Locale.ENGLISH);
-        final Format<?> format = formats.get(id);
-
+        Format<?> format = formats.get(id = id.toUpperCase(Locale.ENGLISH));
         return format != null &&
                 formats.remove(format) == format &&
                 formats.put(id, newFormat) == null;
@@ -138,7 +136,7 @@ final class FormatManagerImpl implements FormatManager {
         oldId = oldId.toUpperCase(Locale.ENGLISH);
         newId = newId.toUpperCase(Locale.ENGLISH);
 
-        final Format<?> format = formats.get(oldId);
+        Format<?> format = formats.get(oldId);
 
         return format != null &&
                 formats.remove(oldId) == format &&
