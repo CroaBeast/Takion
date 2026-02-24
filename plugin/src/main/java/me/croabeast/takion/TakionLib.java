@@ -205,7 +205,7 @@ public class TakionLib {
         langPrefix = "&e " +
                 (plugin != null ? plugin.getName() : "Plugin") +
                 " &8»&7";
-        if (plugin != null) TakionPlugin.libs.put(plugin, this);
+        if (plugin != null) TakionPlugin.LIBRARIES.put(plugin, this);
     }
 
     /**
@@ -374,8 +374,8 @@ public class TakionLib {
      */
     public static TakionLib fromPlugin(Plugin plugin) {
         return plugin != null ?
-                TakionPlugin.libs.getOrDefault(plugin, TakionPlugin.noPluginInstance) :
-                TakionPlugin.noPluginInstance;
+                TakionPlugin.LIBRARIES.getOrDefault(plugin, TakionPlugin.NO_PLUGIN_INSTANCE) :
+                TakionPlugin.NO_PLUGIN_INSTANCE;
     }
 
     /**

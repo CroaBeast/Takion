@@ -18,8 +18,8 @@ import java.util.Map;
 
 public final class TakionPlugin extends JavaPlugin {
 
-    static final TakionLib noPluginInstance = new TakionLib(null);
-    static final Map<Plugin, TakionLib> libs = new HashMap<>();
+    static final TakionLib NO_PLUGIN_INSTANCE = new TakionLib(null);
+    static final Map<Plugin, TakionLib> LIBRARIES = new HashMap<>();
 
     @Getter(AccessLevel.NONE)
     private ChatAdapter<?> holder;
@@ -60,10 +60,10 @@ public final class TakionPlugin extends JavaPlugin {
                             "permissionPlugin", "Permission Plugin",
                             plugin != null ? plugin.getName() : "None"
                     )
-                    .addSingleLine("pluginsCount", libs.size() - 1)
+                    .addSingleLine("pluginsCount", LIBRARIES.size() - 1)
                     .addDrillDownPie(
                             "usagePlugins", "Plugins Using Takion",
-                            CollectionBuilder.of(libs.keySet())
+                            CollectionBuilder.of(LIBRARIES.keySet())
                                     .remove(this)
                                     .map(p -> {
                                         Reflector r = Reflector.of(p.getClass());
