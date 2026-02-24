@@ -1,7 +1,7 @@
 dependencies:
   - group: "me.croabeast"
     artifact: "CommandFramework"
-    version: "1.0"
+    version: "1.2"
     repo: "https://croabeast.github.io/repo/"
     replace: true
   - group: "me.croabeast"
@@ -21,7 +21,7 @@ dependencies:
     replace: true
   - group: "me.croabeast"
     artifact: "VaultAdapter"
-    version: "1.1"
+    version: "1.2"
     repo: "https://croabeast.github.io/repo/"
     replace: true
   - group: "me.croabeast"
@@ -31,6 +31,6 @@ dependencies:
     replace: true
   - group: "me.croabeast"
     artifact: "GlobalScheduler"
-    version: "1.0"
+    version: "1.1"
     repo: "https://croabeast.github.io/repo/"
     replace: true

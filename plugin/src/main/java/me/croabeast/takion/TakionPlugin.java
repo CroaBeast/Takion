@@ -6,7 +6,7 @@ import me.croabeast.common.CollectionBuilder;
 import me.croabeast.common.DependencyLoader;
 import me.croabeast.common.MetricsLoader;
 import me.croabeast.common.reflect.Reflector;
-import me.croabeast.vault.ChatAdapter;
+import me.croabeast.vault.chat.ChatAdapter;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.Plugin;

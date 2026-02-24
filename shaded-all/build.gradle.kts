@@ -10,7 +10,7 @@ dependencies {
     implementation("me.croabeast:GlobalScheduler:1.1")
     implementation("me.croabeast:PrismaticAPI:1.1")
     implementation("me.croabeast:UpdateChecker:1.0")
-    implementation("me.croabeast:VaultAdapter:1.1")
+    implementation("me.croabeast:VaultAdapter:1.2")
     implementation("me.croabeast:CommandFramework:1.2")
     implementation("me.croabeast:AdvancementInfo:1.0")
 }

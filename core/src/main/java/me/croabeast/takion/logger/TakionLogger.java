@@ -269,8 +269,7 @@ public class TakionLogger {
      * @param messages the messages to log
      */
     public void log(LogLevel level, Collection<String> messages) {
-        if (level == null) level = LogLevel.INFO;
-        new LogCollection(level, messages).log();
+        new LogCollection(level == null ? LogLevel.INFO : level, messages).log();
     }
 
     /**
