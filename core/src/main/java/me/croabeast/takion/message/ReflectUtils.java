@@ -17,6 +17,16 @@ class ReflectUtils {
     final Class<?> BASE_COMP_CLASS = from(
             IS_LEGACY ? null : "network.chat.", "IChatBaseComponent");
 
+    private Class<?> firstNonNull(Class<?>... classes) {
+        if (classes == null) return null;
+
+        for (Class<?> clazz : classes)
+            if (clazz != null)
+                return clazz;
+
+        return null;
+    }
+
     Class<?> from(String prefix, String name) {
         StringBuilder builder = new StringBuilder("net.minecraft.");
 
@@ -36,9 +46,15 @@ class ReflectUtils {
 
     final Function<String, Object> COMPONENT_SERIALIZER = message -> {
         try {
-            Class<?> serializer = from(
-                    IS_LEGACY ? null : ("network.chat.IChatBaseComponent$"),
-                    "ChatSerializer");
+            Class<?> serializer = firstNonNull(
+                    from(
+                            IS_LEGACY ? "IChatBaseComponent$" : "network.chat.IChatBaseComponent$",
+                            "ChatSerializer"
+                    ),
+                    from(null, "ChatSerializer")
+            );
+
+            if (serializer == null) return null;
 
             return serializer.getDeclaredMethod("a", String.class)
                     .invoke(null, "{\"text\":\"" + message + "\"}");
@@ -92,12 +108,17 @@ class ReflectUtils {
         Object component = COMPONENT_SERIALIZER.apply(s);
 
         try {
-            Class<?> oldEnum = from(
-                    VERSION < 8.3 ? "PacketPlayOutTitle$" : null,
-                    "EnumTitleAction"
+            Class<?> oldEnum = firstNonNull(
+                    from("PacketPlayOutTitle$", "EnumTitleAction"),
+                    from(null, "EnumTitleAction")
             );
 
-            return from(null, "PacketPlayOutTitle")
+            Class<?> packetClass = from(null, "PacketPlayOutTitle");
+
+            if (packetClass == null || oldEnum == null || BASE_COMP_CLASS == null || component == null)
+                return null;
+
+            return packetClass
                     .getDeclaredConstructor(oldEnum, BASE_COMP_CLASS)
                     .newInstance(
                             oldEnum.getField(type + "").get(null),

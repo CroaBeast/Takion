@@ -6,7 +6,7 @@ import me.croabeast.common.CollectionBuilder;
 import me.croabeast.common.DependencyLoader;
 import me.croabeast.common.MetricsLoader;
 import me.croabeast.common.reflect.Reflector;
-import me.croabeast.vault.chat.ChatAdapter;
+import me.croabeast.vault.chat.ChatProvider;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.Plugin;
@@ -22,7 +22,7 @@ public final class TakionPlugin extends JavaPlugin {
     static final Map<Plugin, TakionLib> LIBRARIES = new HashMap<>();
 
     @Getter(AccessLevel.NONE)
-    private ChatAdapter<?> holder;
+    private ChatProvider holder;
     TakionLib lib;
 
     @Override
@@ -52,7 +52,7 @@ public final class TakionPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        Plugin plugin = (holder = ChatAdapter.create()).getPlugin();
+        Plugin plugin = (holder = ChatProvider.detect()).getPlugin();
 
         lib.getScheduler().runTaskLater(() -> {
             MetricsLoader.initialize(this, 25287)

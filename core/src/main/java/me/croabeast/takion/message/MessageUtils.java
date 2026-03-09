@@ -5,9 +5,6 @@ import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.entity.Player;
 
-import java.lang.reflect.Method;
-import java.util.function.UnaryOperator;
-
 @UtilityClass
 public class MessageUtils {
 
@@ -16,28 +13,29 @@ public class MessageUtils {
 
         if (ReflectUtils.VERSION < 11.0) {
             try {
-                Method method = player.getClass().getMethod("getHandle");
-                Object handle = method.invoke(player);
+                Object component = ReflectUtils.COMPONENT_SERIALIZER.apply(message);
+                Class<?> baseComponent = ReflectUtils.BASE_COMP_CLASS;
+                Class<?> packetClass = ReflectUtils.from(null, "PacketPlayOutChat");
 
-                method = handle.getClass().getMethod("playerConnection");
-                handle = method.invoke(handle);
+                if (component == null || baseComponent == null || packetClass == null)
+                    return false;
 
-                method = handle.getClass().getMethod(
-                        "sendPacket",
-                        ReflectUtils.from(null, "PacketPlayOutChat")
-                );
+                Object packet;
 
-                method.invoke(handle, ((UnaryOperator<Object>) (s) -> {
-                    Class<?> legacyClass = ReflectUtils.from(null, "IChatBaseComponent");
-                    legacyClass = legacyClass.getDeclaredClasses()[0];
+                try {
+                    packet = packetClass
+                            .getDeclaredConstructor(baseComponent, byte.class)
+                            .newInstance(component, (byte) 2);
+                } catch (NoSuchMethodException ignored) {
+                    Class<?> messageTypeClass = ReflectUtils.from(null, "ChatMessageType");
+                    if (messageTypeClass == null) return false;
 
-                    try {
-                        Method m = legacyClass.getMethod("a", String.class);
-                        return m.invoke(null, "{\"text\":\"" + s + "\"}");
-                    } catch (Exception e) {
-                        return null;
-                    }
-                }).apply(message));
+                    packet = packetClass
+                            .getDeclaredConstructor(baseComponent, messageTypeClass)
+                            .newInstance(component, messageTypeClass.getField("GAME_INFO").get(null));
+                }
+
+                ReflectUtils.sendPacket(player, packet);
                 return true;
             }
             catch (Exception e) {
