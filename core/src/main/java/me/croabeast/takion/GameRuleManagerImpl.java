@@ -14,6 +14,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 final class GameRuleManagerImpl implements GameRuleManager {
 
+    private static final boolean BUKKIT_GAME_RULES_AVAILABLE = isClassAvailable("org.bukkit.GameRule");
+
     final Map<World, Map<GameRule<?>, Object>> data = new ConcurrentHashMap<>();
 
     private final TakionLib library;
@@ -31,7 +33,7 @@ final class GameRuleManagerImpl implements GameRuleManager {
 
     @Override
     public void load() {
-        if (isLoaded()) return;
+        if (isLoaded() || !BUKKIT_GAME_RULES_AVAILABLE) return;
 
         task = library.getScheduler().runTask(() -> {
             for (World world : Bukkit.getServer().getWorlds()) {
@@ -60,5 +62,14 @@ final class GameRuleManagerImpl implements GameRuleManager {
     @SuppressWarnings("unchecked")
     public <T> T getLoadedValue(World world, GameRule<T> rule) {
         return (T) getValues(world).get(rule);
+    }
+
+    private static boolean isClassAvailable(String name) {
+        try {
+            Class.forName(name);
+            return true;
+        } catch (Throwable ignored) {
+            return false;
+        }
     }
 }
