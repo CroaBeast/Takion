@@ -40,11 +40,11 @@ Takion is an all-in-one toolkit for building premium chat and text experiences o
 
 Takion is a multi-module Gradle project. Pick the artifact that matches your distribution strategy:
 
-| Module | Description | Ideal For |
-| ------ | ----------- | --------- |
-| `core` | The primary Takion API containing `TakionLib`, managers, and shared utilities. Optional when you only need to compile against the exposed API or validate the core sources. |
-| `shaded` | Repackages `core` together with required libraries (PrismaticAPI, GlobalScheduler, YAML-API). | Shipping a single jar without configuring repositories in your consumer. |
-| `plugin` | Example/production-ready plugin bundle that brings in optional adapters (Vault, bStats) and relocates packages using Shadow. | Deploying Takion directly on a server or as a base plugin for further customization. |
+| Module   | Description                                                                                                                                                                 | Ideal For                                                                            |
+|----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|
+| `core`   | The primary Takion API containing `TakionLib`, managers, and shared utilities. Optional when you only need to compile against the exposed API or validate the core sources. |
+| `shaded` | Repackages `core` together with required libraries (PrismaticAPI, GlobalScheduler, YAML-API).                                                                               | Shipping a single jar without configuring repositories in your consumer.             |
+| `plugin` | Example/production-ready plugin bundle that brings in optional adapters (Vault, bStats) and relocates packages using Shadow.                                                | Deploying Takion directly on a server or as a base plugin for further customization. |
 
 All modules target **Java 8** using Gradle toolchains, so you can build and run on modern JDKs while remaining compatible with legacy Minecraft hosts.
 
@@ -174,16 +174,16 @@ Everything is exposed through `TakionLib`, so once you keep a reference, the res
 
 ## 🧭 Feature Tour
 
-| Capability | What it does |
-| ---------- | ------------- |
-| **PlaceholderManager** | Register, resolve, and chain placeholders with context-aware values, including Vault/chat integrations when present. |
-| **MessageSender** | Compose reusable templates, apply gradients, center text, and deliver to players, console, or audiences. |
-| **TitleManager** | Configure fade timings globally and build one-off titles through a fluent builder API. |
-| **CharacterManager** | Normalize character widths, handle small capitals, and align text perfectly in chat or GUIs. |
-| **ChannelManager** | Define named chat channels, route messages, and attach formatting or permission requirements. |
-| **FormatManager & Rules** | Parse simple markup, enforce server-specific rules (`GameRuleManager`), and blend them into outbound messages. |
-| **TakionLogger** | Structured logging with optional server/plugin separation, colorized output, and external API hooks. |
-| **GlobalScheduler** | Unified async/sync task scheduling compatible with Bukkit, Paper, and Folia environments. |
+| Capability                | What it does                                                                                                         |
+|---------------------------|----------------------------------------------------------------------------------------------------------------------|
+| **PlaceholderManager**    | Register, resolve, and chain placeholders with context-aware values, including Vault/chat integrations when present. |
+| **MessageSender**         | Compose reusable templates, apply gradients, center text, and deliver to players, console, or audiences.             |
+| **TitleManager**          | Configure fade timings globally and build one-off titles through a fluent builder API.                               |
+| **CharacterManager**      | Normalize character widths, handle small capitals, and align text perfectly in chat or GUIs.                         |
+| **ChannelManager**        | Define named chat channels, route messages, and attach formatting or permission requirements.                        |
+| **FormatManager & Rules** | Parse simple markup, enforce server-specific rules (`GameRuleManager`), and blend them into outbound messages.       |
+| **TakionLogger**          | Structured logging with optional server/plugin separation, colorized output, and external API hooks.                 |
+| **GlobalScheduler**       | Unified async/sync task scheduling compatible with Bukkit, Paper, and Folia environments.                            |
 
 All components are designed to be modular: you can use them individually or stitch them together for a full chat pipeline.
 
