@@ -506,42 +506,72 @@ public class AnimatedBossbar {
                     return;
                 }
 
-                bossbars.keySet().removeIf(p -> !p.isOnline());
+                bossbars.entrySet().removeIf(entry -> {
+                    if (entry.getKey().isOnline())
+                        return false;
 
-                int tickPerMessage = messages.isEmpty() ? 1 : totalTicks / messages.size();
-                int tickPerColor = colors.isEmpty() ? 1 : totalTicks / colors.size();
-                int tickPerStyle = styles.isEmpty() ? 1 : totalTicks / styles.size();
+                    entry.getValue().removeAll();
+                    return true;
+                });
 
-                final int currentTick = tick; // para lambda
+                if (bossbars.isEmpty()) {
+                    deleteBossbar();
+                    return;
+                }
+
+                int tickPerMessage = interval(totalTicks, messages.size());
+                int tickPerColor = interval(totalTicks, colors.size());
+                int tickPerStyle = interval(totalTicks, styles.size());
+
+                Progress progressType = type;
+                boolean updateProgress = progressType != Progress.STATIC;
+                double currentProgressValue = 0.0;
+                if (updateProgress) {
+                    double step = tick * (1.0 / totalTicks);
+                    currentProgressValue = progressType == Progress.INCREASE ?
+                            Math.min(1.0, step) :
+                            Math.max(0.0, 1.0 - step);
+                }
+                final double progressValue = currentProgressValue;
+
+                boolean updateMessage = !messages.isEmpty() && tick % tickPerMessage == 0;
+                int messageIndex = updateMessage ?
+                        (isRandom(Element.MESSAGES) ?
+                                random.nextInt(messages.size()) :
+                                (tick / tickPerMessage) % messages.size()) :
+                        -1;
+                String rawMessage = updateMessage ? messages.get(messageIndex) : null;
+
+                boolean updateColor = !colors.isEmpty() && tick % tickPerColor == 0;
+                BarColor color = updateColor ?
+                        colors.get(
+                                isRandom(Element.COLORS) ?
+                                        random.nextInt(colors.size()) :
+                                        (tick / tickPerColor) % colors.size()
+                        ) :
+                        null;
+
+                boolean updateStyle = !styles.isEmpty() && tick % tickPerStyle == 0;
+                BarStyle style = updateStyle ?
+                        styles.get(
+                                isRandom(Element.STYLES) ?
+                                        random.nextInt(styles.size()) :
+                                        (tick / tickPerStyle) % styles.size()
+                        ) :
+                        null;
 
                 bossbars.forEach((player, bossBar) -> {
-                    if (type != Progress.STATIC) {
-                        double step = tick * (1.0 / totalTicks);
-                        double progressValue = type == Progress.INCREASE ? Math.min(1.0, step) : Math.max(0.0, 1.0 - step);
+                    if (updateProgress)
                         bossBar.setProgress(progressValue);
-                    }
 
-                    if (!messages.isEmpty() && tick % tickPerMessage == 0) {
-                        int idxMsg = isRandom(Element.MESSAGES)
-                                ? random.nextInt(messages.size())
-                                : (currentTick / tickPerMessage) % messages.size();
-                        String message = messages.get(idxMsg);
-                        bossBar.setTitle(lib.colorize(player, message));
-                    }
+                    if (updateMessage)
+                        bossBar.setTitle(lib.colorize(player, rawMessage));
 
-                    if (!colors.isEmpty() && tick % tickPerColor == 0) {
-                        int idxColor = isRandom(Element.COLORS)
-                                ? random.nextInt(colors.size())
-                                : (currentTick / tickPerColor) % colors.size();
-                        bossBar.setColor(colors.get(idxColor));
-                    }
+                    if (updateColor)
+                        bossBar.setColor(color);
 
-                    if (!styles.isEmpty() && tick % tickPerStyle == 0) {
-                        int idxStyle = isRandom(Element.STYLES)
-                                ? random.nextInt(styles.size())
-                                : (currentTick / tickPerStyle) % styles.size();
-                        bossBar.setStyle(styles.get(idxStyle));
-                    }
+                    if (updateStyle)
+                        bossBar.setStyle(style);
                 });
 
                 tick++;
@@ -649,5 +679,9 @@ public class AnimatedBossbar {
                 return BarStyle.SOLID;
             }
         }
+    }
+
+    private static int interval(int totalTicks, int size) {
+        return size <= 0 ? 1 : Math.max(1, totalTicks / size);
     }
 }
