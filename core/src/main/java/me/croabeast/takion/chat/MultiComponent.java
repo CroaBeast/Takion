@@ -53,7 +53,7 @@ public interface MultiComponent extends ChatComponent<MultiComponent>, Copyable<
      * Uses {@link #DEFAULT_REGEX} and produces individual {@link ChatComponent} segments for each match.
      * </p>
      */
-    Format<ChatComponent<?>> DEFAULT_FORMAT = new MultiCompImpl(TakionLib.getLib(), "").getFormat();
+    Format<ChatComponent<?>> DEFAULT_FORMAT = new MultiCompImpl(TakionLib.fromPlugin(null), "").getFormat();
 
     @NotNull
     default MultiComponent setMessage(@NotNull String message) {

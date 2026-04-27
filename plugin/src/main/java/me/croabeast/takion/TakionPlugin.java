@@ -13,13 +13,13 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class TakionPlugin extends JavaPlugin {
 
     static final TakionLib NO_PLUGIN_INSTANCE = new TakionLib(null);
-    static final Map<Plugin, TakionLib> LIBRARIES = new HashMap<>();
+    static final Map<Plugin, TakionLib> LIBRARIES = new ConcurrentHashMap<>();
 
     @Getter(AccessLevel.NONE)
     private ChatProvider holder;
@@ -107,6 +107,7 @@ public final class TakionPlugin extends JavaPlugin {
     public void onDisable() {
         HandlerList.unregisterAll(this);
         lib.getScheduler().cancelAll();
+        TakionLib.unregister(this);
         lib.getLogger().log("&eTakion &7was disabled successfully.");
     }
 }

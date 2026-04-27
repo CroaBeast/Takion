@@ -3,9 +3,7 @@ package me.croabeast.takion;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-import me.croabeast.common.PlayerFormatter;
 import me.croabeast.common.Regex;
-import me.croabeast.common.applier.StringApplier;
 import me.croabeast.common.util.Exceptions;
 import me.croabeast.prismatic.PrismaticAPI;
 import me.croabeast.scheduler.GlobalScheduler;
@@ -26,8 +24,10 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 /**
@@ -42,7 +42,7 @@ import java.util.regex.Pattern;
  *   <li><b>Placeholder Management:</b> Managed by a {@link PlaceholderManager} to dynamically replace tokens in messages.</li>
  *   <li><b>Character Management:</b> Provided by a {@link CharacterManager} for text alignment and formatting.</li>
  *   <li><b>Messaging:</b> Facilitated by {@link MessageSender} for sending formatted messages to players.</li>
- *   <li><b>Text Processing:</b> Utilizes {@link PrismaticAPI}, {@link StringApplier}, and related utilities for colorization and string modifications.</li>
+ *   <li><b>Text Processing:</b> Utilizes {@link PrismaticAPI} and related utilities for colorization and string modifications.</li>
  * </ul>
  * </p>
  * <p>
@@ -74,6 +74,9 @@ import java.util.regex.Pattern;
  */
 @Getter @Setter
 public class TakionLib {
+
+    private static final TakionLib NO_PLUGIN = TakionPlugin.NO_PLUGIN_INSTANCE;
+    private static final Map<String, TakionLib> CALLER_CACHE = new ConcurrentHashMap<>();
 
     /**
      * The plugin instance associated with this TakionLib.
@@ -399,7 +402,14 @@ public class TakionLib {
      */
     @NotNull
     public static TakionLib getLib() {
-        return fromPlugin(getProvidingPlugin());
+        if (TakionPlugin.LIBRARIES.isEmpty())
+            return NO_PLUGIN;
+
+        if (TakionPlugin.LIBRARIES.size() == 1)
+            return TakionPlugin.LIBRARIES.values().iterator().next();
+
+        TakionLib resolved = resolveCallerLib();
+        return resolved != null ? resolved : NO_PLUGIN;
     }
 
     /**
@@ -412,20 +422,77 @@ public class TakionLib {
      * @return the providing plugin, or {@code null} if not determinable
      */
     static Plugin getProvidingPlugin() {
+        if (TakionPlugin.LIBRARIES.isEmpty())
+            return null;
+
+        if (TakionPlugin.LIBRARIES.size() == 1)
+            return TakionPlugin.LIBRARIES.keySet().iterator().next();
+
+        TakionLib resolved = resolveCallerLib();
+        return resolved != null ? resolved.plugin : null;
+    }
+
+    static void unregister(Plugin plugin) {
+        if (plugin == null) return;
+
+        TakionLib removed = TakionPlugin.LIBRARIES.remove(plugin);
+        if (removed == null) return;
+
+        CALLER_CACHE.entrySet().removeIf(entry -> entry.getValue() == removed);
+    }
+
+    private static TakionLib resolveCallerLib() {
         try {
             StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-            Class<?> thisClass = TakionLib.class, result = TakionLib.class;
             for (int i = 2; i < stackTrace.length; i++) {
-                final StackTraceElement stack = stackTrace[i];
-                if (stack.getClassName().equals(thisClass.getName()))
+                String className = stackTrace[i].getClassName();
+                if (isInternalCaller(className))
                     continue;
-                try {
-                    result = Class.forName(stack.getClassName());
-                } catch (Exception ignored) {}
+
+                TakionLib cached = CALLER_CACHE.get(className);
+                if (cached != null)
+                    return cached;
+
+                TakionLib resolved = resolveCallerLib(className);
+                if (resolved != null) {
+                    CALLER_CACHE.put(className, resolved);
+                    return resolved;
+                }
             }
-            return JavaPlugin.getProvidingPlugin(result);
+        } catch (Exception ignored) {}
+
+        return NO_PLUGIN;
+    }
+
+    private static TakionLib resolveCallerLib(String className) {
+        TakionLib resolved = null;
+        for (Map.Entry<Plugin, TakionLib> entry : TakionPlugin.LIBRARIES.entrySet()) {
+            ClassLoader loader = entry.getKey().getClass().getClassLoader();
+            try {
+                Class.forName(className, false, loader);
+                if (resolved != null && resolved != entry.getValue())
+                    return null;
+
+                resolved = entry.getValue();
+            } catch (ClassNotFoundException ignored) {}
+        }
+        if (resolved != null)
+            return resolved;
+
+        try {
+            return fromPlugin(JavaPlugin.getProvidingPlugin(Class.forName(className)));
         } catch (Exception e) {
             return null;
         }
+    }
+
+    private static boolean isInternalCaller(String className) {
+        return className.startsWith("java.") ||
+                className.startsWith("javax.") ||
+                className.startsWith("sun.") ||
+                className.startsWith("jdk.") ||
+                className.startsWith("org.bukkit.") ||
+                className.startsWith("me.croabeast.takion.") ||
+                className.startsWith("me.croabeast.common.");
     }
 }
