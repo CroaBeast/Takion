@@ -32,20 +32,15 @@ class PriorityApplier<T> implements Applier<T> {
     /**
      * Applies the given transformation operator at the specified priority.
      *
-     * @param priority the priority to assign; if {@code null}, defaults to {@link Priority#NORMAL}.
+     * @param p the priority to assign; if {@code null}, defaults to {@link Priority#NORMAL}.
      * @param operator the transformation to apply.
      * @return this {@code PriorityApplier} instance for chaining.
      * @throws NullPointerException if {@code operator} is {@code null}.
      */
     @NotNull
-    public PriorityApplier<T> apply(Priority priority, UnaryOperator<T> operator) {
-        priority = priority == null ? Priority.NORMAL : priority;
+    public PriorityApplier<T> apply(Priority p, UnaryOperator<T> operator) {
         Objects.requireNonNull(operator);
-
-        Set<UnaryOperator<T>> set = os.getOrDefault(priority, new LinkedHashSet<>());
-        set.add(operator);
-
-        os.put(priority, set);
+        os.computeIfAbsent(p == null ? Priority.NORMAL : p, s -> new LinkedHashSet<>()).add(operator);
         return this;
     }
 
@@ -67,9 +62,11 @@ class PriorityApplier<T> implements Applier<T> {
      */
     @Override
     public T result() {
-        SimpleApplier<T> applier = new SimpleApplier<>(object);
-        os.forEach((p, o) -> o.forEach(applier::apply));
-        return applier.result();
+        T result = object;
+        for (Set<UnaryOperator<T>> operators : os.values())
+            for (UnaryOperator<T> operator : operators)
+                result = operator.apply(result);
+        return result;
     }
 
     /**

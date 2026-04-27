@@ -1,15 +1,12 @@
 package me.croabeast.common.util;
 
 import lombok.experimental.UtilityClass;
-import me.croabeast.common.applier.StringApplier;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.command.CommandSender;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * A utility class that provides methods for replacing placeholders in strings
@@ -38,14 +35,43 @@ public class ReplaceUtils {
                 value.toString() :
                 ((CommandSender) value).getName();
 
-        String temp = Pattern.quote(key);
-        if (!sensitive) temp = "(?i)" + temp;
+        return sensitive ?
+                string.replace(key, val) :
+                replaceIgnoreCase(key, val, string);
+    }
 
-        Matcher m = Pattern.compile(temp).matcher(string);
-        while (m.find())
-            string = string.replace(m.group(), val);
+    public boolean contains(String key, String string, boolean sensitive) {
+        if (StringUtils.isBlank(string) || StringUtils.isBlank(key))
+            return false;
 
-        return string;
+        return sensitive ?
+                string.contains(key) :
+                indexOfIgnoreCase(key, string, 0) >= 0;
+    }
+
+    private int indexOfIgnoreCase(String key, String string, int start) {
+        int max = string.length() - key.length();
+        for (int i = Math.max(start, 0); i <= max; i++)
+            if (string.regionMatches(true, i, key, 0, key.length()))
+                return i;
+        return -1;
+    }
+
+    private String replaceIgnoreCase(String key, String value, String string) {
+        int index = indexOfIgnoreCase(key, string, 0);
+        if (index < 0) return string;
+
+        int keyLength = key.length();
+        int start = 0;
+        StringBuilder builder = new StringBuilder(string.length());
+
+        while (index >= 0) {
+            builder.append(string, start, index).append(value);
+            start = index + keyLength;
+            index = indexOfIgnoreCase(key, string, start);
+        }
+
+        return builder.append(string, start, string.length()).toString();
     }
 
     /**
@@ -89,16 +115,10 @@ public class ReplaceUtils {
         if (StringUtils.isBlank(string) || !isApplicable(keys, values))
             return string;
 
-        StringApplier applier = StringApplier.simplified(string);
+        for (int i = 0; i < keys.length; i++)
+            string = replace(keys[i], values[i], string, sensitive);
 
-        for (int i = 0; i < keys.length; i++) {
-            String key = keys[i];
-            Object value = values[i];
-
-            applier.apply(s -> replace(key, value, s, sensitive));
-        }
-
-        return applier.toString();
+        return string;
     }
 
     /**
@@ -155,14 +175,12 @@ public class ReplaceUtils {
         if (StringUtils.isBlank(string)) return string;
         if (map.isEmpty()) return string;
 
-        StringApplier applier = StringApplier.simplified(string);
+        for (Map.Entry<String, T> entry : map.entrySet()) {
+            Object result = function != null ? function.apply(entry.getValue()) : entry.getValue();
+            string = replace(entry.getKey(), result, string, sensitive);
+        }
 
-        map.forEach((k, v) -> {
-            Object result = function != null ? function.apply(v) : v;
-            applier.apply(s -> replace(k, result, s, sensitive));
-        });
-
-        return applier.toString();
+        return string;
     }
 
     /**

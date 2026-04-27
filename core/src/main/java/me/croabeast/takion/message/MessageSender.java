@@ -6,7 +6,6 @@ import lombok.experimental.Accessors;
 import me.croabeast.common.CollectionBuilder;
 import me.croabeast.common.Copyable;
 import me.croabeast.common.PlayerFormatter;
-import me.croabeast.common.applier.StringApplier;
 import me.croabeast.common.util.ArrayUtils;
 import me.croabeast.common.util.ReplaceUtils;
 import me.croabeast.takion.TakionLib;
@@ -371,7 +370,7 @@ public class MessageSender implements Copyable<MessageSender> {
         for (Message message : messages) {
             if (message.isBlank() && message.isAllowed()) {
                 message.log(true);
-                targets.forEach(message::send);
+                message.send(targets);
                 continue;
             }
 
@@ -379,15 +378,8 @@ public class MessageSender implements Copyable<MessageSender> {
             if (format.accept(targets, message.message) && !message.isAllowed())
                 continue;
 
-            boolean wasSent = false, wasLogged = false;
-            for (Player target : targets) {
-                boolean isSent = message.send(target);
-                if (isSent && !wasSent)
-                    wasSent = true;
-                if (wasLogged) continue;
-                message.log(isSent);
-                wasLogged = true;
-            }
+            boolean wasSent = message.send(targets);
+            message.log(wasSent);
 
             if (!atLeastOneIsSent) atLeastOneIsSent = wasSent;
         }
@@ -429,6 +421,12 @@ public class MessageSender implements Copyable<MessageSender> {
          */
         private final String message;
 
+        private boolean formatted;
+        private String formattedMessage;
+
+        private boolean logged;
+        private String loggedMessage;
+
         /**
          * Constructs a new {@code Message} with the provided raw message.
          * <p>
@@ -459,11 +457,17 @@ public class MessageSender implements Copyable<MessageSender> {
          * @return the fully formatted message as a {@link String}
          */
         String formatMessage() {
-            StringApplier applier = StringApplier.simplified(message)
-                    .apply(s -> lib.replacePrefixKey(s, false));
-            functions.forEach(f -> applier.apply(s -> f.apply(parser, s)));
-            placeholders.forEach(p -> applier.apply(s -> p.replace(parser, s)));
-            return applier.toString();
+            if (formatted) return formattedMessage;
+
+            String temp = lib.replacePrefixKey(message, false);
+            for (PlayerFormatter function : functions)
+                temp = function.apply(parser, temp);
+            for (Placeholder<?> placeholder : placeholders)
+                temp = placeholder.replace(parser, temp);
+
+            formattedMessage = temp;
+            formatted = true;
+            return temp;
         }
 
         /**
@@ -485,19 +489,24 @@ public class MessageSender implements Copyable<MessageSender> {
          */
         void log(boolean sent) {
             if (!isLogger()) return;
-            String s = lib.getPlaceholderManager().replace(parser, formatMessage());
+
+            if (!logged) {
+                loggedMessage = lib.getPlaceholderManager().replace(parser, formatMessage());
+                logged = true;
+            }
+
             String error = getErrorPrefix();
-            lib.getLogger().log((sent || StringUtils.isBlank(error) ? "" : error) + s);
+            lib.getLogger().log((sent || StringUtils.isBlank(error) ? "" : error) + loggedMessage);
         }
 
         /**
-         * Sends the formatted message to a single player.
+         * Sends the formatted message to the provided targets.
          *
-         * @param target the target player
+         * @param targets the targets that will receive the message
          * @return {@code true} if the message was sent successfully; {@code false} otherwise
          */
-        boolean send(Player target) {
-            return isAllowed() && channel.send(target, parser, formatMessage());
+        boolean send(Collection<? extends Player> targets) {
+            return isAllowed() && channel.send(targets, parser, formatMessage());
         }
     }
 }

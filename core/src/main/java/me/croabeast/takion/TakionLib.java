@@ -41,7 +41,7 @@ import java.util.regex.Pattern;
  *   <li><b>Placeholder Management:</b> Managed by a {@link PlaceholderManager} to dynamically replace tokens in messages.</li>
  *   <li><b>Character Management:</b> Provided by a {@link CharacterManager} for text alignment and formatting.</li>
  *   <li><b>Messaging:</b> Facilitated by {@link MessageSender} for sending formatted messages to players.</li>
- *   <li><b>Text Processing:</b> Utilizes {@link PrismaticAPI}, {@link StringApplier}, and related utilities for colorization and string modifications.</li>
+ *   <li><b>Text Processing:</b> Utilizes {@link PrismaticAPI} and related utilities for colorization and string modifications.</li>
  * </ul>
  * </p>
  * <p>

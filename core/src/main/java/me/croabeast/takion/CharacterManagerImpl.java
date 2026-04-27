@@ -1,6 +1,5 @@
 package me.croabeast.takion;
 
-import me.croabeast.common.applier.StringApplier;
 import me.croabeast.common.util.ArrayUtils;
 import me.croabeast.prismatic.PrismaticAPI;
 import me.croabeast.takion.character.CharacterInfo;
@@ -54,13 +53,11 @@ final class CharacterManagerImpl implements CharacterManager {
             return string;
 
         String before = string.replace(prefix, "");
-        String temp = StringApplier.simplified(before)
-                .apply(PrismaticAPI::stripAll)
-                .apply(MultiComponent.DEFAULT_FORMAT::removeFormat)
-                .apply(s -> {
-                    StringFormat format = lib.getFormatManager().get("character");
-                    return format.accept(s);
-                }).toString();
+        String temp = PrismaticAPI.stripAll(before);
+        temp = MultiComponent.DEFAULT_FORMAT.removeFormat(temp);
+
+        StringFormat format = lib.getFormatManager().get("character");
+        temp = format.accept(temp);
 
         int size = 0;
         boolean previousCode = false;

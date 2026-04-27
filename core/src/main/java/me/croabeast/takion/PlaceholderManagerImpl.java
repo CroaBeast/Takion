@@ -1,7 +1,6 @@
 package me.croabeast.takion;
 
 import me.croabeast.common.Rounder;
-import me.croabeast.common.applier.StringApplier;
 import me.croabeast.takion.placeholder.Placeholder;
 import me.croabeast.takion.placeholder.PlaceholderManager;
 import org.apache.commons.lang.StringUtils;
@@ -78,14 +77,13 @@ final class PlaceholderManagerImpl implements PlaceholderManager {
 
     @Override
     public String replace(Player player, String string, boolean sensitive) {
-        if (player == null || StringUtils.isBlank(string))
+        if (player == null || StringUtils.isBlank(string) || placeholders.isEmpty())
             return string;
 
-        StringApplier applier = StringApplier.simplified(string);
         for (Placeholder<?> placeholder : placeholders)
-            applier.apply(s -> placeholder.replace(player, s));
+            string = placeholder.replace(player, string);
 
-        return applier.toString();
+        return string;
     }
 
     public void setDefaults() {

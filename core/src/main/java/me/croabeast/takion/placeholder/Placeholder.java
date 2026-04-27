@@ -97,6 +97,9 @@ public class Placeholder<T> {
      * @return the resulting string with all placeholder keys replaced by the computed value
      */
     public String replace(Player player, String string) {
+        if (!ReplaceUtils.contains(key, string, sensitive))
+            return string;
+
         return ReplaceUtils.replace(key, function.apply(player), string, sensitive);
     }
 

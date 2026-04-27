@@ -5,6 +5,8 @@ import org.apache.commons.lang.StringUtils;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -44,8 +46,9 @@ public interface Format<T> {
      */
     @NotNull
     default Matcher matcher(String string) {
-        Pattern pattern = Pattern.compile(getRegex());
-        return pattern.matcher(string);
+        return Holder.PATTERNS
+                .computeIfAbsent(getRegex(), Pattern::compile)
+                .matcher(string);
     }
 
     /**
@@ -117,5 +120,11 @@ public interface Format<T> {
     @NotNull
     default String toFormattedString(T result) {
         throw new UnsupportedOperationException("toFormattedString() not implemented");
+    }
+
+    final class Holder {
+        private static final Map<String, Pattern> PATTERNS = new ConcurrentHashMap<>();
+
+        private Holder() {}
     }
 }
