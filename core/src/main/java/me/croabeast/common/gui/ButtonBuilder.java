@@ -24,13 +24,16 @@ import org.jetbrains.annotations.NotNull;
  * </code></pre>
  * </p>
  *
- * @see ToggleButton
  * @see PaneBuilder
  */
 public final class ButtonBuilder extends PaneBuilder<ToggleButton, ButtonBuilder> {
 
+    @NotNull
+    private final Slot slot;
+
     ButtonBuilder(Plugin plugin, Slot slot, boolean value) {
-        super(new ToggleButton(slot, 1, 1, value, plugin));
+        super(new ToggleButton(1, 1, value, plugin));
+        this.slot = slot;
     }
 
     /**
@@ -62,6 +65,16 @@ public final class ButtonBuilder extends PaneBuilder<ToggleButton, ButtonBuilder
     @NotNull
     public ButtonBuilder instance() {
         return this;
+    }
+
+    /**
+     * Returns the slot where the button should be placed by the parent pane.
+     *
+     * @return the target slot for this button
+     */
+    @NotNull
+    public Slot getSlot() {
+        return slot;
     }
 
     /**

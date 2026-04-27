@@ -34,7 +34,7 @@ public final class ChestBuilder extends GuiBuilder<ChestGui, ChestBuilder> {
     private boolean loaded = false;
 
     ChestBuilder(Plugin plugin, int rows, String name) {
-        super(new PaginatedPane(0, 0, 9, rows), new ChestGui(rows, PrismaticAPI.colorize(name), plugin));
+        super(new PaginatedPane(9, rows), new ChestGui(rows, PrismaticAPI.colorize(name), plugin));
     }
 
     /**
@@ -69,7 +69,7 @@ public final class ChestBuilder extends GuiBuilder<ChestGui, ChestBuilder> {
     @Override
     public void showGui(HumanEntity entity) {
         if (!loaded) {
-            value.addPane(pane);
+            value.addPane(com.github.stefvanschie.inventoryframework.pane.util.Slot.fromXY(0, 0), pane);
             loaded = true;
         }
         value.show(entity);

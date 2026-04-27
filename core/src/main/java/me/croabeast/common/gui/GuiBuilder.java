@@ -5,6 +5,7 @@ import com.github.stefvanschie.inventoryframework.gui.type.util.Gui;
 import com.github.stefvanschie.inventoryframework.pane.OutlinePane;
 import com.github.stefvanschie.inventoryframework.pane.PaginatedPane;
 import com.github.stefvanschie.inventoryframework.pane.Pane;
+import com.github.stefvanschie.inventoryframework.pane.util.Slot;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -50,7 +51,8 @@ public abstract class GuiBuilder<G extends Gui, B extends GuiBuilder<G, B>> impl
     /**
      * Adds a pane to the paginated pane at the specified index.
      * <p>
-     * Optional consumers can be provided to further configure the pane before it is added.
+     * InventoryFramework 0.12 requires the slot to be provided explicitly, so this overload is kept
+     * only to fail fast with a clear message for legacy callers.
      * </p>
      *
      * @param index     the index at which to add the pane
@@ -58,14 +60,32 @@ public abstract class GuiBuilder<G extends Gui, B extends GuiBuilder<G, B>> impl
      * @param consumers optional consumers to modify the pane
      * @param <P>       the type of the pane being added
      * @return this builder instance for fluent chaining
-     * @throws NullPointerException if the provided pane is {@code null}
+     * @throws IllegalArgumentException always, instructing callers to use the slot-aware overload
      */
+    @Deprecated
     @SafeVarargs
     public final <P extends Pane> B addPane(int index, P pane, Consumer<P>... consumers) {
+        throw new IllegalArgumentException("Pane placement is explicit in IF 0.12. Use addPane(index, slot, pane, ...) instead.");
+    }
+
+    /**
+     * Adds a pane to the paginated pane at the specified page and slot.
+     *
+     * @param index     the page index at which to add the pane
+     * @param slot      the slot where the pane should be placed
+     * @param pane      the pane to add
+     * @param consumers optional consumers to modify the pane
+     * @param <P>       the type of the pane being added
+     * @return this builder instance for fluent chaining
+     * @throws NullPointerException if the provided slot or pane is {@code null}
+     */
+    @SafeVarargs
+    public final <P extends Pane> B addPane(int index, Slot slot, P pane, Consumer<P>... consumers) {
+        Objects.requireNonNull(slot);
         Objects.requireNonNull(pane);
         for (Consumer<P> c : ArrayUtils.toList(consumers))
             if (c != null) c.accept(pane);
-        this.pane.addPane(index, pane);
+        this.pane.addPane(index, slot, pane);
         return instance();
     }
 
@@ -85,11 +105,11 @@ public abstract class GuiBuilder<G extends Gui, B extends GuiBuilder<G, B>> impl
      */
     @SafeVarargs
     public final B addSingleItem(int index, int x, int y, GuiItem item, Consumer<OutlinePane>... consumers) {
-        OutlinePane pane = new OutlinePane(x, y, 1, 1);
+        OutlinePane pane = new OutlinePane(1, 1);
         for (Consumer<OutlinePane> c : ArrayUtils.toList(consumers))
             if (c != null) c.accept(pane);
         pane.addItem(item);
-        return addPane(index, pane);
+        return addPane(index, Slot.fromXY(x, y), pane);
     }
 
     /**
