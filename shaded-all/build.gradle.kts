@@ -1,5 +1,9 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
+val workspaceDir = rootDir.parentFile
+val commandFrameworkDir = workspaceDir.resolve("CommandFramework")
+val commandFrameworkJar = commandFrameworkDir.resolve("build/libs/CommandFramework-1.2.jar")
+
 dependencies {
     implementation(project(":core"))
 
@@ -11,15 +15,29 @@ dependencies {
     implementation("me.croabeast:PrismaticAPI:1.2")
     implementation("me.croabeast:UpdateChecker:1.0")
     implementation("me.croabeast:VaultAdapter:1.2")
-    implementation("me.croabeast:CommandFramework:1.2")
+    implementation(files(commandFrameworkJar))
     implementation("me.croabeast:AdvancementInfo:1.0")
 }
 
+val buildCommandFrameworkJar by tasks.registering(Exec::class) {
+    group = "build"
+    description = "Builds the local CommandFramework jar used by shaded-all."
+    workingDir = commandFrameworkDir
+
+    if (org.gradle.internal.os.OperatingSystem.current().isWindows) {
+        commandLine("cmd", "/c", "gradlew.bat", "jar")
+    } else {
+        commandLine("./gradlew", "jar")
+    }
+}
+
 tasks.named("build") {
+    dependsOn(buildCommandFrameworkJar)
     dependsOn(tasks.named("shadowJar"))
 }
 
 tasks.named<ShadowJar>("shadowJar") {
+    dependsOn(buildCommandFrameworkJar)
     archiveClassifier.set("")
     exclude(
         "META-INF/**", "org/apache/commons/**", "org/intellij/**", "org/jetbrains/**",
