@@ -1,7 +1,7 @@
 dependencies:
   - group: "me.croabeast"
     artifact: "CommandFramework"
-    version: "1.2"
+    version: "1.2.1"
     repo: "https://croabeast.github.io/repo/"
     replace: true
   - group: "me.croabeast"

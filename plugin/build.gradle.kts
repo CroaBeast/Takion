@@ -5,7 +5,7 @@ dependencies {
 
     compileOnly("me.croabeast:UpdateChecker:1.0")
     compileOnly("me.croabeast:VaultAdapter:1.2")
-    compileOnly("me.croabeast:CommandFramework:1.2")
+    compileOnly("me.croabeast:CommandFramework:1.2.1")
     compileOnly("me.croabeast:AdvancementInfo:1.0")
 }
 
