@@ -314,8 +314,8 @@ public class TakionLib {
     /**
      * Replaces placeholders and applies player formatting functions on a string.
      * <p>
-     * This method uses the {@link PlaceholderManager} and a {@link PlayerFormatter} to process
-     * the string, and then applies a character action for further formatting.
+     * This method uses the {@link PlaceholderManager} to process the string, and
+     * then applies a character action for further formatting.
      * </p>
      *
      * @param parser the player context for placeholder replacement
@@ -323,13 +323,21 @@ public class TakionLib {
      * @return the processed string after placeholder and function application
      */
     public String replace(Player parser, String string) {
-        return StringApplier.simplified(string)
-                .apply(s -> placeholderManager.replace(parser, s))
-                .apply(s -> PlainFormat.PLACEHOLDER_API.accept(parser, s))
-                .apply(s -> {
-                    StringFormat format = formatManager.get("character");
-                    return format.accept(s);
-                }).toString();
+        return replace(parser, string, true);
+    }
+
+    public String replace(Player parser, String string, boolean processPlayerHead) {
+        if (StringUtils.isBlank(string)) return string;
+
+        String temp = placeholderManager.replace(parser, string);
+        temp = PlainFormat.PLACEHOLDER_API.accept(parser, temp);
+
+        StringFormat playerHead = formatManager.get("PLAYER_HEAD");
+        if (processPlayerHead && playerHead != null)
+            temp = playerHead.accept(parser, temp);
+
+        StringFormat character = formatManager.get("character");
+        return character != null ? character.accept(temp) : temp;
     }
 
     /**
@@ -341,8 +349,12 @@ public class TakionLib {
      * @return the final colorized and formatted message
      */
     public String colorize(Player target, Player parser, String string) {
+        return colorize(target, parser, string, true);
+    }
+
+    public String colorize(Player target, Player parser, String string, boolean processPlayerHead) {
         return PrismaticAPI.colorize(
-                target == null ? parser : target, replace(parser, string));
+                target == null ? parser : target, replace(parser, string, processPlayerHead));
     }
 
     /**

@@ -10,6 +10,8 @@ import org.apache.commons.lang.StringUtils;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -18,6 +20,9 @@ import java.util.regex.Pattern;
 @Getter
 @SuppressWarnings("deprecation")
 class ComponentImpl implements ChatComponent<ComponentImpl> {
+
+    private static final Pattern HOVER_PATTERN = Pattern.compile("hover:\"(.*?)\"");
+    private static final String HOVER_ITEM_BASE64_PREFIX = "b64:";
 
     private final TakionLib lib;
     @NotNull
@@ -35,6 +40,7 @@ class ComponentImpl implements ChatComponent<ComponentImpl> {
         ClickEvent create(Player player) {
             return new ClickEvent(click.asBukkit(), lib.colorize(player, input));
         }
+
     }
 
     @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
@@ -53,6 +59,7 @@ class ComponentImpl implements ChatComponent<ComponentImpl> {
 
             return new HoverEvent(HoverEvent.Action.SHOW_TEXT, contents);
         }
+
     }
 
     @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
@@ -89,8 +96,7 @@ class ComponentImpl implements ChatComponent<ComponentImpl> {
 
     @NotNull
     public ComponentImpl setHover(String string) {
-        Pattern pattern = Pattern.compile("hover:\"(.*?)\"");
-        Matcher matcher = pattern.matcher(string);
+        Matcher matcher = HOVER_PATTERN.matcher(string);
         while (matcher.find())
             string = string.replace(matcher.group(), matcher.group(1));
         return setHover(lib.splitString(string));
@@ -100,9 +106,9 @@ class ComponentImpl implements ChatComponent<ComponentImpl> {
     public ComponentImpl setHoverItem(String json) {
         if (StringUtils.isBlank(json)) return instance();
 
-        String unescaped = json.replace("\\\\", "\\").replace("\\\"", "\"");
+        String itemJson = deserializeHoverItem(json);
         hoverEvent = null;
-        hoverItemEvent = new HoverItemHolder(unescaped, json);
+        hoverItemEvent = new HoverItemHolder(itemJson, serializeHoverItem(itemJson));
         return instance();
     }
 
@@ -122,7 +128,6 @@ class ComponentImpl implements ChatComponent<ComponentImpl> {
     public boolean hasEvents() {
         return hasClick() || hasHover() || hasHoverItem();
     }
-
 
     @NotNull
     public BaseComponent[] compile(Player player) {
@@ -144,6 +149,34 @@ class ComponentImpl implements ChatComponent<ComponentImpl> {
             comp.setHoverEvent(hoverEvent.create(player));
 
         return new BaseComponent[] {comp};
+    }
+
+    private String deserializeHoverItem(String payload) {
+        if (StringUtils.isBlank(payload)) return payload;
+
+        String decoded = tryDecodeHoverItem(payload);
+        return decoded != null ? decoded : payload.replace("\\\\", "\\").replace("\\\"", "\"");
+    }
+
+    private String tryDecodeHoverItem(String payload) {
+        if (!payload.startsWith(HOVER_ITEM_BASE64_PREFIX)) return null;
+
+        try {
+            return new String(
+                    Base64.getUrlDecoder().decode(payload.substring(HOVER_ITEM_BASE64_PREFIX.length())),
+                    StandardCharsets.UTF_8
+            );
+        } catch (IllegalArgumentException ignored) {
+            return null;
+        }
+    }
+
+    private String serializeHoverItem(String itemJson) {
+        if (StringUtils.isBlank(itemJson)) return itemJson;
+
+        return HOVER_ITEM_BASE64_PREFIX + Base64.getUrlEncoder()
+                .withoutPadding()
+                .encodeToString(itemJson.getBytes(StandardCharsets.UTF_8));
     }
 
     @Override

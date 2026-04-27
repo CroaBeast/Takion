@@ -1,12 +1,7 @@
 package me.croabeast.takion.format;
 
-import com.mojang.authlib.Agent;
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.GameProfileRepository;
-import com.mojang.authlib.ProfileLookupCallback;
-import com.mojang.authlib.minecraft.MinecraftSessionService;
-import com.mojang.authlib.properties.Property;
-import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
@@ -14,45 +9,20 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.net.Proxy;
-import java.util.Map;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
+import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @UtilityClass
 class PlayerHeadUtils {
 
-    private final String REGEX = "(?i)\\{player_head(?::([^}]+))?}";
+    private final Pattern TOKEN_PATTERN = Pattern.compile("(?i)(?:\\{player_head(?::([^}]*))?}|<player_head(?::([^>]*))?>)");
+    private final String REGEX = TOKEN_PATTERN.pattern();
     private final String DISPLAY_MARKER = "■";
-    private final Map<String, String> TEXTURE_CACHE = new ConcurrentHashMap<>();
-    private final Map<String, UUID> UUID_CACHE = new ConcurrentHashMap<>();
-    private final Map<String, CacheEntry> LOOKUP_CACHE = new ConcurrentHashMap<>();
-    private final long CACHE_TTL_MILLIS = TimeUnit.MINUTES.toMillis(10);
-
-    private volatile YggdrasilAuthenticationService authService;
-    private volatile MinecraftSessionService sessionService;
-    private volatile GameProfileRepository profileRepository;
-
-    private enum CacheStatus {
-        PENDING,
-        READY,
-        FAILED
-    }
-
-    private final class CacheEntry {
-        private final String texture;
-        private final long timestamp;
-        private final CacheStatus status;
-
-        private CacheEntry(String texture, long timestamp, CacheStatus status) {
-            this.texture = texture;
-            this.timestamp = timestamp;
-            this.status = status;
-        }
-    }
+    private final String BASE64_PREFIX = "b64:";
 
     final StringFormat FORMAT = new StringFormat() {
         @NotNull
@@ -69,209 +39,196 @@ class PlayerHeadUtils {
         public String accept(Player player, String string) {
             return replace(player, string);
         }
+
+        @Override
+        public String removeFormat(String string) {
+            return stripTokens(string);
+        }
     };
 
-    public String replace(Player parser, String input) {
+    String replace(Player parser, String input) {
+        return transform(parser, input, false);
+    }
+
+    private String stripTokens(String input) {
+        return transform(null, input, true);
+    }
+
+    private String transform(Player parser, String input, boolean stripTokens) {
         if (StringUtils.isBlank(input)) return input;
 
-        Matcher matcher = FORMAT.matcher(input);
+        Matcher matcher = TOKEN_PATTERN.matcher(input);
         if (!matcher.find()) return input;
 
-        StringBuilder result = new StringBuilder();
+        StringBuilder result = new StringBuilder(input.length() + 32);
         int lastEnd = 0;
 
         matcher.reset();
         while (matcher.find()) {
             result.append(input, lastEnd, matcher.start());
 
-            String name = matcher.group(1);
-            String replacement = buildHeadComponent(parser, name);
-            result.append(replacement == null ? matcher.group() : replacement);
+            if (!stripTokens) {
+                String replacement = buildLegacyHeadComponent(parser, matcher);
+                if (replacement == null) result.append(matcher.group());
+                else result.append(replacement);
+            }
 
             lastEnd = matcher.end();
         }
 
-        result.append(input.substring(lastEnd));
+        result.append(input, lastEnd, input.length());
         return result.toString();
     }
 
-    @SuppressWarnings("deprecation")
-    private String buildHeadComponent(Player parser, String name) {
-        Player target = parser;
+    private String buildLegacyHeadComponent(Player parser, MatchResult result) {
+        HeadArguments args = parseArguments(rawArguments(result));
 
-        if (StringUtils.isNotBlank(name)) {
-            OfflinePlayer offline = Bukkit.getOfflinePlayer(name);
-            target = offline.getPlayer();
-            if (target == null && offline.hasPlayedBefore())
-                return buildFromOfflineProfile(offline);
-        }
+        if (StringUtils.isBlank(args.target))
+            return parser == null ?
+                    null :
+                    buildMarker(parser.getName(), parser.getUniqueId(), null);
 
-        if (target == null && StringUtils.isBlank(name)) return null;
-        if (target != null) {
-            String texture = resolveTexture(target.getName(), target.getUniqueId());
-            return buildMarker(target.getName(), target.getUniqueId(), texture);
-        }
+        if (isTextureValue(args.target))
+            return buildMarker(null, null, args.target);
 
-        return StringUtils.isNotBlank(name) ? buildFromMojangProfile(name) : null;
-    }
+        UUID uuid = tryParseUuid(args.target);
+        if (uuid != null)
+            return buildMarker(resolveName(uuid), uuid, null);
 
-    private String buildFromOfflineProfile(OfflinePlayer offline) {
-        String name = offline.getName();
-        UUID uuid = offline.getUniqueId();
-        String texture = resolveTexture(name, uuid);
-        return buildMarker(name, uuid, texture);
-    }
+        Player online = findOnlinePlayer(args.target);
+        if (online != null)
+            return buildMarker(online.getName(), online.getUniqueId(), null);
 
-    private String buildFromMojangProfile(String name) {
-        String texture = resolveTexture(name, UUID_CACHE.get(name.toLowerCase()));
-        return buildMarker(name, UUID_CACHE.get(name.toLowerCase()), texture);
+        @SuppressWarnings("deprecation")
+        OfflinePlayer offline = Bukkit.getOfflinePlayer(args.target);
+        UUID offlineUuid = offline.getUniqueId();
+        String offlineName = offline.getName();
+
+        boolean notBlank = StringUtils.isNotBlank(offlineName);
+        return buildMarker(
+                notBlank ? offlineName : args.target,
+                notBlank ? offlineUuid : null,
+                null
+        );
     }
 
     private String buildMarker(String name, UUID uuid, String textureValue) {
-        if (StringUtils.isBlank(textureValue)) return null;
-
         StringBuilder json = new StringBuilder()
-                .append("{\"id\":\"minecraft:player_head\",\"Count\":1,\"tag\":{")
-                .append("\"SkullOwner\":{");
+                .append("{\"id\":\"minecraft:player_head\",\"Count\":1");
 
-        if (uuid != null)
-            json.append("\"Id\":\"").append(uuid).append("\",");
+        if (uuid != null || StringUtils.isNotBlank(name) || StringUtils.isNotBlank(textureValue)) {
+            json.append(",\"tag\":{\"SkullOwner\":{");
 
-        if (StringUtils.isNotBlank(name))
-            json.append("\"Name\":\"").append(escapeJson(name)).append("\",");
+            boolean needsComma = false;
 
-        json.append("\"Properties\":{\"textures\":[{\"Value\":\"")
-                .append(textureValue)
-                .append("\"}]}}}").append("}");
+            if (uuid != null) {
+                json.append("\"Id\":\"").append(uuid).append("\"");
+                needsComma = true;
+            }
 
-        String escaped = json.toString().replace("\"", "\\\"");
-        return "<hover_item:\"" + escaped + "\">" + DISPLAY_MARKER + "</text>";
+            if (StringUtils.isNotBlank(name)) {
+                if (needsComma) json.append(',');
+                json.append("\"Name\":\"").append(escapeJson(name)).append("\"");
+                needsComma = true;
+            }
+
+            if (StringUtils.isNotBlank(textureValue)) {
+                if (needsComma) json.append(',');
+                json.append("\"Properties\":{\"textures\":[{\"Value\":\"")
+                        .append(textureValue)
+                        .append("\"}]}");
+            }
+
+            json.append("}}");
+        }
+
+        json.append('}');
+
+        return "<hover_item:\""
+                + serializeHoverItem(json.toString())
+                + "\">"
+                + DISPLAY_MARKER
+                + "</text>";
     }
 
-    private String resolveTexture(String name, UUID uuid) {
-        if (StringUtils.isBlank(name) && uuid == null) return null;
+    private String serializeHoverItem(String itemJson) {
+        if (StringUtils.isBlank(itemJson)) return itemJson;
 
-        String cacheKey = StringUtils.isNotBlank(name) ? name.toLowerCase() : uuid.toString();
+        return BASE64_PREFIX + Base64.getUrlEncoder()
+                .withoutPadding()
+                .encodeToString(itemJson.getBytes(StandardCharsets.UTF_8));
+    }
 
-        String cached = TEXTURE_CACHE.get(cacheKey);
-        if (StringUtils.isNotBlank(cached)) return cached;
-
-        CacheEntry entry = LOOKUP_CACHE.get(cacheKey);
-        if (entry != null && isRunning(entry))
-            return entry.status == CacheStatus.READY ? entry.texture : null;
-
-        enqueueLookup(name, uuid, cacheKey);
+    private String rawArguments(MatchResult result) {
+        for (int i = 1; i <= result.groupCount(); i++) {
+            String group = result.group(i);
+            if (group != null) return group;
+        }
         return null;
     }
 
-    private void enqueueLookup(String name, UUID uuid, String cacheKey) {
-        LOOKUP_CACHE.compute(cacheKey, (key, entry) ->
-                entry != null && isRunning(entry) ?
-                        entry :
-                        new CacheEntry(null, System.currentTimeMillis(), CacheStatus.PENDING)
-        );
+    private HeadArguments parseArguments(String rawArguments) {
+        if (StringUtils.isBlank(rawArguments))
+            return new HeadArguments(null, true);
 
-        runAsync(() -> {
-            if (uuid != null || StringUtils.isBlank(name)) {
-                String value = fetchTextureValue(new GameProfile(uuid, name), name, uuid);
-                writeCache(cacheKey, value);
-                return;
-            }
+        String[] parts = rawArguments.split(":", 2);
+        String first = sanitize(parts[0]);
 
-            GameProfileRepository repository = getProfileRepository();
-            try {
-                repository.findProfilesByNames(new String[] {name}, Agent.MINECRAFT, new ProfileLookupCallback() {
-                    @Override
-                    public void onProfileLookupSucceeded(GameProfile profile) {
-                        if (profile != null) {
-                            UUID_CACHE.put(name.toLowerCase(), profile.getId());
-                            String value = fetchTextureValue(profile, name, profile.getId());
-                            writeCache(cacheKey, value);
-                            return;
-                        }
+        if (parts.length == 1 && isBooleanToken(first))
+            return new HeadArguments(null, Boolean.parseBoolean(first));
 
-                        writeCache(cacheKey, null);
-                    }
+        boolean hat = parts.length != 2 || !isBooleanToken(parts[1]) ||
+                Boolean.parseBoolean(parts[1]);
 
-                    @Override
-                    public void onProfileLookupFailed(GameProfile profile, Exception exception) {
-                        writeCache(cacheKey, null);
-                    }
-                });
-            } catch (Exception e) {
-                writeCache(cacheKey, null);
-            }
-        });
+        return new HeadArguments(first, hat);
     }
 
-    private boolean isRunning(CacheEntry entry) {
-        return System.currentTimeMillis() - entry.timestamp < CACHE_TTL_MILLIS;
+    private boolean isTextureValue(String value) {
+        return StringUtils.isNotBlank(value) && value.length() > 16 && tryParseUuid(value) == null;
     }
 
-    private String fetchTextureValue(GameProfile profile, String name, UUID uuid) {
-        GameProfile filled;
-        try {
-            MinecraftSessionService session = getSessionService();
-            filled = session.fillProfileProperties(profile, true);
-        } catch (Exception e) {
-            return null;
-        }
-
-        Property texture = filled.getProperties().get("textures").stream().findFirst().orElse(null);
-        if (texture == null) return null;
-
-        String value = texture.getValue();
+    private UUID tryParseUuid(String value) {
         if (StringUtils.isBlank(value)) return null;
 
-        if (StringUtils.isNotBlank(name))
-            TEXTURE_CACHE.put(name.toLowerCase(), value);
-        if (uuid != null)
-            TEXTURE_CACHE.put(uuid.toString(), value);
-
-        return value;
-    }
-
-    private void writeCache(String cacheKey, String value) {
-        CacheEntry result = new CacheEntry(
-                value,
-                System.currentTimeMillis(),
-                StringUtils.isNotBlank(value) ? CacheStatus.READY : CacheStatus.FAILED
-        );
-        LOOKUP_CACHE.put(cacheKey, result);
-    }
-
-    private void runAsync(Runnable task) {
-        CompletableFuture.runAsync(task);
-    }
-
-    private MinecraftSessionService getSessionService() {
-        if (sessionService != null) return sessionService;
-        synchronized (PlayerHeadUtils.class) {
-            if (sessionService == null)
-                sessionService = getAuthService().createMinecraftSessionService();
+        try {
+            return UUID.fromString(value);
+        } catch (IllegalArgumentException ignored) {
+            return null;
         }
-        return sessionService;
     }
 
-    private GameProfileRepository getProfileRepository() {
-        if (profileRepository != null) return profileRepository;
-        synchronized (PlayerHeadUtils.class) {
-            if (profileRepository == null)
-                profileRepository = getAuthService().createProfileRepository();
-        }
-        return profileRepository;
+    private String resolveName(UUID uuid) {
+        Player online = Bukkit.getPlayer(uuid);
+        return online != null ? online.getName() : Bukkit.getOfflinePlayer(uuid).getName();
     }
 
-    private YggdrasilAuthenticationService getAuthService() {
-        if (authService != null) return authService;
-        synchronized (PlayerHeadUtils.class) {
-            if (authService == null)
-                authService = new YggdrasilAuthenticationService(Proxy.NO_PROXY, UUID.randomUUID().toString());
-        }
-        return authService;
+    private Player findOnlinePlayer(String name) {
+        Player player = Bukkit.getPlayerExact(name);
+        if (player != null) return player;
+
+        for (Player online : Bukkit.getOnlinePlayers())
+            if (online.getName().equalsIgnoreCase(name))
+                return online;
+
+        return null;
+    }
+
+    private boolean isBooleanToken(String value) {
+        return "true".equalsIgnoreCase(value) || "false".equalsIgnoreCase(value);
+    }
+
+    private String sanitize(String value) {
+        return StringUtils.isBlank(value) ? null : value.trim();
     }
 
     private String escapeJson(String value) {
         return StringUtils.isBlank(value) ? value : value.replace("\\", "\\\\").replace("\"", "\\\"");
+    }
+
+    @RequiredArgsConstructor
+    @Getter
+    private static final class HeadArguments {
+        private final String target;
+        private final boolean hat;
     }
 }

@@ -21,6 +21,9 @@ import java.util.regex.Pattern;
 @Getter
 class MultiCompImpl implements MultiComponent {
 
+    private static final Pattern LEGACY_FORMAT_PATTERN = Pattern.compile("(?i)(hover|run|suggest|url)=\\[(.[^|\\[\\]]*)]");
+    private static final Pattern HOVER_PATTERN = Pattern.compile("hover:\"(.*?)\"");
+
     private final TakionLib lib;
     private final String message;
 
@@ -67,9 +70,7 @@ class MultiCompImpl implements MultiComponent {
     private static String stripLegacyFormat(String string) {
         if (StringUtils.isBlank(string)) return string;
 
-        String p = "(?i)(hover|run|suggest|url)=\\[(.[^|\\[\\]]*)]";
-        Matcher old = Pattern.compile(p).matcher(string);
-
+        Matcher old = LEGACY_FORMAT_PATTERN.matcher(string);
         while (old.find()) {
             String temp = old.group(1) + ":\"" + old.group(2) + "\"";
             string = string.replace(old.group(), temp);
@@ -82,12 +83,12 @@ class MultiCompImpl implements MultiComponent {
         final String regex = DEFAULT_REGEX;
 
         private void setAction(ComponentImpl component, String action, String argument) {
-            if (action.matches("(?i)hover_item")) {
+            if ("hover_item".equalsIgnoreCase(action)) {
                 component.setHoverItem(argument);
                 return;
             }
 
-            if (action.matches("(?i)hover")) {
+            if ("hover".equalsIgnoreCase(action)) {
                 component.setHover(argument);
                 return;
             }
@@ -313,8 +314,7 @@ class MultiCompImpl implements MultiComponent {
 
     @NotNull
     public MultiComponent setHoverToAll(String string) {
-        Pattern pattern = Pattern.compile("hover:\"(.*?)\"");
-        Matcher matcher = pattern.matcher(string);
+        Matcher matcher = HOVER_PATTERN.matcher(string);
         while (matcher.find())
             string = string.replace(matcher.group(), matcher.group(1));
         return setHoverToAll(lib.splitString(string));
@@ -338,8 +338,7 @@ class MultiCompImpl implements MultiComponent {
 
     @NotNull
     public MultiComponent setHover(String string) {
-        Pattern pattern = Pattern.compile("hover:\"(.*?)\"");
-        Matcher matcher = pattern.matcher(string);
+        Matcher matcher = HOVER_PATTERN.matcher(string);
         while (matcher.find())
             string = string.replace(matcher.group(), matcher.group(1));
         return setHover(lib.splitString(string));
