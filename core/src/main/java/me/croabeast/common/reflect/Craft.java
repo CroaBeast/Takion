@@ -4,7 +4,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
-import me.croabeast.common.util.ServerInfoUtils;
+import me.croabeast.vnc.VNC;
 import org.bukkit.Bukkit;
 import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -116,7 +116,7 @@ public class Craft {
          * </p>
          */
         public void updateCommands() {
-            if (ServerInfoUtils.SERVER_VERSION >= 13.0)
+            if (VNC.isAtLeast(13))
                 Bukkit.getOnlinePlayers().forEach(Player::updateCommands);
         }
 
@@ -131,7 +131,7 @@ public class Craft {
          */
         @SneakyThrows
         public void syncCommands(Collection<String> collection) {
-            if (ServerInfoUtils.SERVER_VERSION < 13.0) return;
+            if (!VNC.isAtLeast(13)) return;
             Collection<?> children = Command.Dispatcher.getRoot().getChildren();
             syncCommands();
             Command.Node root = Command.Dispatcher.getRoot();
@@ -157,7 +157,7 @@ public class Craft {
          */
         @SneakyThrows
         public void reloadCommandsFile() {
-            if (ServerInfoUtils.PAPER_ENABLED && ServerInfoUtils.SERVER_VERSION >= 12) {
+            if (VNC.PAPER_ENABLED && VNC.isAtLeast(12)) {
                 Server.INSTANCE.call("reloadCommandAliases");
                 return;
             }
@@ -172,10 +172,10 @@ public class Craft {
             INSTANCE.set("overrideAllCommandBlockCommands",
                     file.getStringList("command-block-overrides").contains("*"));
             INSTANCE.set("commandsConfiguration", file);
-            if (ServerInfoUtils.SERVER_VERSION <= 13)
+            if (VNC.isBefore("1.14"))
                 INSTANCE.set("ignoreVanillaPermissions",
                         file.getBoolean("ignore-vanilla-permissions"));
-            if (ServerInfoUtils.SERVER_VERSION <= 12)
+            if (VNC.isBefore("1.13"))
                 INSTANCE.set("unrestrictedAdvancements",
                         file.getBoolean("unrestricted-advancements"));
             map.registerServerAliases();
@@ -239,9 +239,9 @@ public class Craft {
              */
             @Nullable
             public final Reflector INSTANCE = ((Supplier<Reflector>) () -> {
-                if (ServerInfoUtils.SERVER_VERSION < 13.0)
+                if (!VNC.isAtLeast(13))
                     return null;
-                return ServerInfoUtils.SERVER_VERSION >= 17.0 ?
+                return VNC.isAtLeast(17) ?
                         Reflector.of("net.minecraft.commands.CommandDispatcher") :
                         Reflector.ofNms("CommandDispatcher");
             }).get();
@@ -252,7 +252,7 @@ public class Craft {
              * @param collection a collection of command names to remove
              */
             public void removeCommands(Collection<String> collection) {
-                if (ServerInfoUtils.SERVER_VERSION >= 13.0)
+                if (VNC.isAtLeast(13))
                     collection.forEach(getRoot()::removeCommand);
             }
 

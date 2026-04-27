@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import me.croabeast.common.util.ArrayUtils;
 import me.croabeast.common.util.Exceptions;
-import me.croabeast.common.util.ServerInfoUtils;
+import me.croabeast.vnc.VNC;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 
@@ -58,7 +58,7 @@ public final class Reflector {
     /**
      * The current Bukkit API version, used for dynamic resolution of NMS classes.
      */
-    private static final String API = ServerInfoUtils.BUKKIT_API_VERSION;
+    private static final String API = VNC.BUKKIT_API_VERSION;
 
     /**
      * The package path for NMS (net.minecraft.server) classes, dynamically constructed based on the API version.

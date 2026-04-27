@@ -1,12 +1,7 @@
 package me.croabeast.common.util;
 
 import lombok.experimental.UtilityClass;
-import org.apache.commons.lang.SystemUtils;
-import org.apache.commons.lang.WordUtils;
-import org.bukkit.Bukkit;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import me.croabeast.vnc.VNC;
 
 /**
  * The class that stores static keys for easy access and management.
@@ -47,51 +42,10 @@ public class ServerInfoUtils {
     public final int JAVA_VERSION;
     
     static {
-        double main = 0.0;
-        
-        Pattern p = Pattern.compile("1\\.(\\d+(\\.\\d+)?)");
-        Matcher m = p.matcher(Bukkit.getVersion());
-
-        if (m.find()) 
-            try {
-                main = Double.parseDouble(m.group(1));
-            } catch (Exception ignored) {}
-        
-        SERVER_VERSION = main;
-
-        BUKKIT_API_VERSION = SERVER_VERSION >= 20.5 ?
-                "" :
-                Bukkit.getServer().getClass()
-                        .getPackage()
-                        .getName().split("\\.")[3];
-        
-        SERVER_FORK = WordUtils.capitalize(Bukkit.getName())
-                + " 1." +
-                SERVER_VERSION;
-
-        boolean isPaper = false;
-
-        if (SERVER_VERSION >= 8) {
-            try {
-                Class.forName(SERVER_VERSION >= 12.0 ?
-                        "com.destroystokyo.paper.ParticleBuilder" :
-                        "io.papermc.paperclip.Paperclip"
-                );
-                isPaper = true;
-            } catch (ClassNotFoundException ignored) {}
-        }
-
-        PAPER_ENABLED = isPaper;
-
-        String version = SystemUtils.JAVA_VERSION;
-
-        if (!version.startsWith("1.")) {
-            int dot = version.indexOf(".");
-            if (dot != -1)
-                version = version.substring(0, dot);
-        }
-        else version = version.substring(2, 3);
-
-        JAVA_VERSION = Integer.parseInt(version);
+        BUKKIT_API_VERSION = VNC.BUKKIT_API_VERSION;
+        SERVER_VERSION = VNC.SERVER_VERSION;
+        SERVER_FORK = VNC.SERVER_FORK;
+        PAPER_ENABLED = VNC.PAPER_ENABLED;
+        JAVA_VERSION = VNC.JAVA_VERSION;
     }
 }

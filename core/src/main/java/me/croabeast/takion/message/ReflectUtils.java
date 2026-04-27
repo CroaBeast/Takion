@@ -2,17 +2,19 @@ package me.croabeast.takion.message;
 
 import lombok.experimental.UtilityClass;
 import me.croabeast.common.function.TriFunction;
-import me.croabeast.common.util.ServerInfoUtils;
+import me.croabeast.vnc.VNC;
 import org.bukkit.entity.Player;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
 @UtilityClass
 class ReflectUtils {
 
-    final double VERSION = ServerInfoUtils.SERVER_VERSION;
-    final boolean IS_LEGACY = VERSION < 17.0;
+    final double VERSION = VNC.SERVER_VERSION;
+    final boolean IS_LEGACY = VNC.isBefore("1.17");
 
     final Class<?> BASE_COMP_CLASS = from(
             IS_LEGACY ? null : "network.chat.", "IChatBaseComponent");
@@ -32,7 +34,7 @@ class ReflectUtils {
 
         if (IS_LEGACY)
             builder.append("server.")
-                    .append(ServerInfoUtils.BUKKIT_API_VERSION)
+                    .append(VNC.BUKKIT_API_VERSION)
                     .append(".");
 
         if (prefix != null) builder.append(prefix);
@@ -72,15 +74,64 @@ class ReflectUtils {
         );
 
         Object handler = p.getClass().getMethod("getHandle").invoke(p);
-        String co = VERSION >= 20.0 ? "c" : "b";
+        Object connect = readFirstField(
+                handler,
+                IS_LEGACY ? new String[] {"playerConnection"} : new String[] {"playerConnection", "b", "c"}
+        );
 
-        Object connect = handler.getClass()
-                .getField(IS_LEGACY ? "playerConnection" : co)
-                .get(handler);
+        if (connect == null || clazz == null)
+            throw new IllegalStateException("Could not resolve the player connection packet bridge.");
 
-        connect.getClass()
-                .getMethod(VERSION < 18.0 ? "sendPacket" : "a", clazz)
-                .invoke(connect, o);
+        Method method = getFirstMethod(
+                connect.getClass(),
+                clazz,
+                VERSION < 18.0 ? new String[] {"sendPacket", "a"} : new String[] {"a", "sendPacket"}
+        );
+
+        if (method == null)
+            throw new NoSuchMethodException("Could not resolve the packet sending method.");
+
+        method.invoke(connect, o);
+    }
+
+    private Object readFirstField(Object instance, String... names) throws IllegalAccessException {
+        for (String name : names) {
+            Field field = getField(instance.getClass(), name);
+            if (field != null)
+                return field.get(instance);
+        }
+        return null;
+    }
+
+    private Field getField(Class<?> type, String name) {
+        try {
+            return type.getField(name);
+        } catch (NoSuchFieldException ignored) {}
+
+        try {
+            Field field = type.getDeclaredField(name);
+            if (!field.isAccessible())
+                field.setAccessible(true);
+            return field;
+        } catch (NoSuchFieldException ignored) {
+            return null;
+        }
+    }
+
+    private Method getFirstMethod(Class<?> type, Class<?> parameter, String... names) {
+        for (String name : names) {
+            try {
+                return type.getMethod(name, parameter);
+            } catch (NoSuchMethodException ignored) {}
+
+            try {
+                Method method = type.getDeclaredMethod(name, parameter);
+                if (!method.isAccessible())
+                    method.setAccessible(true);
+                return method;
+            } catch (NoSuchMethodException ignored) {}
+        }
+        return null;
     }
 
     int round(int i) {

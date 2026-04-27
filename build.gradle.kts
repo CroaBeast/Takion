@@ -79,6 +79,6 @@ subprojects {
 
         compileOnly("me.croabeast:YAML-API:1.1")
         compileOnly("me.croabeast:GlobalScheduler:1.1")
-        compileOnly("me.croabeast:PrismaticAPI:1.2")
+        compileOnly("me.croabeast:PrismaticAPI:1.4.0")
     }
 }

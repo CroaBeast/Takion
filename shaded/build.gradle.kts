@@ -5,7 +5,7 @@ dependencies {
 
     implementation("me.croabeast:YAML-API:1.1")
     implementation("me.croabeast:GlobalScheduler:1.1")
-    implementation("me.croabeast:PrismaticAPI:1.2")
+    implementation("me.croabeast:PrismaticAPI:1.4.0")
 }
 
 tasks.named("build") {
