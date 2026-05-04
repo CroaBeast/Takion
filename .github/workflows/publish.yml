@@ -42,7 +42,7 @@ jobs:
 
       - name: Build with Gradle
         run: |
-          ./gradlew --no-daemon clean :core:build :shaded:shadowJar :shaded-all:shadowJar :plugin:shadowJar
+          ./gradlew --no-daemon clean :core:build :shaded:build :plugin:shadowJar
 
       - name: Get Version from Gradle
         id: version
@@ -59,10 +59,8 @@ jobs:
             core/build/libs/*-${{ env.VERSION }}.jar
             core/build/libs/*-${{ env.VERSION }}-sources.jar
             core/build/libs/*-${{ env.VERSION }}-javadoc.jar
-            shaded-all/build/libs/*-${{ env.VERSION }}.jar
-            shaded-all/build/libs/*-${{ env.VERSION }}-sources.jar
-            shaded-all/build/libs/*-${{ env.VERSION }}-javadoc.jar
             shaded/build/libs/*-${{ env.VERSION }}.jar
+            shaded/build/libs/*-${{ env.VERSION }}-all.jar
             shaded/build/libs/*-${{ env.VERSION }}-sources.jar
             shaded/build/libs/*-${{ env.VERSION }}-javadoc.jar
             plugin/build/libs/*-${{ env.VERSION }}.jar
@@ -97,8 +95,8 @@ jobs:
           name: Release ${{ env.VERSION }}
           files: |
             core/build/libs/*-${{ env.VERSION }}.jar
-            shaded-all/build/libs/*-${{ env.VERSION }}.jar
             shaded/build/libs/*-${{ env.VERSION }}.jar
+            shaded/build/libs/*-${{ env.VERSION }}-all.jar
             plugin/build/libs/*-${{ env.VERSION }}.jar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -120,6 +118,27 @@ jobs:
           VERSION: ${{ env.VERSION }}
         run: |
           set -e
+
+          write_metadata () {
+            ARTIFACT_ID="$1"
+            META_DIR="maven-repo/me/croabeast/takion/$ARTIFACT_ID"
+            mkdir -p "$META_DIR"
+            cat > "$META_DIR/maven-metadata.xml" << EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <metadata>
+            <groupId>me.croabeast.takion</groupId>
+            <artifactId>$ARTIFACT_ID</artifactId>
+            <versioning>
+              <latest>$VERSION</latest>
+              <release>$VERSION</release>
+              <versions>
+                <version>$VERSION</version>
+              </versions>
+              <lastUpdated>$(date -u +%Y%m%d%H%M%S)</lastUpdated>
+            </versioning>
+          </metadata>
+          EOF
+          }
 
           deploy_module () {
             MODULE_DIR="$1"
@@ -151,28 +170,44 @@ jobs:
           </project>
           EOF
 
-            META_DIR="maven-repo/me/croabeast/takion/$ARTIFACT_ID"
-            mkdir -p "$META_DIR"
-            cat > "$META_DIR/maven-metadata.xml" << EOF
+            write_metadata "$ARTIFACT_ID"
+          }
+
+          deploy_shaded () {
+            SRC_DIR="shaded/build/libs"
+            DEST_DIR="maven-repo/me/croabeast/takion/shaded/$VERSION"
+            ART="shaded-$VERSION"
+
+            mkdir -p "$DEST_DIR"
+
+            MAIN_JAR=$(ls "$SRC_DIR"/shaded-"$VERSION".jar 2>/dev/null | grep -vE '(-sources|-javadoc|-all).jar' | head -n1 || true)
+            [ -n "$MAIN_JAR" ] && cp "$MAIN_JAR" "$DEST_DIR/$ART.jar" || true
+
+            ALL_JAR=$(ls "$SRC_DIR"/*-"$VERSION"-all.jar 2>/dev/null | head -n1 || true)
+            [ -n "$ALL_JAR" ] && cp "$ALL_JAR" "$DEST_DIR/$ART-all.jar" || true
+
+            SRC_JAR=$(ls "$SRC_DIR"/*-"$VERSION"-sources.jar 2>/dev/null | head -n1 || true)
+            [ -n "$SRC_JAR" ] && cp "$SRC_JAR" "$DEST_DIR/$ART-sources.jar" || true
+
+            DOC_JAR=$(ls "$SRC_DIR"/*-"$VERSION"-javadoc.jar 2>/dev/null | head -n1 || true)
+            [ -n "$DOC_JAR" ] && cp "$DOC_JAR" "$DEST_DIR/$ART-javadoc.jar" || true
+
+            cat > "$DEST_DIR/$ART.pom" << EOF
           <?xml version="1.0" encoding="UTF-8"?>
-          <metadata>
+          <project>
+            <modelVersion>4.0.0</modelVersion>
             <groupId>me.croabeast.takion</groupId>
-            <artifactId>$ARTIFACT_ID</artifactId>
-            <versioning>
-              <latest>$VERSION</latest>
-              <release>$VERSION</release>
-              <versions>
-                <version>$VERSION</version>
-              </versions>
-              <lastUpdated>$(date -u +%Y%m%d%H%M%S)</lastUpdated>
-            </versioning>
-          </metadata>
+            <artifactId>shaded</artifactId>
+            <version>$VERSION</version>
+            <packaging>jar</packaging>
+          </project>
           EOF
+
+            write_metadata shaded
           }
 
           deploy_module core   core
-          deploy_module shaded-all shaded-all
-          deploy_module shaded shaded
+          deploy_shaded
           deploy_module plugin plugin
 
           cd maven-repo

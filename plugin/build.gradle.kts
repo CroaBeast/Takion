@@ -9,6 +9,15 @@ dependencies {
     compileOnly("me.croabeast:AdvancementInfo:1.0")
 }
 
+tasks.processResources {
+    val props = mapOf("version" to version)
+    inputs.properties(props)
+    filteringCharset = "UTF-8"
+    filesMatching("plugin.yml") {
+        expand(props)
+    }
+}
+
 tasks.named("build") {
     dependsOn(tasks.named("shadowJar"))
 }
