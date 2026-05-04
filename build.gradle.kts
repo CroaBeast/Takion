@@ -1,7 +1,7 @@
 plugins {
-    kotlin("jvm") version "2.3.0-Beta1"
+    kotlin("jvm") version "2.4.0-Beta2"
     id("java-library")
-    id("io.freefair.lombok") version "9.4.0"
+    id("io.freefair.lombok") version "9.5.0"
     id("com.gradleup.shadow") version "9.4.1"
 }
 
@@ -56,17 +56,17 @@ subprojects {
     dependencies {
         compileOnly("org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT")
 
-        compileOnly("org.jetbrains:annotations:26.0.2-1")
-        annotationProcessor("org.jetbrains:annotations:26.0.2-1")
+        compileOnly("org.jetbrains:annotations:26.1.0")
+        annotationProcessor("org.jetbrains:annotations:26.1.0")
 
-        compileOnly("org.projectlombok:lombok:1.18.42")
-        annotationProcessor("org.projectlombok:lombok:1.18.42")
+        compileOnly("org.projectlombok:lombok:1.18.46")
+        annotationProcessor("org.projectlombok:lombok:1.18.46")
 
-        compileOnly("me.clip:placeholderapi:2.11.6")
+        compileOnly("me.clip:placeholderapi:2.12.2")
 
-        compileOnly("net.kyori:adventure-text-minimessage:4.25.0")
-        compileOnly("net.kyori:adventure-text-serializer-legacy:4.25.0")
-        compileOnly("net.kyori:adventure-text-logger-slf4j:4.25.0")
+        compileOnly("net.kyori:adventure-text-minimessage:4.26.1")
+        compileOnly("net.kyori:adventure-text-serializer-legacy:4.26.1")
+        compileOnly("net.kyori:adventure-text-logger-slf4j:4.26.1")
 
         compileOnly("com.github.MilkBowl:VaultAPI:1.7")
         compileOnly("net.luckperms:api:5.5")
@@ -74,10 +74,9 @@ subprojects {
             isTransitive = false
         }
 
-        compileOnly("org.bstats:bstats-bukkit:3.0.2")
+        compileOnly("org.bstats:bstats-bukkit:3.2.1")
         compileOnly("com.github.stefvanschie.inventoryframework:IF:0.12.0")
-        compileOnly("com.mojang:authlib:1.5.25")
-
+        
         compileOnly("me.croabeast:YAML-API:1.1")
         compileOnly("me.croabeast:GlobalScheduler:1.1")
         compileOnly("me.croabeast:PrismaticAPI:1.4.0")
