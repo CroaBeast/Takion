@@ -32,7 +32,7 @@ Takion is an all-in-one toolkit for building premium chat and text experiences o
 - **Channel, placeholder, and rule management** baked directly into the `TakionLib` entry point for one-line access in your plugin lifecycle.
 - **Scheduler integration** via `GlobalScheduler`, making it trivial to run asynchronous or delayed messaging tasks without boilerplate.
 - **Drop-in metrics** (bstats) and optional Vault/chat bridges when using the plugin distribution.
-- **Ready for shading**—choose between the lightweight core API, the shaded binary with dependencies, or the demonstration plugin module.
+- **Ready for shading**—choose between the lightweight core API, the shaded binary, the `shaded:all` variant with extra bundled libraries, or the demonstration plugin module.
 
 ---
 
@@ -43,7 +43,7 @@ Takion is a multi-module Gradle project. Pick the artifact that matches your dis
 | Module   | Description                                                                                                                                                                 | Ideal For                                                                            |
 |----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|
 | `core`   | The primary Takion API containing `TakionLib`, managers, and shared utilities. Optional when you only need to compile against the exposed API or validate the core sources. |
-| `shaded` | Repackages `core` together with required libraries (PrismaticAPI, GlobalScheduler, YAML-API).                                                                               | Shipping a single jar without configuring repositories in your consumer.             |
+| `shaded` | Repackages `core` together with required libraries (PrismaticAPI, GlobalScheduler, YAML-API) and also publishes an `all` classifier with extra bundled libraries.          | Shipping a single jar without configuring repositories in your consumer.             |
 | `plugin` | Example/production-ready plugin bundle that brings in optional adapters (Vault, bStats) and relocates packages using Shadow.                                                | Deploying Takion directly on a server or as a base plugin for further customization. |
 
 All modules target **Java 8** using Gradle toolchains, so you can build and run on modern JDKs while remaining compatible with legacy Minecraft hosts.
@@ -58,7 +58,7 @@ Takion leans on several battle-tested libraries created by the same author:
 - [**YAML-API**](https://github.com/CroaBeast/YAML-API) – lightweight YAML configuration helpers and file management.
 - [**GlobalScheduler**](https://github.com/CroaBeast/GlobalScheduler) – abstraction for Paper/Spigot task scheduling.
 - [**VaultAdapter**](https://github.com/CroaBeast/VaultAdapter) *(plugin module)* – bridges Vault chat/permissions into Takion placeholders.
-- [**CommandFramework**](https://github.com/CroaBeast/CommandFramework) and [**AdvancementInfo**](https://github.com/CroaBeast/AdvancementInfo)** (via the shaded distribution) – extendable command and advancement utilities.
+- [**CommandFramework**](https://github.com/CroaBeast/CommandFramework) and [**AdvancementInfo**](https://github.com/CroaBeast/AdvancementInfo)** (via the `shaded:all` classifier) – extendable command and advancement utilities.
 - [**bStats**](https://bstats.org/) *(plugin module)* – anonymous usage metrics (relocated to avoid conflicts).
 
 Optional integrations such as **InteractiveChat** or **Vault** can be toggled inside the plugin module without affecting the core API.
@@ -67,10 +67,10 @@ Optional integrations such as **InteractiveChat** or **Vault** can be toggled in
 
 ## 📦 Installation
 
-Add the public repository and choose the dependency that fits your workflow. As of **Takion 1.3**, artifacts live under the
-`me.croabeast.takion` group and are published per-module (`core`, `shaded`, `plugin`).
+Add the public repository and choose the dependency that fits your workflow. As of **Takion 1.5.1**, artifacts live under the
+`me.croabeast.takion` group and are published per-module (`core`, `shaded`, `plugin`), with an additional `all` classifier on `shaded`.
 
-> **Heads up:** You only need either the `shaded` or `plugin` artifact at runtime. The `core` artifact is optional—keep it as
+> **Heads up:** You only need either the `shaded`, `shaded:all`, or `plugin` artifact at runtime. The `core` artifact is optional—keep it as
 > a `compileOnly` dependency when you want IDE access to the core sources or plan to shade Takion yourself, but it is not
 > required on your production server.
 
@@ -82,10 +82,11 @@ repositories {
 
 dependencies {
     // Optional: keep core on the compileOnly classpath for source access while shading
-    compileOnly("me.croabeast.takion:core:1.3")
-    // Choose exactly one runtime: shaded (self-contained) or plugin (ready-to-run)
-    implementation("me.croabeast.takion:shaded:1.3")
-    // implementation("me.croabeast.takion:plugin:1.3")
+    compileOnly("me.croabeast.takion:core:1.5.1")
+    // Choose exactly one runtime
+    implementation("me.croabeast.takion:shaded:1.5.1")
+    // implementation("me.croabeast.takion:shaded:1.5.1:all")
+    // implementation("me.croabeast.takion:plugin:1.5.1")
 }
 ```
 
@@ -97,10 +98,11 @@ repositories {
 
 dependencies {
     // Optional: keep core on the compileOnly classpath for source access while shading
-    compileOnly "me.croabeast.takion:core:1.3"
-    // Choose exactly one runtime: shaded (self-contained) or plugin (ready-to-run)
-    implementation "me.croabeast.takion:shaded:1.3"
-    // implementation "me.croabeast.takion:plugin:1.3"
+    compileOnly "me.croabeast.takion:core:1.5.1"
+    // Choose exactly one runtime
+    implementation "me.croabeast.takion:shaded:1.5.1"
+    // implementation "me.croabeast.takion:shaded:1.5.1:all"
+    // implementation "me.croabeast.takion:plugin:1.5.1"
 }
 ```
 
@@ -118,20 +120,26 @@ dependencies {
     <dependency>
         <groupId>me.croabeast.takion</groupId>
         <artifactId>core</artifactId>
-        <version>1.3</version>
+        <version>1.5.1</version>
         <scope>provided</scope>
     </dependency>
-    <!-- Choose exactly one runtime: shaded (self-contained) or plugin (ready-to-run) -->
+    <!-- Choose exactly one runtime -->
     <dependency>
         <groupId>me.croabeast.takion</groupId>
         <artifactId>shaded</artifactId>
-        <version>1.3</version>
+        <version>1.5.1</version>
     </dependency>
     <!--
     <dependency>
         <groupId>me.croabeast.takion</groupId>
+        <artifactId>shaded</artifactId>
+        <version>1.5.1</version>
+        <classifier>all</classifier>
+    </dependency>
+    <dependency>
+        <groupId>me.croabeast.takion</groupId>
         <artifactId>plugin</artifactId>
-        <version>1.3</version>
+        <version>1.5.1</version>
     </dependency>
     -->
 </dependencies>
@@ -201,9 +209,10 @@ All components are designed to be modular: you can use them individually or stit
    ./gradlew clean build
    ```
 3. **Pick your artifact**:
-    - `core/build/libs/Takion-<version>.jar` – API only.
-    - `shaded/build/libs/Takion-<version>.jar` – shaded distribution.
-    - `plugin/build/libs/Takion-<version>.jar` – ready-to-run plugin with relocated packages.
+    - `core/build/libs/core-<version>.jar` – API only.
+    - `shaded/build/libs/shaded-<version>.jar` – shaded distribution.
+    - `shaded/build/libs/shaded-<version>-all.jar` – shaded distribution with the `all` classifier.
+    - `plugin/build/libs/plugin-<version>.jar` – ready-to-run plugin with relocated packages.
 
 Gradle Wrapper handles dependency downloads, so no additional setup is required.
 
