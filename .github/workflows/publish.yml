@@ -42,7 +42,7 @@ jobs:
 
       - name: Build with Gradle
         run: |
-          ./gradlew --no-daemon clean :core:build :shaded:build :plugin:shadowJar
+          ./gradlew --no-daemon clean :common:build :core:build :shaded:build :plugin:shadowJar
 
       - name: Get Version from Gradle
         id: version
@@ -59,6 +59,9 @@ jobs:
             core/build/libs/*-${{ env.VERSION }}.jar
             core/build/libs/*-${{ env.VERSION }}-sources.jar
             core/build/libs/*-${{ env.VERSION }}-javadoc.jar
+            common/build/libs/*-${{ env.VERSION }}.jar
+            common/build/libs/*-${{ env.VERSION }}-sources.jar
+            common/build/libs/*-${{ env.VERSION }}-javadoc.jar
             shaded/build/libs/*-${{ env.VERSION }}.jar
             shaded/build/libs/*-${{ env.VERSION }}-all.jar
             shaded/build/libs/*-${{ env.VERSION }}-sources.jar
@@ -95,6 +98,7 @@ jobs:
           name: Release ${{ env.VERSION }}
           files: |
             core/build/libs/*-${{ env.VERSION }}.jar
+            common/build/libs/*-${{ env.VERSION }}.jar
             shaded/build/libs/*-${{ env.VERSION }}.jar
             shaded/build/libs/*-${{ env.VERSION }}-all.jar
             plugin/build/libs/*-${{ env.VERSION }}.jar
@@ -167,6 +171,21 @@ jobs:
             <artifactId>$ARTIFACT_ID</artifactId>
             <version>$VERSION</version>
             <packaging>jar</packaging>
+          EOF
+
+            if [ "$ARTIFACT_ID" = "core" ]; then
+              cat >> "$DEST_DIR/$ART.pom" << EOF
+            <dependencies>
+              <dependency>
+                <groupId>me.croabeast.takion</groupId>
+                <artifactId>common</artifactId>
+                <version>$VERSION</version>
+              </dependency>
+            </dependencies>
+          EOF
+            fi
+
+            cat >> "$DEST_DIR/$ART.pom" << EOF
           </project>
           EOF
 
@@ -206,6 +225,7 @@ jobs:
             write_metadata shaded
           }
 
+          deploy_module common common
           deploy_module core   core
           deploy_shaded
           deploy_module plugin plugin

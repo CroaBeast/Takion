@@ -42,8 +42,9 @@ Takion is a multi-module Gradle project. Pick the artifact that matches your dis
 
 | Module   | Description                                                                                                                                                                 | Ideal For                                                                            |
 |----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|
-| `core`   | The primary Takion API containing `TakionLib`, managers, and shared utilities. Optional when you only need to compile against the exposed API or validate the core sources. |
-| `shaded` | Repackages `core` together with required libraries (PrismaticAPI, GlobalScheduler, YAML-API) and also publishes an `all` classifier with extra bundled libraries.          | Shipping a single jar without configuring repositories in your consumer.             |
+| `common` | Shared utilities under `me.croabeast.common`, including builders, reflection helpers, time utilities, dependency loading, and GUI helpers.                    | Reusing utility APIs independently from the main Takion API.                          |
+| `core`   | The primary Takion API containing `TakionLib` and managers. Optional when you only need to compile against the exposed API or validate the core sources.       | Compiling against Takion's main API or shading it yourself.                           |
+| `shaded` | Repackages `common` and `core` together with required libraries (PrismaticAPI, GlobalScheduler, YAML-API) and also publishes an `all` classifier with extra bundled libraries. | Shipping a single jar without configuring repositories in your consumer.             |
 | `plugin` | Example/production-ready plugin bundle that brings in optional adapters (Vault, bStats) and relocates packages using Shadow.                                                | Deploying Takion directly on a server or as a base plugin for further customization. |
 
 All modules target **Java 8** using Gradle toolchains, so you can build and run on modern JDKs while remaining compatible with legacy Minecraft hosts.
@@ -67,11 +68,11 @@ Optional integrations such as **InteractiveChat** or **Vault** can be toggled in
 
 ## 📦 Installation
 
-Add the public repository and choose the dependency that fits your workflow. As of **Takion 1.5.1**, artifacts live under the
-`me.croabeast.takion` group and are published per-module (`core`, `shaded`, `plugin`), with an additional `all` classifier on `shaded`.
+Add the public repository and choose the dependency that fits your workflow. As of **Takion 1.6.0**, artifacts live under the
+`me.croabeast.takion` group and are published per-module (`common`, `core`, `shaded`, `plugin`), with an additional `all` classifier on `shaded`.
 
-> **Heads up:** You only need either the `shaded`, `shaded:all`, or `plugin` artifact at runtime. The `core` artifact is optional—keep it as
-> a `compileOnly` dependency when you want IDE access to the core sources or plan to shade Takion yourself, but it is not
+> **Heads up:** You only need either the `shaded`, `shaded:all`, or `plugin` artifact at runtime. The `common` and `core` artifacts are optional—keep them as
+> `compileOnly` dependencies when you want IDE access to the sources or plan to shade Takion yourself, but they are not
 > required on your production server.
 
 ### Gradle (Kotlin DSL)
@@ -81,12 +82,13 @@ repositories {
 }
 
 dependencies {
-    // Optional: keep core on the compileOnly classpath for source access while shading
-    compileOnly("me.croabeast.takion:core:1.5.1")
+    // Optional: keep common/core on the compileOnly classpath for source access while shading
+    compileOnly("me.croabeast.takion:common:1.6.0")
+    compileOnly("me.croabeast.takion:core:1.6.0")
     // Choose exactly one runtime
-    implementation("me.croabeast.takion:shaded:1.5.1")
-    // implementation("me.croabeast.takion:shaded:1.5.1:all")
-    // implementation("me.croabeast.takion:plugin:1.5.1")
+    implementation("me.croabeast.takion:shaded:1.6.0")
+    // implementation("me.croabeast.takion:shaded:1.6.0:all")
+    // implementation("me.croabeast.takion:plugin:1.6.0")
 }
 ```
 
@@ -97,12 +99,13 @@ repositories {
 }
 
 dependencies {
-    // Optional: keep core on the compileOnly classpath for source access while shading
-    compileOnly "me.croabeast.takion:core:1.5.1"
+    // Optional: keep common/core on the compileOnly classpath for source access while shading
+    compileOnly "me.croabeast.takion:common:1.6.0"
+    compileOnly "me.croabeast.takion:core:1.6.0"
     // Choose exactly one runtime
-    implementation "me.croabeast.takion:shaded:1.5.1"
-    // implementation "me.croabeast.takion:shaded:1.5.1:all"
-    // implementation "me.croabeast.takion:plugin:1.5.1"
+    implementation "me.croabeast.takion:shaded:1.6.0"
+    // implementation "me.croabeast.takion:shaded:1.6.0:all"
+    // implementation "me.croabeast.takion:plugin:1.6.0"
 }
 ```
 
@@ -116,30 +119,36 @@ dependencies {
 </repositories>
 
 <dependencies>
-    <!-- Optional: include core for compilation-time access to the API -->
+    <!-- Optional: include common/core for compilation-time access to the API -->
+    <dependency>
+        <groupId>me.croabeast.takion</groupId>
+        <artifactId>common</artifactId>
+        <version>1.6.0</version>
+        <scope>provided</scope>
+    </dependency>
     <dependency>
         <groupId>me.croabeast.takion</groupId>
         <artifactId>core</artifactId>
-        <version>1.5.1</version>
+        <version>1.6.0</version>
         <scope>provided</scope>
     </dependency>
     <!-- Choose exactly one runtime -->
     <dependency>
         <groupId>me.croabeast.takion</groupId>
         <artifactId>shaded</artifactId>
-        <version>1.5.1</version>
+        <version>1.6.0</version>
     </dependency>
     <!--
     <dependency>
         <groupId>me.croabeast.takion</groupId>
         <artifactId>shaded</artifactId>
-        <version>1.5.1</version>
+        <version>1.6.0</version>
         <classifier>all</classifier>
     </dependency>
     <dependency>
         <groupId>me.croabeast.takion</groupId>
         <artifactId>plugin</artifactId>
-        <version>1.5.1</version>
+        <version>1.6.0</version>
     </dependency>
     -->
 </dependencies>
@@ -209,6 +218,7 @@ All components are designed to be modular: you can use them individually or stit
    ./gradlew clean build
    ```
 3. **Pick your artifact**:
+    - `common/build/libs/common-<version>.jar` - shared utilities.
     - `core/build/libs/core-<version>.jar` – API only.
     - `shaded/build/libs/shaded-<version>.jar` – shaded distribution.
     - `shaded/build/libs/shaded-<version>-all.jar` – shaded distribution with the `all` classifier.
