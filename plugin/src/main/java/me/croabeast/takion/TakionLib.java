@@ -3,6 +3,8 @@ package me.croabeast.takion;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import me.croabeast.common.Colorizer;
+import me.croabeast.common.CommonServices;
 import me.croabeast.common.Regex;
 import me.croabeast.common.util.Exceptions;
 import me.croabeast.prismatic.PrismaticAPI;
@@ -73,7 +75,7 @@ import java.util.regex.Pattern;
  * @see PrismaticAPI
  */
 @Getter @Setter
-public class TakionLib {
+public class TakionLib implements Colorizer {
 
     private static final TakionLib NO_PLUGIN = TakionPlugin.NO_PLUGIN_INSTANCE;
     private static final Map<String, TakionLib> CALLER_CACHE = new ConcurrentHashMap<>();
@@ -184,8 +186,10 @@ public class TakionLib {
         this.serverLogger = new TakionLogger(this, false);
         this.logger = new TakionLogger(this);
 
-        if (plugin != null)
+        if (plugin != null) {
             this.scheduler = GlobalScheduler.getScheduler(plugin);
+            CommonServices.setPluginSupplier(() -> TakionLib.getLib().getPlugin());
+        }
 
         titleManager = new TitleManager() {
             @Setter @Getter

@@ -1,5 +1,7 @@
 package me.croabeast.takion;
 
+import me.croabeast.common.Colorizer;
+import me.croabeast.common.CommonServices;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -68,7 +70,7 @@ import java.util.regex.Pattern;
  * @see PrismaticAPI
  */
 @Getter @Setter
-public class TakionLib {
+public class TakionLib implements Colorizer {
 
     private static final TakionLib NO_PLUGIN = new TakionLib(null);
     private static TakionLib instance = NO_PLUGIN;
@@ -178,8 +180,10 @@ public class TakionLib {
         this.serverLogger = new TakionLogger(this, false);
         this.logger = new TakionLogger(this);
 
-        if (plugin != null)
+        if (plugin != null) {
             this.scheduler = GlobalScheduler.getScheduler(plugin);
+            CommonServices.setPluginSupplier(() -> TakionLib.getLib().getPlugin());
+        }
 
         titleManager = new TitleManager() {
             @Setter @Getter

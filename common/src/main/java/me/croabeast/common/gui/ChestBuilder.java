@@ -2,8 +2,8 @@ package me.croabeast.common.gui;
 
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
 import com.github.stefvanschie.inventoryframework.pane.PaginatedPane;
+import me.croabeast.common.CommonServices;
 import me.croabeast.prismatic.PrismaticAPI;
-import me.croabeast.takion.TakionLib;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
@@ -92,6 +92,6 @@ public final class ChestBuilder extends GuiBuilder<ChestGui, ChestBuilder> {
 
     @NotNull
     public static ChestBuilder of(int rows, String name) {
-        return of(TakionLib.getLib().getPlugin(), rows, name);
+        return of(CommonServices.getPlugin(), rows, name);
     }
 }

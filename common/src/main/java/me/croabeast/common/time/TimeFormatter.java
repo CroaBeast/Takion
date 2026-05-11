@@ -1,6 +1,6 @@
 package me.croabeast.common.time;
 
-import me.croabeast.takion.TakionLib;
+import me.croabeast.common.Colorizer;
 import org.bukkit.entity.Player;
 
 import java.util.Objects;
@@ -11,7 +11,7 @@ import java.util.Objects;
  * {@code TimeFormatter} uses a {@link TimeValues} instance to format time durations into strings.
  * It calculates the number of years, months, weeks, days, hours, minutes, and seconds contained within
  * a duration, and returns a formatted string where each non-zero unit is included with proper pluralization.
- * The resulting string is also colorized via the provided {@link TakionLib} instance.
+ * The resulting string is also colorized via the provided {@link Colorizer} instance.
  * </p>
  *
  * <p>
@@ -29,15 +29,15 @@ import java.util.Objects;
  * <p>
  * Example usage:
  * <pre><code>
- * TakionLib lib = TakionLib.fromPlugin(plugin);
- * TimeFormatter formatter = new TimeFormatter(lib, TimeValues.DEFAULT_KEYS, 987654);
+ * Colorizer colorizer = TakionLib.fromPlugin(plugin);
+ * TimeFormatter formatter = new TimeFormatter(colorizer, TimeValues.DEFAULT_KEYS, 987654);
  * String formatted = formatter.formatTime(player);
  * System.out.println(formatted);
  * </code></pre>
  * </p>
  *
  * @see TimeValues
- * @see TakionLib
+ * @see Colorizer
  */
 public class TimeFormatter {
 
@@ -71,7 +71,7 @@ public class TimeFormatter {
      */
     private static final String PLURAL_REGEX = "\\s*\\([^)]*\\)\\s*";
 
-    private final TakionLib lib;
+    private final Colorizer colorizer;
     private final TimeValues values;
     private final long seconds;
 
@@ -79,12 +79,12 @@ public class TimeFormatter {
      * Constructs a new {@code TimeFormatter} with the given library instance, time value formats,
      * and duration in seconds.
      *
-     * @param lib     the {@link TakionLib} instance used for colorization and formatting utilities (must not be {@code null})
+     * @param colorizer the {@link Colorizer} instance used for colorization and formatting utilities (must not be {@code null})
      * @param values  the {@link TimeValues} instance containing format strings; if {@code null}, default keys are used
      * @param seconds the duration in seconds to format
      */
-    public TimeFormatter(TakionLib lib, TimeValues values, long seconds) {
-        this.lib = Objects.requireNonNull(lib);
+    public TimeFormatter(Colorizer colorizer, TimeValues values, long seconds) {
+        this.colorizer = Objects.requireNonNull(colorizer);
         this.values = values == null ? TimeValues.DEFAULT_KEYS : values;
         this.seconds = seconds;
     }
@@ -93,11 +93,11 @@ public class TimeFormatter {
      * Constructs a new {@code TimeFormatter} with the given library instance and duration in seconds,
      * using default time value formats.
      *
-     * @param lib     the {@link TakionLib} instance used for colorization and formatting utilities
+     * @param colorizer the {@link Colorizer} instance used for colorization and formatting utilities
      * @param seconds the duration in seconds to format
      */
-    public TimeFormatter(TakionLib lib, long seconds) {
-        this(lib, null, seconds);
+    public TimeFormatter(Colorizer colorizer, long seconds) {
+        this(colorizer, null, seconds);
     }
 
     /**
@@ -130,7 +130,7 @@ public class TimeFormatter {
     }
 
     /**
-     * Colorizes the provided string using the {@link TakionLib} instance.
+     * Colorizes the provided string using the {@link Colorizer} instance.
      * <p>
      * The colorization is applied with respect to the target and parser players.
      * </p>
@@ -141,7 +141,7 @@ public class TimeFormatter {
      * @return the colorized string
      */
     private String colorize(Player target, Player parser, String string) {
-        return lib.colorize(target, parser, string);
+        return colorizer.colorize(target, parser, string);
     }
 
     /**

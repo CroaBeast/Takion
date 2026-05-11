@@ -1,0 +1,1 @@
+tasks.named("build") {}

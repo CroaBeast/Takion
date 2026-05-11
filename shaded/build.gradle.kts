@@ -12,6 +12,7 @@ val allBundle by configurations.creating {
 }
 
 dependencies {
+    implementation(project(":common"))
     implementation(project(":core"))
 
     implementation("me.croabeast:YAML-API:1.1")

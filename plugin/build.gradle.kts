@@ -1,6 +1,7 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 dependencies {
+    implementation(project(":common"))
     implementation(project(":core"))
 
     compileOnly("me.croabeast:UpdateChecker:1.0")

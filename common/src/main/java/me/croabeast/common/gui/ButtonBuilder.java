@@ -3,7 +3,7 @@ package me.croabeast.common.gui;
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.github.stefvanschie.inventoryframework.pane.component.ToggleButton;
 import com.github.stefvanschie.inventoryframework.pane.util.Slot;
-import me.croabeast.takion.TakionLib;
+import me.croabeast.common.CommonServices;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
@@ -98,7 +98,7 @@ public final class ButtonBuilder extends PaneBuilder<ToggleButton, ButtonBuilder
      * @return a new {@code ButtonBuilder} instance
      */
     public static ButtonBuilder of(Slot slot, boolean value) {
-        return of(TakionLib.getLib().getPlugin(), slot, value);
+        return of(CommonServices.getPlugin(), slot, value);
     }
 
     /**
