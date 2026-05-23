@@ -80,13 +80,14 @@ public class TakionLogger {
      */
     static final class PaperLogger implements Loggable {
 
+        /** The underlying Adventure SLF4J component logger. */
         private final ComponentLogger logger;
 
         /**
          * Constructs a new {@code PaperLogger} instance that routes log output
          * through Adventure's SLF4J ComponentLogger.
          *
-         * @param name the logger name (usually the plugin name)=
+         * @param name the logger name (usually the plugin name)
          */
         @SneakyThrows
         PaperLogger(String name) {
@@ -243,12 +244,20 @@ public class TakionLogger {
     }
 
     /**
-     * Internal helper that formats and logs a collection of messages.
+     * Internal helper that pre-formats a collection of messages and dispatches them to the active logger.
      */
     private class LogCollection {
+        /** The pre-formatted messages ready to be logged. */
         private final Collection<String> collection;
+        /** The log level at which all messages in this collection will be emitted. */
         private final LogLevel level;
 
+        /**
+         * Creates a new {@code LogCollection}, filtering and formatting the provided messages.
+         *
+         * @param level      the log level to use for all messages
+         * @param collection the raw messages to format and store
+         */
         LogCollection(LogLevel level, Collection<String> collection) {
             this.level = level;
             this.collection = CollectionBuilder.of(collection)
@@ -257,6 +266,10 @@ public class TakionLogger {
                     .toList();
         }
 
+        /**
+         * Dispatches all pre-formatted messages to the active logger backend
+         * (Paper if available, otherwise Bukkit).
+         */
         void log() {
             collection.forEach(s -> (paper == null ? bukkit : paper).log(level, s));
         }

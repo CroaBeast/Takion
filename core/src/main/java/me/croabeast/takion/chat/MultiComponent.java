@@ -55,6 +55,13 @@ public interface MultiComponent extends ChatComponent<MultiComponent>, Copyable<
      */
     Format<ChatComponent<?>> DEFAULT_FORMAT = new MultiCompImpl(TakionLib.fromPlugin(null), "").getFormat();
 
+    /**
+     * Unsupported operation — the message of a {@code MultiComponent} cannot be replaced directly.
+     *
+     * @param message the message to set
+     * @return never returns normally
+     * @throws IllegalStateException always, since setting a raw message is not supported
+     */
     @NotNull
     default MultiComponent setMessage(@NotNull String message) {
         throw new IllegalStateException("Message can not be set");

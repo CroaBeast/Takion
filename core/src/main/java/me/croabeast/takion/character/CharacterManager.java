@@ -13,8 +13,10 @@ import java.util.List;
  * A {@code CharacterManager} allows you to register custom characters with specific widths,
  * retrieve character information, remove characters, and align strings based on character widths.
  * </p>
+ * <p>
  * This is particularly useful when handling text rendering or custom UI layouts where each character
  * might have a different visual width.
+ * </p>
  */
 public interface CharacterManager {
 

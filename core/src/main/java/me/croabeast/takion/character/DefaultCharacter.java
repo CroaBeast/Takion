@@ -10,8 +10,11 @@ import java.util.Locale;
  * This enum implements {@link CharacterInfo} and provides a predefined list of characters
  * (letters, numbers, and symbols) with configurable length values for text formatting purposes.
  * </p>
+ * <p>
  * Each enum constant represents a character with a default or custom length, which can be used
- * to determine how much space the character occupies when rendered (for example, in custom chat formats or UI elements).
+ * to determine how much space the character occupies when rendered (for example, in custom chat
+ * formats or UI elements).
+ * </p>
  */
 @Getter
 public enum DefaultCharacter implements CharacterInfo {
@@ -137,11 +140,22 @@ public enum DefaultCharacter implements CharacterInfo {
      */
     int length = 5;
 
+    /**
+     * Creates a constant with the given character and a custom display length.
+     *
+     * @param character the character represented by this constant
+     * @param length    the custom display length for the character
+     */
     DefaultCharacter(char character, int length) {
         this(character);
         this.length = length;
     }
 
+    /**
+     * Creates a constant with the given character and the default display length of {@code 5}.
+     *
+     * @param character the character represented by this constant
+     */
     DefaultCharacter(char character) {
         this.character = character;
         name = name().toLowerCase(Locale.ENGLISH);

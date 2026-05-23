@@ -6,8 +6,10 @@ package me.croabeast.takion.character;
  * This interface provides methods to retrieve the character itself and its
  * associated length (which might be used for formatting or layout purposes).
  * </p>
+ * <p>
  * Additionally, it offers a method to calculate the "bold" length, which takes
  * into account an extra width for non-space characters.
+ * </p>
  */
 public interface CharacterInfo {
 

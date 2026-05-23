@@ -8,11 +8,10 @@ import java.util.logging.Level;
 
 /**
  * Represents different levels of logging severity.
- * This enum provides a bridge between Bukkit's {@link Level} and custom log levels
- * used within the Takion framework.
  * <p>
- * Each log level corresponds to one or more Java logging levels, allowing
- * for a flexible mapping of log messages to different levels of severity.
+ * This enum provides a bridge between Bukkit's {@link Level} and custom log levels
+ * used within the Takion framework. Each log level corresponds to one or more Java logging
+ * levels, allowing for a flexible mapping of log messages to different levels of severity.
  * </p>
  */
 public enum LogLevel {
@@ -55,9 +54,11 @@ public enum LogLevel {
 
     /**
      * Converts this {@code LogLevel} to its corresponding Java {@link Level}.
-     * If multiple levels are associated, the first one is returned.
+     * <p>
+     * If multiple levels are associated with this log level, the first one is returned.
+     * </p>
      *
-     * @return The primary {@link Level} associated with this log level.
+     * @return the primary {@link Level} associated with this log level
      */
     public Level toJava() {
         return levels.get(0);
@@ -65,20 +66,24 @@ public enum LogLevel {
 
     /**
      * Returns the name of this log level in lowercase.
+     * <p>
      * Useful for formatting or serialization purposes.
+     * </p>
      *
-     * @return The lowercase name of the log level.
+     * @return the lowercase name of this log level
      */
     public String getName() {
         return name().toLowerCase(Locale.ENGLISH);
     }
 
     /**
-     * Retrieves the corresponding {@code LogLevel} for a given Java {@link Level}.
-     * If the provided level does not match any predefined {@code LogLevel}, it defaults to {@link #DEBUG}.
+     * Returns the {@code LogLevel} corresponding to the given Java {@link Level}.
+     * <p>
+     * If the provided level does not match any predefined {@code LogLevel}, defaults to {@link #DEBUG}.
+     * </p>
      *
-     * @param level The Java logging level to map.
-     * @return The corresponding {@code LogLevel}, or {@link #DEBUG} if no match is found.
+     * @param level the Java logging level to map
+     * @return the corresponding {@code LogLevel}, or {@link #DEBUG} if no match is found
      */
     public static LogLevel fromJava(Level level) {
         if (level == null) return DEBUG;
