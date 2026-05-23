@@ -188,7 +188,7 @@ public class TakionLib implements Colorizer {
 
         if (plugin != null) {
             this.scheduler = GlobalScheduler.getScheduler(plugin);
-            CommonServices.setPluginSupplier(() -> TakionLib.getLib().getPlugin());
+            CommonServices.setPlugin(() -> TakionLib.getLib().getPlugin());
         }
 
         titleManager = new TitleManager() {
