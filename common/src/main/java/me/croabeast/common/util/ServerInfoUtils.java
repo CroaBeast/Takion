@@ -4,40 +4,39 @@ import lombok.experimental.UtilityClass;
 import me.croabeast.vnc.VNC;
 
 /**
- * The class that stores static keys for easy access and management.
- *
- * @author CroaBeast
- * @since 1.0
+ * A utility class that stores static server information constants for easy access.
  */
 @UtilityClass
 public class ServerInfoUtils {
 
     /**
-     * Retrieves the version number of the Bukkit package that is currently running.
+     * The version number of the Bukkit package that is currently running.
      */
     public static final String BUKKIT_API_VERSION;
 
     /**
-     * Returns the major and minor version of the server in a double/decimal format.
-     *
-     * <p> If version is <code>1.16.5</code>, will return <code>16.5</code>.
+     * The major and minor version of the server in a decimal format.
+     * <p>
+     * For example, if the server version is {@code 1.16.5}, this field holds {@code 16.5}.
+     * </p>
      */
     public final double SERVER_VERSION;
 
     /**
-     * Returns the spigot-format server version and fork.
+     * The spigot-format server version string, including the server fork name.
      */
     public final String SERVER_FORK;
 
     /**
-     * Returns true if the server is Paper or a fork of it, otherwise false.
+     * {@code true} if the server is running Paper or a Paper-based fork; {@code false} otherwise.
      */
     public final boolean PAPER_ENABLED;
 
     /**
-     * Returns the Java major version of the server.
-     *
-     * <p> Example: if version is <code>1.8.0.302</code>, will return <code>8</code>.
+     * The Java major version running on the server.
+     * <p>
+     * For example, if the full Java version is {@code 1.8.0_302}, this field holds {@code 8}.
+     * </p>
      */
     public final int JAVA_VERSION;
     

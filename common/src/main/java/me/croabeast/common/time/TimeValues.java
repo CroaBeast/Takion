@@ -59,29 +59,48 @@ public class TimeValues {
             .setMonthsFormat("Mes(es)")
             .setYearsFormat("Año(s)").toggleModification();
 
+    /** Whether this instance can still be modified; {@code false} means it is locked. */
     @Getter(AccessLevel.NONE)
     private boolean modify = true;
 
     /**
-     * The delimiter used to separate time unit strings in the final formatted output.
+     * The delimiter used to separate time unit segments in the final formatted output.
      */
     @NotNull
     private String splitter = ", ";
 
+    /** The format string representing seconds (e.g., {@code "Second(s)"}). */
     private String secondsFormat = "Second(s)";
+    /** The format string representing minutes (e.g., {@code "Minute(s)"}). */
     private String minutesFormat = "Minute(s)";
+    /** The format string representing hours (e.g., {@code "Hour(s)"}). */
     private String hoursFormat = "Hour(s)";
+    /** The format string representing days (e.g., {@code "Day(s)"}). */
     private String daysFormat = "Day(s)";
+    /** The format string representing weeks (e.g., {@code "Week(s)"}). */
     private String weeksFormat = "Week(s)";
+    /** The format string representing months (e.g., {@code "Month(s)"}). */
     private String monthsFormat = "Month(s)";
+    /** The format string representing years (e.g., {@code "Year(s)"}). */
     private String yearsFormat = "Year(s)";
 
+    /**
+     * Creates a new instance with the modification flag set to {@code b}.
+     *
+     * @param b {@code true} to allow modifications; {@code false} to lock the instance immediately
+     */
     private TimeValues(boolean b) {
         this.modify = b;
     }
 
+    /** Creates a new modifiable instance with all default format strings. */
     private TimeValues() {}
 
+    /**
+     * Creates a new instance by copying all values from the given {@code TimeValues}.
+     *
+     * @param values the source instance to copy from
+     */
     private TimeValues(TimeValues values) {
         modify = values.modify;
         splitter = values.getSplitter();

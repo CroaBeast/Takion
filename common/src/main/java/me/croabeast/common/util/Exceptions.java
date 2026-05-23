@@ -41,11 +41,16 @@ public class Exceptions {
     }
 
     /**
-     * Checks if at least one of the specified plugins is enabled.
+     * Checks if plugins are enabled based on the {@code inclusive} flag.
+     * <p>
+     * When {@code inclusive} is {@code true}, returns {@code true} only if all plugins are enabled.
+     * When {@code false}, returns {@code true} if at least one plugin is enabled.
+     * </p>
      *
-     * @param names the plugin names to check
-     * @return      {@code true} if any plugin in {@code names} is enabled; {@code false} if none are enabled or if {@code names} is empty
-     * @deprecated use {@link #anyPluginEnabled(Collection)} instead for clarity
+     * @param inclusive {@code true} to require all plugins to be enabled; {@code false} to require only one
+     * @param names     the plugin names to check
+     * @return          {@code true} if the condition determined by {@code inclusive} is met; {@code false} otherwise
+     * @deprecated use {@link #anyPluginEnabled(Collection)} or {@link #allPluginsEnabled(Collection)} instead for clarity
      */
     @Deprecated
     public boolean arePluginsEnabled(boolean inclusive, @NotNull Collection<String> names) {
@@ -84,13 +89,13 @@ public class Exceptions {
      * If the predicate test fails, the supplied exception is thrown.
      * </p>
      *
-     * @param  <T>               the type of the input object
-     * @param  object            the object to validate (must not be null)
-     * @param  predicate         the condition to test
-     * @param  supplier supplies the exception to throw if the test fails
-     *
-     * @return                   the validated object
-     * @throws X                 the exception returned by {@code supplier}
+     * @param <T>       the type of the input object
+     * @param <X>       the type of exception thrown on failure
+     * @param object    the object to validate (must not be {@code null})
+     * @param predicate the condition to test
+     * @param supplier  the supplier that provides the exception to throw if the test fails
+     * @return the validated object
+     * @throws X if the predicate test fails
      */
     public <T, X extends Throwable> T validate(T object, Predicate<T> predicate, Supplier<X> supplier) throws X {
         Objects.requireNonNull(object);
@@ -104,13 +109,12 @@ public class Exceptions {
      * If the predicate test fails, an {@link IllegalStateException} is thrown.
      * </p>
      *
-     * @param  <T>               the type of the input object
-     * @param  object            the object to validate (must not be null)
-     * @param  predicate         the condition to test
-     * @param  errorMessage      the error message to be shown
-     *
-     * @return                   the validated object
-     * @throws IllegalStateException if the {@code predicate} test fails
+     * @param <T>          the type of the input object
+     * @param object       the object to validate (must not be {@code null})
+     * @param predicate    the condition to test
+     * @param errorMessage the error message for the thrown exception
+     * @return the validated object
+     * @throws IllegalStateException if the predicate test fails
      */
     @NotNull
     public <T> T validate(T object, Predicate<T> predicate, String errorMessage) throws IllegalStateException {
@@ -123,12 +127,11 @@ public class Exceptions {
      * If the predicate test fails, an {@link IllegalStateException} is thrown.
      * </p>
      *
-     * @param  <T>               the type of the input object
-     * @param  object            the object to validate (must not be null)
-     * @param  predicate         the condition to test
-     *
-     * @return                   the validated object
-     * @throws IllegalStateException if the {@code predicate} test fails
+     * @param <T>       the type of the input object
+     * @param object    the object to validate (must not be {@code null})
+     * @param predicate the condition to test
+     * @return the validated object
+     * @throws IllegalStateException if the predicate test fails
      */
     @NotNull
     public <T> T validate(T object, Predicate<T> predicate) throws IllegalStateException {
@@ -136,17 +139,16 @@ public class Exceptions {
     }
 
     /**
-     * Ensures that the given object satisfies the provided predicate.
+     * Ensures that the given object satisfies the provided boolean condition.
      * <p>
-     * If the predicate test fails, an {@link IllegalStateException} is thrown.
+     * If {@code b} is {@code false}, an {@link IllegalStateException} is thrown.
      * </p>
      *
-     * @param  <T>               the type of the input object
-     * @param  object            the object to validate (must not be null)
-     * @param  b                 the condition to test
-     *
-     * @return                   the validated object
-     * @throws IllegalStateException if the {@code predicate} test fails
+     * @param <T>    the type of the input object
+     * @param object the object to validate (must not be {@code null})
+     * @param b      the boolean condition that must be {@code true}
+     * @return the validated object
+     * @throws IllegalStateException if {@code b} is {@code false}
      */
     @NotNull
     public <T> T validate(T object, boolean b) {
@@ -156,13 +158,12 @@ public class Exceptions {
     /**
      * Ensures that the caller of the protected API belongs to the given plugin.
      * <p>
-     * If the calling class was not provided by {@code plugin}, throws the supplied exception.
+     * If the calling class was not provided by {@code plugin}, an {@link IllegalStateException} is thrown.
      * </p>
      *
-     * @param  plugin    the plugin that must own the caller class (might be null)
-     * @param  clazz the class invoking the protected API
-     *
-     * @throws IllegalStateException    if {@code clazz} was not provided by {@code plugin}
+     * @param plugin the plugin that must own the caller class (may be {@code null})
+     * @param clazz  the class invoking the protected API
+     * @throws IllegalStateException if {@code clazz} was not provided by {@code plugin}
      */
     public void requirePluginAccess(@Nullable Plugin plugin, @NotNull Class<?> clazz) {
         Plugin owner = null;

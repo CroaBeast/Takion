@@ -85,11 +85,26 @@ public final class ChestBuilder extends GuiBuilder<ChestGui, ChestBuilder> {
         return this;
     }
 
+    /**
+     * Creates a new {@code ChestBuilder} for the given plugin, row count, and display name.
+     *
+     * @param plugin the plugin owning this GUI
+     * @param rows   the number of rows in the chest (1–6)
+     * @param name   the display name shown in the chest GUI title bar
+     * @return a new {@code ChestBuilder} instance
+     */
     @NotNull
     public static ChestBuilder of(Plugin plugin, int rows, String name) {
         return new ChestBuilder(plugin, rows, Objects.requireNonNull(name));
     }
 
+    /**
+     * Creates a new {@code ChestBuilder} using the common plugin from {@link CommonServices}.
+     *
+     * @param rows the number of rows in the chest (1–6)
+     * @param name the display name shown in the chest GUI title bar
+     * @return a new {@code ChestBuilder} instance
+     */
     @NotNull
     public static ChestBuilder of(int rows, String name) {
         return of(CommonServices.getPlugin(), rows, name);

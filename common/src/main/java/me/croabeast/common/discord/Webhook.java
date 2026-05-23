@@ -290,6 +290,12 @@ public final class Webhook {
             this(null, null);
         }
 
+        /**
+         * Creates an embed with placeholder replacement using the given token and message.
+         *
+         * @param token   the placeholder token to replace in field values
+         * @param message the replacement string for the token
+         */
         private Embed(String token, String message) {
             this.token = token;
             this.message = message;
@@ -304,37 +310,82 @@ public final class Webhook {
             return value;
         }
 
+        /**
+         * Sets the title of this embed.
+         *
+         * @param s the embed title (supports placeholder replacement)
+         * @return this embed for chaining
+         */
         public Embed title(String s) {
             this.title = applyTemplate(s);
             return this;
         }
 
+        /**
+         * Sets the description of this embed.
+         *
+         * @param s the embed description (supports placeholder replacement)
+         * @return this embed for chaining
+         */
         public Embed description(String s) {
             this.description = applyTemplate(s);
             return this;
         }
 
+        /**
+         * Sets the URL that the embed title links to.
+         *
+         * @param s the URL string (supports placeholder replacement)
+         * @return this embed for chaining
+         */
         public Embed url(String s) {
             this.url = applyTemplate(s);
             return this;
         }
 
+        /**
+         * Sets the thumbnail image URL shown in the top-right corner of the embed.
+         *
+         * @param s the thumbnail URL (supports placeholder replacement)
+         * @return this embed for chaining
+         */
         public Embed thumbnail(String s) {
             this.thumbnail = applyTemplate(s);
             return this;
         }
 
+        /**
+         * Sets the large image URL shown at the bottom of the embed.
+         *
+         * @param s the image URL (supports placeholder replacement)
+         * @return this embed for chaining
+         */
         public Embed image(String s) {
             this.image = applyTemplate(s);
             return this;
         }
 
+        /**
+         * Sets the footer text and optional icon URL.
+         *
+         * @param text    the footer text (supports placeholder replacement)
+         * @param iconUrl the URL of the footer icon (supports placeholder replacement; may be {@code null})
+         * @return this embed for chaining
+         */
         public Embed footer(String text, String iconUrl) {
             this.footerText = applyTemplate(text);
             this.footerIcon = applyTemplate(iconUrl);
             return this;
         }
 
+        /**
+         * Sets the embed's author block with a display name, optional link URL, and optional icon.
+         *
+         * @param name    the author display name (supports placeholder replacement)
+         * @param url     the URL the author name links to (supports placeholder replacement; may be {@code null})
+         * @param iconUrl the URL of the author's icon (supports placeholder replacement; may be {@code null})
+         * @return this embed for chaining
+         */
         public Embed author(String name, String url, String iconUrl) {
             this.authorName = applyTemplate(name);
             this.authorUrl = applyTemplate(url);
@@ -342,11 +393,28 @@ public final class Webhook {
             return this;
         }
 
+        /**
+         * Sets the left-side accent color of the embed.
+         * <p>
+         * Accepts hex strings (e.g., {@code "#FF5733"} or {@code "0xFF5733"}) or plain decimal integers.
+         * </p>
+         *
+         * @param color the color string to parse (supports placeholder replacement; may be {@code null})
+         * @return this embed for chaining
+         */
         public Embed color(String color) {
             this.color = parseColor(applyTemplate(color));
             return this;
         }
 
+        /**
+         * Adds a field to this embed.
+         *
+         * @param name   the field name (bold label shown above the value)
+         * @param value  the field value
+         * @param inline {@code true} to render this field inline alongside other inline fields
+         * @return this embed for chaining
+         */
         public Embed field(String name, String value, boolean inline) {
             fields.add(new Field(applyTemplate(name), applyTemplate(value), inline));
             return this;
@@ -391,13 +459,23 @@ public final class Webhook {
         }
 
         /**
-         * Single embed field.
+         * A single name–value field within a Discord embed, optionally displayed inline.
          */
         public static final class Field {
+            /** The bold label shown above the field value. */
             private final String name;
+            /** The content of the field. */
             private final String value;
+            /** Whether this field is rendered side-by-side with other inline fields. */
             private final boolean inline;
 
+            /**
+             * Creates a new embed field.
+             *
+             * @param name   the field label
+             * @param value  the field content
+             * @param inline {@code true} to render this field inline
+             */
             Field(String name, String value, boolean inline) {
                 this.name = name;
                 this.value = value;

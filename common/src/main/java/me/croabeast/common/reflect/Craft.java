@@ -143,6 +143,12 @@ public class Craft {
             updateCommands();
         }
 
+        /**
+         * Synchronizes the server's command dispatcher with the Bukkit command system.
+         * <p>
+         * Calls the server's {@code syncCommands()} method via reflection.
+         * </p>
+         */
         public void syncCommands() {
             INSTANCE.call("syncCommands");
         }
