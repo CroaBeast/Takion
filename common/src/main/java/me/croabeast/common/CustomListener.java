@@ -25,7 +25,7 @@ public interface CustomListener extends Listener, Registrable {
     /**
      * Returns the current registration status of this listener.
      *
-     * @return the {@link Status} object representing whether this listener is registered.
+     * @return the {@link Status} representing whether this listener is registered
      */
     @NotNull
     Status getStatus();
@@ -36,7 +36,7 @@ public interface CustomListener extends Listener, Registrable {
      * This is a convenience method inherited from {@link Registrable}.
      * </p>
      *
-     * @return {@code true} if the listener is currently registered, {@code false} otherwise.
+     * @return {@code true} if the listener is currently registered; {@code false} otherwise
      */
     @Override
     default boolean isRegistered() {
@@ -51,8 +51,8 @@ public interface CustomListener extends Listener, Registrable {
      * Upon successful registration, the internal status is updated.
      * </p>
      *
-     * @param plugin the {@link Plugin} with which to register this listener.
-     * @return {@code true} if registration was successful, {@code false} otherwise.
+     * @param plugin the {@link Plugin} with which to register this listener
+     * @return {@code true} if registration was successful; {@code false} otherwise
      */
     default boolean register(Plugin plugin) {
         if (getStatus().registered || plugin == null)
@@ -70,7 +70,7 @@ public interface CustomListener extends Listener, Registrable {
      * {@link JavaPlugin#getProvidingPlugin(Class)}.
      * </p>
      *
-     * @return {@code true} if registration was successful, {@code false} otherwise.
+     * @return {@code true} if registration was successful; {@code false} otherwise
      */
     default boolean register() {
         return register(JavaPlugin.getProvidingPlugin(CustomListener.class));
@@ -83,7 +83,7 @@ public interface CustomListener extends Listener, Registrable {
      * Upon successful unregistration, the internal status is updated.
      * </p>
      *
-     * @return {@code true} if unregistration was successful, {@code false} otherwise.
+     * @return {@code true} if unregistration was successful; {@code false} otherwise
      */
     default boolean unregister() {
         if (!getStatus().registered)
@@ -117,7 +117,7 @@ public interface CustomListener extends Listener, Registrable {
         /**
          * Returns a string representation of this status.
          *
-         * @return a string indicating the registration state.
+         * @return a string indicating the registration state
          */
         @Override
         public String toString() {

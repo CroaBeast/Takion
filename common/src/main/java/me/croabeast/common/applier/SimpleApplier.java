@@ -12,7 +12,7 @@ import java.util.function.UnaryOperator;
  * chained {@link UnaryOperator} calls. The final result can be retrieved using {@link #result()}.
  * </p>
  *
- * @param <T> the type of the object being transformed.
+ * @param <T> the type of the object being transformed
  */
 class SimpleApplier<T> implements Applier<T> {
 
@@ -21,7 +21,7 @@ class SimpleApplier<T> implements Applier<T> {
     /**
      * Constructs a new {@code SimpleApplier} with the specified object.
      *
-     * @param object the object to transform (must not be {@code null}).
+     * @param object the object to transform (must not be {@code null})
      */
     SimpleApplier(T object) {
         this.object = Objects.requireNonNull(object);
@@ -33,9 +33,9 @@ class SimpleApplier<T> implements Applier<T> {
      * In this implementation, the priority parameter is ignored and the operator is simply applied.
      * </p>
      *
-     * @param priority the priority at which to apply the operator.
-     * @param operator the transformation to apply.
-     * @return this {@code SimpleApplier} instance.
+     * @param priority the priority at which to apply the operator
+     * @param operator the transformation to apply
+     * @return this {@code SimpleApplier} instance
      */
     @NotNull
     public SimpleApplier<T> apply(Priority priority, UnaryOperator<T> operator) {
@@ -45,8 +45,8 @@ class SimpleApplier<T> implements Applier<T> {
     /**
      * Applies the specified transformation operator to the stored object.
      *
-     * @param operator the transformation to apply.
-     * @return this {@code SimpleApplier} instance.
+     * @param operator the transformation to apply
+     * @return this {@code SimpleApplier} instance
      */
     @NotNull
     public SimpleApplier<T> apply(UnaryOperator<T> operator) {
@@ -57,7 +57,7 @@ class SimpleApplier<T> implements Applier<T> {
     /**
      * Returns the transformed object.
      *
-     * @return the final result.
+     * @return the final result
      */
     @Override
     public T result() {
@@ -67,7 +67,7 @@ class SimpleApplier<T> implements Applier<T> {
     /**
      * Returns a string representation of the transformed object.
      *
-     * @return the string representation.
+     * @return the string representation
      */
     @Override
     public String toString() {

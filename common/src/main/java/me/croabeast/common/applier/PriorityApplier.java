@@ -9,11 +9,11 @@ import java.util.function.UnaryOperator;
  * An implementation of {@link Applier} that supports prioritizing transformation operators.
  * <p>
  * {@code PriorityApplier} maintains a map of transformation operators grouped by their assigned priority.
- * When {@link #result()} is called, it applies the operators in order of descending priority (from highest to lowest)
- * to the initial object.
+ * When {@link #result()} is called, it applies the operators in order of descending priority
+ * (from highest to lowest) to the initial object.
  * </p>
  *
- * @param <T> the type of the object being transformed.
+ * @param <T> the type of the object being transformed
  */
 class PriorityApplier<T> implements Applier<T> {
 
@@ -23,7 +23,7 @@ class PriorityApplier<T> implements Applier<T> {
     /**
      * Constructs a new {@code PriorityApplier} with the specified object.
      *
-     * @param object the object to transform (must not be {@code null}).
+     * @param object the object to transform (must not be {@code null})
      */
     PriorityApplier(T object) {
         this.object = Objects.requireNonNull(object);
@@ -32,10 +32,10 @@ class PriorityApplier<T> implements Applier<T> {
     /**
      * Applies the given transformation operator at the specified priority.
      *
-     * @param p the priority to assign; if {@code null}, defaults to {@link Priority#NORMAL}.
-     * @param operator the transformation to apply.
-     * @return this {@code PriorityApplier} instance for chaining.
-     * @throws NullPointerException if {@code operator} is {@code null}.
+     * @param p        the priority to assign; if {@code null}, defaults to {@link Priority#NORMAL}
+     * @param operator the transformation to apply
+     * @return this {@code PriorityApplier} instance for chaining
+     * @throws NullPointerException if {@code operator} is {@code null}
      */
     @NotNull
     public PriorityApplier<T> apply(Priority p, UnaryOperator<T> operator) {
@@ -45,10 +45,10 @@ class PriorityApplier<T> implements Applier<T> {
     }
 
     /**
-     * Applies the given transformation operator at the default priority (NORMAL).
+     * Applies the given transformation operator at the default priority ({@link Priority#NORMAL}).
      *
-     * @param operator the transformation to apply.
-     * @return this {@code PriorityApplier} instance for chaining.
+     * @param operator the transformation to apply
+     * @return this {@code PriorityApplier} instance for chaining
      */
     @NotNull
     public PriorityApplier<T> apply(UnaryOperator<T> operator) {
@@ -58,7 +58,7 @@ class PriorityApplier<T> implements Applier<T> {
     /**
      * Applies all registered transformation operators in order of descending priority and returns the result.
      *
-     * @return the transformed object.
+     * @return the transformed object
      */
     @Override
     public T result() {
@@ -70,9 +70,9 @@ class PriorityApplier<T> implements Applier<T> {
     }
 
     /**
-     * Returns a string representation of the transformed object.
+     * Returns a string representation of the transformed object after all operators are applied.
      *
-     * @return the string representation.
+     * @return the string representation of the result
      */
     @Override
     public String toString() {

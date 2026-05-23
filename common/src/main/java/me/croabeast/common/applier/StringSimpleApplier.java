@@ -16,7 +16,7 @@ class StringSimpleApplier extends SimpleApplier<String> implements StringApplier
     /**
      * Constructs a new {@code StringSimpleApplier} for the given string.
      *
-     * @param object the string to transform (must not be {@code null}).
+     * @param object the string to transform (must not be {@code null})
      */
     StringSimpleApplier(String object) {
         super(object);
@@ -24,10 +24,13 @@ class StringSimpleApplier extends SimpleApplier<String> implements StringApplier
 
     /**
      * Applies the given transformation operator at the specified priority.
+     * <p>
+     * In this implementation, priority is ignored and the operator is applied sequentially.
+     * </p>
      *
-     * @param priority the priority for the transformation.
-     * @param operator the transformation to apply.
-     * @return this {@code StringSimpleApplier} instance for chaining.
+     * @param priority the priority for the transformation (ignored)
+     * @param operator the transformation to apply
+     * @return this {@code StringSimpleApplier} instance for chaining
      */
     @NotNull
     public StringSimpleApplier apply(Priority priority, UnaryOperator<String> operator) {
@@ -35,10 +38,10 @@ class StringSimpleApplier extends SimpleApplier<String> implements StringApplier
     }
 
     /**
-     * Applies the given transformation operator at the default priority (NORMAL).
+     * Applies the given transformation operator at the default priority.
      *
-     * @param operator the transformation to apply.
-     * @return this {@code StringSimpleApplier} instance for chaining.
+     * @param operator the transformation to apply
+     * @return this {@code StringSimpleApplier} instance for chaining
      */
     @NotNull
     public StringSimpleApplier apply(UnaryOperator<String> operator) {
@@ -49,7 +52,7 @@ class StringSimpleApplier extends SimpleApplier<String> implements StringApplier
     /**
      * Returns the final transformed string.
      *
-     * @return the resulting string.
+     * @return the resulting string
      */
     @Override
     public String toString() {
