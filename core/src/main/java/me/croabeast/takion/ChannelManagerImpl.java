@@ -4,10 +4,10 @@ import lombok.Getter;
 import lombok.Setter;
 import me.croabeast.common.Regex;
 import me.croabeast.common.discord.Webhook;
+import me.croabeast.prismatic.chat.MultiComponent;
 import me.croabeast.takion.bossbar.AnimatedBossbar;
 import me.croabeast.takion.channel.Channel;
 import me.croabeast.takion.channel.ChannelManager;
-import me.croabeast.takion.chat.MultiComponent;
 import me.croabeast.takion.format.PlainFormat;
 import me.croabeast.takion.message.MessageUtils;
 import me.croabeast.takion.message.TitleManager;
@@ -100,7 +100,7 @@ final class ChannelManagerImpl implements ChannelManager {
 
                     BaseComponent[] components;
                     try {
-                        components = MultiComponent.fromString(lib, s).compile(ps);
+                        components = MultiComponent.fromString(new TakionChatProcessor(lib), s).compile(ps);
                     } catch (Exception e) {
                         e.printStackTrace();
                         continue;

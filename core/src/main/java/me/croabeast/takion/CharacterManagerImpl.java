@@ -2,11 +2,11 @@ package me.croabeast.takion;
 
 import me.croabeast.common.util.ArrayUtils;
 import me.croabeast.prismatic.PrismaticAPI;
+import me.croabeast.prismatic.chat.MultiComponent;
 import me.croabeast.takion.character.CharacterInfo;
 import me.croabeast.takion.character.CharacterManager;
 import me.croabeast.takion.character.DefaultCharacter;
 import me.croabeast.takion.character.SmallCaps;
-import me.croabeast.takion.chat.MultiComponent;
 import me.croabeast.takion.format.StringFormat;
 import org.apache.commons.lang.StringUtils;
 
