@@ -10,6 +10,7 @@ import me.croabeast.common.Regex;
 import me.croabeast.common.applier.StringApplier;
 import me.croabeast.common.util.Exceptions;
 import me.croabeast.prismatic.PrismaticAPI;
+import me.croabeast.prismatic.chat.ChatProcessor;
 import me.croabeast.scheduler.GlobalScheduler;
 import me.croabeast.takion.channel.ChannelManager;
 import me.croabeast.takion.character.CharacterManager;
@@ -43,7 +44,8 @@ import java.util.regex.Pattern;
  *   <li><b>Placeholder Management:</b> Managed by a {@link PlaceholderManager} to dynamically replace tokens in messages.</li>
  *   <li><b>Character Management:</b> Provided by a {@link CharacterManager} for text alignment and formatting.</li>
  *   <li><b>Messaging:</b> Facilitated by {@link MessageSender} for sending formatted messages to players.</li>
- *   <li><b>Text Processing:</b> Utilizes {@link PrismaticAPI} and related utilities for colorization and string modifications.</li>
+ *   <li><b>Text Processing:</b> Utilizes {@link PrismaticAPI} and a configurable {@link ChatProcessor}
+ *       for colorization, component parsing, and string modifications.</li>
  * </ul>
  * </p>
  * <p>
@@ -159,6 +161,18 @@ public class TakionLib implements Colorizer {
     private String lineSeparator = Pattern.quote("<n>");
 
     /**
+     * Processor used by PrismaticAPI chat components when Takion sends interactive chat.
+     *
+     * <p>The default processor keeps Takion behavior intact by applying placeholder replacement, small-caps
+     * formatting, character alignment, colorization, and the configured line separator. Plugins can replace
+     * it through {@link #setChatProcessor(ChatProcessor)} when they need custom component preprocessing.</p>
+     */
+    @Getter
+    @Setter(AccessLevel.NONE)
+    @NotNull
+    private ChatProcessor chatProcessor = new TakionChatProcessor(this);
+
+    /**
      * The prefix used for center alignment in messages.
      */
     private String centerPrefix = "[C]";
@@ -230,6 +244,22 @@ public class TakionLib implements Colorizer {
      */
     public final MessageSender getLoadedSender() {
         return loadedSender.copy();
+    }
+
+    /**
+     * Sets the processor used by PrismaticAPI chat components created by Takion.
+     *
+     * <p>Changing this value affects interactive chat parsing, including messages sent through the chat
+     * channel. Use the default processor unless a plugin needs to inject additional preprocessing.</p>
+     *
+     * @param chatProcessor processor to use for interactive chat components
+     * @return this library instance
+     * @since 1.6.3
+     */
+    @NotNull
+    public TakionLib setChatProcessor(@NotNull ChatProcessor chatProcessor) {
+        this.chatProcessor = Objects.requireNonNull(chatProcessor, "chatProcessor");
+        return this;
     }
 
     /**

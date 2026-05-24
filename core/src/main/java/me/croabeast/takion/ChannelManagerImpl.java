@@ -100,7 +100,7 @@ final class ChannelManagerImpl implements ChannelManager {
 
                     BaseComponent[] components;
                     try {
-                        components = MultiComponent.fromString(new TakionChatProcessor(lib), s).compile(ps);
+                        components = MultiComponent.fromString(lib.getChatProcessor(), s).compile(ps);
                     } catch (Exception e) {
                         e.printStackTrace();
                         continue;

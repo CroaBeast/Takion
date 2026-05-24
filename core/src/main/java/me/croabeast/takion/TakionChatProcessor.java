@@ -7,6 +7,15 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * Default Takion implementation for PrismaticAPI chat component processing.
+ *
+ * <p>This processor is owned by {@link TakionLib} and is exposed through
+ * {@link TakionLib#getChatProcessor()} so downstream plugins can reuse or replace it without creating
+ * their own bridge for normal Takion upgrades.</p>
+ *
+ * @since 1.6.3
+ */
 @RequiredArgsConstructor
 final class TakionChatProcessor implements ChatProcessor {
 
