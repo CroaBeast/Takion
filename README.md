@@ -55,7 +55,7 @@ All modules target **Java 8** using Gradle toolchains, so you can build and run 
 
 Takion leans on several battle-tested libraries created by the same author:
 
-- [**PrismaticAPI**](https://github.com/CroaBeast/PrismaticAPI) – color gradients, RGB conversion, and mini-message-style formatting.
+- [**PrismaticAPI**](https://github.com/CroaBeast/PrismaticAPI) - color gradients, RGB conversion and interactive chat components.
 - [**YAML-API**](https://github.com/CroaBeast/YAML-API) – lightweight YAML configuration helpers and file management.
 - [**GlobalScheduler**](https://github.com/CroaBeast/GlobalScheduler) – abstraction for Paper/Spigot task scheduling.
 - [**VaultAdapter**](https://github.com/CroaBeast/VaultAdapter) *(plugin module)* – bridges Vault chat/permissions into Takion placeholders.
@@ -68,7 +68,7 @@ Optional integrations such as **InteractiveChat** or **Vault** can be toggled in
 
 ## 📦 Installation
 
-Add the public repository and choose the dependency that fits your workflow. As of **Takion 1.6.0**, artifacts live under the
+Add the public repository and choose the dependency that fits your workflow. As of **Takion 1.6.2**, artifacts live under the
 `me.croabeast.takion` group and are published per-module (`common`, `core`, `shaded`, `plugin`), with an additional `all` classifier on `shaded`.
 
 > **Heads up:** You only need either the `shaded`, `shaded:all`, or `plugin` artifact at runtime. The `common` and `core` artifacts are optional—keep them as
@@ -83,12 +83,12 @@ repositories {
 
 dependencies {
     // Optional: keep common/core on the compileOnly classpath for source access while shading
-    compileOnly("me.croabeast.takion:common:1.6.0")
-    compileOnly("me.croabeast.takion:core:1.6.0")
+    compileOnly("me.croabeast.takion:common:1.6.2")
+    compileOnly("me.croabeast.takion:core:1.6.2")
     // Choose exactly one runtime
-    implementation("me.croabeast.takion:shaded:1.6.0")
-    // implementation("me.croabeast.takion:shaded:1.6.0:all")
-    // implementation("me.croabeast.takion:plugin:1.6.0")
+    implementation("me.croabeast.takion:shaded:1.6.2")
+    // implementation("me.croabeast.takion:shaded:1.6.2:all")
+    // implementation("me.croabeast.takion:plugin:1.6.2")
 }
 ```
 
@@ -100,12 +100,12 @@ repositories {
 
 dependencies {
     // Optional: keep common/core on the compileOnly classpath for source access while shading
-    compileOnly "me.croabeast.takion:common:1.6.0"
-    compileOnly "me.croabeast.takion:core:1.6.0"
+    compileOnly "me.croabeast.takion:common:1.6.2"
+    compileOnly "me.croabeast.takion:core:1.6.2"
     // Choose exactly one runtime
-    implementation "me.croabeast.takion:shaded:1.6.0"
-    // implementation "me.croabeast.takion:shaded:1.6.0:all"
-    // implementation "me.croabeast.takion:plugin:1.6.0"
+    implementation "me.croabeast.takion:shaded:1.6.2"
+    // implementation "me.croabeast.takion:shaded:1.6.2:all"
+    // implementation "me.croabeast.takion:plugin:1.6.2"
 }
 ```
 
@@ -123,32 +123,32 @@ dependencies {
     <dependency>
         <groupId>me.croabeast.takion</groupId>
         <artifactId>common</artifactId>
-        <version>1.6.0</version>
+        <version>1.6.2</version>
         <scope>provided</scope>
     </dependency>
     <dependency>
         <groupId>me.croabeast.takion</groupId>
         <artifactId>core</artifactId>
-        <version>1.6.0</version>
+        <version>1.6.2</version>
         <scope>provided</scope>
     </dependency>
     <!-- Choose exactly one runtime -->
     <dependency>
         <groupId>me.croabeast.takion</groupId>
         <artifactId>shaded</artifactId>
-        <version>1.6.0</version>
+        <version>1.6.2</version>
     </dependency>
     <!--
     <dependency>
         <groupId>me.croabeast.takion</groupId>
         <artifactId>shaded</artifactId>
-        <version>1.6.0</version>
+        <version>1.6.2</version>
         <classifier>all</classifier>
     </dependency>
     <dependency>
         <groupId>me.croabeast.takion</groupId>
         <artifactId>plugin</artifactId>
-        <version>1.6.0</version>
+        <version>1.6.2</version>
     </dependency>
     -->
 </dependencies>
