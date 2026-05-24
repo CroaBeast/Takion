@@ -2,10 +2,17 @@ package me.croabeast.common.util;
 
 import lombok.experimental.UtilityClass;
 import me.croabeast.vnc.VNC;
+import org.bukkit.Bukkit;
+
+import java.util.Locale;
 
 /**
  * A utility class that stores static server information constants for easy access.
+ *
+ * @deprecated Use {@link me.croabeast.vnc.VNC} directly instead.
+ *             This class will be removed in a future version.
  */
+@Deprecated
 @UtilityClass
 public class ServerInfoUtils {
 
@@ -41,10 +48,13 @@ public class ServerInfoUtils {
     public final int JAVA_VERSION;
     
     static {
-        BUKKIT_API_VERSION = VNC.BUKKIT_API_VERSION;
+        String craftPackage = Bukkit.getServer().getClass().getPackage().getName();
+        String apiVersion = craftPackage.substring(craftPackage.lastIndexOf('.') + 1);
+        BUKKIT_API_VERSION = apiVersion.matches("v\\d+_\\d+_R\\d+") ? apiVersion : "";
         SERVER_VERSION = VNC.SERVER_VERSION;
-        SERVER_FORK = VNC.SERVER_FORK;
-        PAPER_ENABLED = VNC.PAPER_ENABLED;
+        SERVER_FORK = Bukkit.getName() + " " + VNC.SERVER_CLASSIC_VERSION;
+        String implementation = (Bukkit.getName() + ' ' + Bukkit.getVersion()).toLowerCase(Locale.ENGLISH);
+        PAPER_ENABLED = implementation.contains("paper");
         JAVA_VERSION = VNC.JAVA_VERSION;
     }
 }

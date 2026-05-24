@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import me.croabeast.common.util.ArrayUtils;
 import me.croabeast.common.util.Exceptions;
-import me.croabeast.vnc.VNC;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 
@@ -56,19 +55,26 @@ import java.util.function.Supplier;
 public final class Reflector {
 
     /**
-     * The current Bukkit API version, used for dynamic resolution of NMS classes.
+     * The package path for CraftBukkit classes, derived from the server's implementation.
      */
-    private static final String API = VNC.BUKKIT_API_VERSION;
+    public static final String CRAFT_BUKKIT_PACKAGE = Bukkit.getServer().getClass().getPackage().getName();
+
+    /**
+     * The current Bukkit API version string (e.g., {@code "v1_16_R3"}), extracted from the
+     * CraftBukkit package name. Empty if the server does not use versioned CraftBukkit packages
+     * (i.e., Paper 1.20.5+).
+     */
+    private static final String API;
+
+    static {
+        String ver = CRAFT_BUKKIT_PACKAGE.substring(CRAFT_BUKKIT_PACKAGE.lastIndexOf('.') + 1);
+        API = ver.matches("v\\d+_\\d+_R\\d+") ? ver : "";
+    }
 
     /**
      * The package path for NMS (net.minecraft.server) classes, dynamically constructed based on the API version.
      */
     public static final String NMS_PACKAGE = "net.minecraft.server." + API + (StringUtils.isNotBlank(API) ? "." : "");
-
-    /**
-     * The package path for CraftBukkit classes, derived from the server's implementation.
-     */
-    public static final String CRAFT_BUKKIT_PACKAGE = Bukkit.getServer().getClass().getPackage().getName();
 
     /**
      * The target class that this Reflector instance wraps.

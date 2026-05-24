@@ -3,6 +3,7 @@ package me.croabeast.takion.message;
 import lombok.experimental.UtilityClass;
 import me.croabeast.common.function.TriFunction;
 import me.croabeast.vnc.VNC;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.lang.reflect.Field;
@@ -12,6 +13,14 @@ import java.util.function.Function;
 
 @UtilityClass
 class ReflectUtils {
+
+    private static final String BUKKIT_API_VERSION;
+
+    static {
+        String pkg = Bukkit.getServer().getClass().getPackage().getName();
+        String ver = pkg.substring(pkg.lastIndexOf('.') + 1);
+        BUKKIT_API_VERSION = ver.matches("v\\d+_\\d+_R\\d+") ? ver : "";
+    }
 
     final double VERSION = VNC.SERVER_VERSION;
     final boolean IS_LEGACY = VNC.isBefore("1.17");
@@ -34,7 +43,7 @@ class ReflectUtils {
 
         if (IS_LEGACY)
             builder.append("server.")
-                    .append(VNC.BUKKIT_API_VERSION)
+                    .append(BUKKIT_API_VERSION)
                     .append(".");
 
         if (prefix != null) builder.append(prefix);

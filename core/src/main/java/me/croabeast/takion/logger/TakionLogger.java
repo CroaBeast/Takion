@@ -7,7 +7,7 @@ import lombok.experimental.Accessors;
 import me.croabeast.common.CollectionBuilder;
 import me.croabeast.common.applier.StringApplier;
 import me.croabeast.common.util.ArrayUtils;
-import me.croabeast.common.util.ServerInfoUtils;
+import me.croabeast.vnc.VNC;
 import me.croabeast.prismatic.PrismaticAPI;
 import me.croabeast.prismatic.chat.MultiComponent;
 import me.croabeast.takion.TakionLib;
@@ -20,6 +20,7 @@ import org.bukkit.plugin.PluginLogger;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.logging.LogRecord;
@@ -220,7 +221,7 @@ public class TakionLogger {
         Logger logger = usePlugin ? plugin.getLogger() : Bukkit.getLogger();
         bukkit = (level, msg) -> logger.log(level.toJava(), msg);
 
-        if (ServerInfoUtils.PAPER_ENABLED && ServerInfoUtils.SERVER_VERSION >= 18.2) {
+        if (VNC.SERVER != null && VNC.SERVER.getImplementationVersion().toLowerCase(Locale.ENGLISH).contains("paper") && VNC.SERVER_VERSION >= 18.2) {
             try {
                 paper = new PaperLogger(usePlugin ?
                         ((Function<Plugin, String>) p -> {

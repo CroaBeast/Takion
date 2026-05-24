@@ -14,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -116,7 +117,7 @@ public class Craft {
          * </p>
          */
         public void updateCommands() {
-            if (VNC.isAtLeast(13))
+            if (VNC.isAtLeast("1.13"))
                 Bukkit.getOnlinePlayers().forEach(Player::updateCommands);
         }
 
@@ -131,7 +132,7 @@ public class Craft {
          */
         @SneakyThrows
         public void syncCommands(Collection<String> collection) {
-            if (!VNC.isAtLeast(13)) return;
+            if (!VNC.isAtLeast("1.13")) return;
             Collection<?> children = Command.Dispatcher.getRoot().getChildren();
             syncCommands();
             Command.Node root = Command.Dispatcher.getRoot();
@@ -163,7 +164,7 @@ public class Craft {
          */
         @SneakyThrows
         public void reloadCommandsFile() {
-            if (VNC.PAPER_ENABLED && VNC.isAtLeast(12)) {
+            if (VNC.SERVER != null && VNC.SERVER.getImplementationVersion().toLowerCase(Locale.ENGLISH).contains("paper") && VNC.isAtLeast("1.12")) {
                 Server.INSTANCE.call("reloadCommandAliases");
                 return;
             }
@@ -245,9 +246,9 @@ public class Craft {
              */
             @Nullable
             public final Reflector INSTANCE = ((Supplier<Reflector>) () -> {
-                if (!VNC.isAtLeast(13))
+                if (!VNC.isAtLeast("1.13"))
                     return null;
-                return VNC.isAtLeast(17) ?
+                return VNC.isAtLeast("1.17") ?
                         Reflector.of("net.minecraft.commands.CommandDispatcher") :
                         Reflector.ofNms("CommandDispatcher");
             }).get();
@@ -258,7 +259,7 @@ public class Craft {
              * @param collection a collection of command names to remove
              */
             public void removeCommands(Collection<String> collection) {
-                if (VNC.isAtLeast(13))
+                if (VNC.isAtLeast("1.13"))
                     collection.forEach(getRoot()::removeCommand);
             }
 
