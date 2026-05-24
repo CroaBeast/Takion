@@ -68,7 +68,7 @@ Optional integrations such as **InteractiveChat** or **Vault** can be toggled in
 
 ## 📦 Installation
 
-Add the public repository and choose the dependency that fits your workflow. As of **Takion 1.6.2**, artifacts live under the
+Add the public repository and choose the dependency that fits your workflow. As of **Takion 1.6.3**, artifacts live under the
 `me.croabeast.takion` group and are published per-module (`common`, `core`, `shaded`, `plugin`), with an additional `all` classifier on `shaded`.
 
 > **Heads up:** You only need either the `shaded`, `shaded:all`, or `plugin` artifact at runtime. The `common` and `core` artifacts are optional—keep them as
@@ -83,12 +83,12 @@ repositories {
 
 dependencies {
     // Optional: keep common/core on the compileOnly classpath for source access while shading
-    compileOnly("me.croabeast.takion:common:1.6.2")
-    compileOnly("me.croabeast.takion:core:1.6.2")
+    compileOnly("me.croabeast.takion:common:1.6.3")
+    compileOnly("me.croabeast.takion:core:1.6.3")
     // Choose exactly one runtime
-    implementation("me.croabeast.takion:shaded:1.6.2")
-    // implementation("me.croabeast.takion:shaded:1.6.2:all")
-    // implementation("me.croabeast.takion:plugin:1.6.2")
+    implementation("me.croabeast.takion:shaded:1.6.3")
+    // implementation("me.croabeast.takion:shaded:1.6.3:all")
+    // implementation("me.croabeast.takion:plugin:1.6.3")
 }
 ```
 
@@ -100,12 +100,12 @@ repositories {
 
 dependencies {
     // Optional: keep common/core on the compileOnly classpath for source access while shading
-    compileOnly "me.croabeast.takion:common:1.6.2"
-    compileOnly "me.croabeast.takion:core:1.6.2"
+    compileOnly "me.croabeast.takion:common:1.6.3"
+    compileOnly "me.croabeast.takion:core:1.6.3"
     // Choose exactly one runtime
-    implementation "me.croabeast.takion:shaded:1.6.2"
-    // implementation "me.croabeast.takion:shaded:1.6.2:all"
-    // implementation "me.croabeast.takion:plugin:1.6.2"
+    implementation "me.croabeast.takion:shaded:1.6.3"
+    // implementation "me.croabeast.takion:shaded:1.6.3:all"
+    // implementation "me.croabeast.takion:plugin:1.6.3"
 }
 ```
 
@@ -123,32 +123,32 @@ dependencies {
     <dependency>
         <groupId>me.croabeast.takion</groupId>
         <artifactId>common</artifactId>
-        <version>1.6.2</version>
+        <version>1.6.3</version>
         <scope>provided</scope>
     </dependency>
     <dependency>
         <groupId>me.croabeast.takion</groupId>
         <artifactId>core</artifactId>
-        <version>1.6.2</version>
+        <version>1.6.3</version>
         <scope>provided</scope>
     </dependency>
     <!-- Choose exactly one runtime -->
     <dependency>
         <groupId>me.croabeast.takion</groupId>
         <artifactId>shaded</artifactId>
-        <version>1.6.2</version>
+        <version>1.6.3</version>
     </dependency>
     <!--
     <dependency>
         <groupId>me.croabeast.takion</groupId>
         <artifactId>shaded</artifactId>
-        <version>1.6.2</version>
+        <version>1.6.3</version>
         <classifier>all</classifier>
     </dependency>
     <dependency>
         <groupId>me.croabeast.takion</groupId>
         <artifactId>plugin</artifactId>
-        <version>1.6.2</version>
+        <version>1.6.3</version>
     </dependency>
     -->
 </dependencies>
@@ -184,6 +184,14 @@ Once declared, reload your project and you are ready to import `TakionLib`.
           .fadeIn(10).stay(60).fadeOut(10)
           .send(player);
     ```
+4. **Reuse Takion's Prismatic chat processor** when working with interactive chat components:
+    ```java
+    BaseComponent[] components = MultiComponent
+          .fromString(takion.getChatProcessor(), "<run:\"/spawn\">Spawn</text>")
+          .compile(player);
+    ```
+
+   Takion creates this processor automatically. Plugins only need `setChatProcessor(...)` when they want to replace the default component preprocessing.
 
 Everything is exposed through `TakionLib`, so once you keep a reference, the rest of the managers are a method call away.
 
