@@ -221,7 +221,7 @@ public class TakionLogger {
         Logger logger = usePlugin ? plugin.getLogger() : Bukkit.getLogger();
         bukkit = (level, msg) -> logger.log(level.toJava(), msg);
 
-        if (VNC.SERVER != null && VNC.SERVER.getImplementationVersion().toLowerCase(Locale.ENGLISH).contains("paper") && VNC.SERVER_VERSION >= 18.2) {
+        if (VNC.SERVER_VERSION >= 18.2) {
             try {
                 paper = new PaperLogger(usePlugin ?
                         ((Function<Plugin, String>) p -> {
@@ -229,9 +229,7 @@ public class TakionLogger {
                             return prefix == null ? p.getName() : prefix;
                         }).apply(plugin) :
                         "");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            } catch (Exception ignored) {}
         }
     }
 
