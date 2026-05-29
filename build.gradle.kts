@@ -7,7 +7,7 @@ plugins {
 
 allprojects {
     group = "me.croabeast.takion"
-    version = "1.6.3"
+    version = "1.6.4"
 
     repositories {
         mavenCentral()
