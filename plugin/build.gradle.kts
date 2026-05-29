@@ -26,8 +26,7 @@ tasks.named("build") {
 tasks.named<ShadowJar>("shadowJar") {
     archiveClassifier.set("")
     exclude(
-        "META-INF/**", "org/apache/commons/**", "org/intellij/**", "org/jetbrains/**",
-        "me/croabeast/file/plugin/YAMLPlugin.*", "plugin.yml"
+        "META-INF/**", "org/apache/commons/**", "org/intellij/**", "org/jetbrains/**"
     )
     relocate("org.bstats", "me.croabeast.metrics")
 }
