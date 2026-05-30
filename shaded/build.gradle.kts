@@ -17,7 +17,7 @@ dependencies {
 
     implementation("me.croabeast:YAML-API:1.1")
     implementation("me.croabeast:GlobalScheduler:1.1")
-    implementation("me.croabeast:PrismaticAPI:1.5.1")
+    implementation("me.croabeast:PrismaticAPI:1.5.2")
 
     allBundle("com.github.stefvanschie.inventoryframework:IF:0.12.0")
     allBundle("org.bstats:bstats-bukkit:3.2.1")
