@@ -5,9 +5,7 @@ import me.croabeast.common.CommonServices;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-import me.croabeast.common.PlayerFormatter;
 import me.croabeast.common.Regex;
-import me.croabeast.common.applier.StringApplier;
 import me.croabeast.common.util.Exceptions;
 import me.croabeast.prismatic.PrismaticAPI;
 import me.croabeast.prismatic.chat.ChatProcessor;
@@ -345,8 +343,8 @@ public class TakionLib implements Colorizer {
     /**
      * Replaces placeholders and applies player formatting functions on a string.
      * <p>
-     * This method uses the {@link PlaceholderManager} and a {@link PlayerFormatter} to process
-     * the string, and then applies a character action for further formatting.
+     * This method uses the {@link PlaceholderManager} to process the string,
+     * then applies Takion text formats before PrismaticAPI colorization.
      * </p>
      *
      * @param parser the player context for placeholder replacement
@@ -354,17 +352,45 @@ public class TakionLib implements Colorizer {
      * @return the processed string after placeholder and function application
      */
     public String replace(Player parser, String string) {
-        return StringApplier.simplified(string)
-                .apply(s -> placeholderManager.replace(parser, s))
-                .apply(s -> {
-                    StringFormat format = formatManager.get("PLAYER_HEAD");
-                    return format.accept(parser, s);
-                })
-                .apply(s -> PlainFormat.PLACEHOLDER_API.accept(parser, s))
-                .apply(s -> {
-                    StringFormat format = formatManager.get("character");
-                    return format.accept(s);
-                }).toString();
+        return replace(parser, string, true);
+    }
+
+    private String applyStringFormat(String id, Player parser, String string) {
+        StringFormat format = formatManager.get(id);
+        return format == null ? string : format.accept(parser, string);
+    }
+
+    /**
+     * Applies Takion text-only formats without running PrismaticAPI color parsing.
+     *
+     * @param string the input message string
+     * @return the message after text-only Takion formats are applied
+     */
+    public String prepareText(String string) {
+        if (StringUtils.isBlank(string)) return string;
+
+        string = applyStringFormat("SMALL_CAPS", null, string);
+        return applyStringFormat("CHARACTER", null, string);
+    }
+
+    /**
+     * Replaces placeholders and applies player formatting functions on a string.
+     *
+     * @param parser            the player context for placeholder replacement
+     * @param string            the input message string
+     * @param processPlayerHead whether player-head placeholders should be transformed
+     * @return the processed string after placeholder and function application
+     */
+    public String replace(Player parser, String string, boolean processPlayerHead) {
+        if (StringUtils.isBlank(string)) return string;
+
+        String temp = placeholderManager.replace(parser, string);
+        temp = PlainFormat.PLACEHOLDER_API.accept(parser, temp);
+
+        if (processPlayerHead)
+            temp = applyStringFormat("PLAYER_HEAD", parser, temp);
+
+        return prepareText(temp);
     }
 
     /**
@@ -376,8 +402,21 @@ public class TakionLib implements Colorizer {
      * @return the final colorized and formatted message
      */
     public String colorize(Player target, Player parser, String string) {
+        return colorize(target, parser, string, true);
+    }
+
+    /**
+     * Colorizes a string and replaces placeholders for a target and parser.
+     *
+     * @param target            the target player to receive the colored text; if {@code null}, the parser is used
+     * @param parser            the player context for formatting
+     * @param string            the input message string
+     * @param processPlayerHead whether player-head placeholders should be transformed
+     * @return the final colorized message
+     */
+    public String colorize(Player target, Player parser, String string, boolean processPlayerHead) {
         return PrismaticAPI.colorize(
-                target == null ? parser : target, replace(parser, string));
+                target == null ? parser : target, replace(parser, string, processPlayerHead));
     }
 
     /**

@@ -369,12 +369,28 @@ public class TakionLib implements Colorizer {
         String temp = placeholderManager.replace(parser, string);
         temp = PlainFormat.PLACEHOLDER_API.accept(parser, temp);
 
-        StringFormat playerHead = formatManager.get("PLAYER_HEAD");
-        if (processPlayerHead && playerHead != null)
-            temp = playerHead.accept(parser, temp);
+        if (processPlayerHead)
+            temp = applyStringFormat("PLAYER_HEAD", parser, temp);
 
-        StringFormat character = formatManager.get("character");
-        return character != null ? character.accept(temp) : temp;
+        return prepareText(temp);
+    }
+
+    /**
+     * Applies Takion text-only formats without running PrismaticAPI color parsing.
+     *
+     * @param string the input message string
+     * @return the message after text-only Takion formats are applied
+     */
+    public String prepareText(String string) {
+        if (StringUtils.isBlank(string)) return string;
+
+        string = applyStringFormat("SMALL_CAPS", null, string);
+        return applyStringFormat("CHARACTER", null, string);
+    }
+
+    private String applyStringFormat(String id, Player parser, String string) {
+        StringFormat format = formatManager.get(id);
+        return format == null ? string : format.accept(parser, string);
     }
 
     /**

@@ -2,7 +2,6 @@ package me.croabeast.takion;
 
 import lombok.RequiredArgsConstructor;
 import me.croabeast.prismatic.chat.ChatProcessor;
-import me.croabeast.takion.format.StringFormat;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -28,8 +27,7 @@ final class TakionChatProcessor implements ChatProcessor {
 
     @NotNull
     public String prepare(String string) {
-        StringFormat format = lib.getFormatManager().get("SMALL_CAPS");
-        return lib.getCharacterManager().align(format.accept(string));
+        return lib.getCharacterManager().align(lib.prepareText(string));
     }
 
     @NotNull
