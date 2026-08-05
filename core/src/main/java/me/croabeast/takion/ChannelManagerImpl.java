@@ -4,7 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 import me.croabeast.common.Regex;
 import me.croabeast.common.discord.Webhook;
-import me.croabeast.prismatic.chat.MultiComponent;
+import me.croabeast.prismatic.element.Element;
+import me.croabeast.prismatic.element.RenderContext;
 import me.croabeast.takion.bossbar.AnimatedBossbar;
 import me.croabeast.takion.channel.Channel;
 import me.croabeast.takion.channel.ChannelManager;
@@ -49,11 +50,13 @@ final class ChannelManagerImpl implements ChannelManager {
                 if (matcher.find())
                     message = message.replace(matcher.group(), "");
 
+                Element element = Element.parse(
+                        PlainFormat.PLACEHOLDER_API.accept(parser, message), lib.getMarkup());
                 boolean atLeastOneIsSent = false;
 
                 for (final Player p : targets) {
                     final Player ps = parser == null ? p : parser;
-                    String s = formatString(p, ps, message);
+                    String s = element.legacy(RenderContext.of(p, token -> lib.resolvePlaceholder(ps, token)));
 
                     if (MessageUtils.sendActionBar(p, s) && !atLeastOneIsSent)
                         atLeastOneIsSent = true;
@@ -79,35 +82,47 @@ final class ChannelManagerImpl implements ChannelManager {
                     return false;
                 }
 
-                String temp = lib.getCharacterManager().align(message);
+                // The prefix has to go first: aligning before stripping threw the aligned text away
+                // when a prefix was present, and the center marker is anchored to the start, so it
+                // never matched behind one either.
                 Matcher matcher = matcher(message);
-                if (matcher.find())
-                    temp = message.replace(matcher.group(), "");
+                String temp = matcher.find() ? message.replace(matcher.group(), "") : message;
 
+                temp = lib.getCharacterManager().align(temp);
+
+                // Both depend on the sender, not on the receiver, so they belong to the message.
+                temp = PlainFormat.INTERACTIVE_CHAT.accept(parser, temp);
+                temp = PlainFormat.PLACEHOLDER_API.accept(parser, temp);
+
+                // Parsed once from the raw text instead of once per receiver from the colorized
+                // text, and plain shares the parse with interactive: gating it on markup left the
+                // common case rescanning the whole message once per registered placeholder, per
+                // receiver, and made a bare URL clickable only when the message carried a tag.
+                Element element = Element.parse(temp, lib.getMarkup());
+                boolean interactive = element.hasEvents();
                 boolean atLeastOneIsSent = false;
 
                 for (final Player p : targets) {
                     if (p == null) continue;
 
-                    Player ps = parser == null ? p : parser;
-                    String s = formatString(p, ps, temp);
+                    final Player ps = parser == null ? p : parser;
 
-                    if (!MultiComponent.DEFAULT_FORMAT.isFormatted(temp)) {
-                        p.sendMessage(s);
-                        if (!atLeastOneIsSent) atLeastOneIsSent = true;
-                        continue;
-                    }
+                    // No custom formatter: colorizing is the plain Prismatic pipeline now, which is
+                    // what lets a message without placeholders reuse its cached render across every
+                    // receiver sharing a color profile.
+                    RenderContext context = RenderContext.of(p, token -> lib.resolvePlaceholder(ps, token));
 
-                    BaseComponent[] components;
                     try {
-                        components = MultiComponent.fromString(lib.getChatProcessor(), s).compile(ps);
+                        if (interactive)
+                            p.spigot().sendMessage(element.bungee(context));
+                        else
+                            p.sendMessage(element.legacy(context));
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        lib.getLogger().log("Could not build the message: " + e.getMessage());
                         continue;
                     }
 
-                    p.spigot().sendMessage(components);
-                    if (!atLeastOneIsSent) atLeastOneIsSent = true;
+                    atLeastOneIsSent = true;
                 }
 
                 return atLeastOneIsSent;
@@ -143,17 +158,16 @@ final class ChannelManagerImpl implements ChannelManager {
                 try {
                     if (tempTime != null)
                         time = Integer.parseInt(tempTime) * 20;
-                } catch (Exception ignored) {}
+                } catch (NumberFormatException ignored) {}
 
+                Element element = Element.parse(
+                        PlainFormat.PLACEHOLDER_API.accept(parser, message), lib.getMarkup());
                 boolean atLeastOneIsSent = false;
 
                 for (final Player p : targets) {
+                    final Player ps = parser == null ? p : parser;
                     TitleManager.Builder b = lib.getTitleManager()
-                            .builder(formatString(
-                                    p,
-                                    parser == null ? p : parser,
-                                    message
-                            ))
+                            .builder(element.legacy(RenderContext.of(p, token -> lib.resolvePlaceholder(ps, token))))
                             .setStay(time);
 
                     if (b.send(p) && !atLeastOneIsSent) atLeastOneIsSent = true;
@@ -189,7 +203,7 @@ final class ChannelManagerImpl implements ChannelManager {
                     ConfigurationSection c = null;
                     try {
                         c = bossbars.get(bossbars.firstKey());
-                    } catch (Exception ignored) {}
+                    } catch (java.util.NoSuchElementException ignored) {}
 
                     if (c == null && !(array.length == 1 && (c = bossbars.get(array[0])) == null))
                     {
@@ -199,16 +213,16 @@ final class ChannelManagerImpl implements ChannelManager {
                             try {
                                 bossbar.setDuration(Double.parseDouble(arg));
                                 continue;
-                            } catch (Exception ignored) {}
+                            } catch (NumberFormatException ignored) {}
 
                             try {
                                 bossbar.setColors(BarColor.valueOf(arg));
                                 continue;
-                            } catch (Exception ignored) {}
+                            } catch (IllegalArgumentException ignored) {}
 
                             try {
                                 bossbar.setStyles(BarStyle.valueOf(arg));
-                            } catch (Exception ignored) {}
+                            } catch (IllegalArgumentException ignored) {}
                         }
                     }
                     else bossbar = new AnimatedBossbar(lib.getPlugin(), c);

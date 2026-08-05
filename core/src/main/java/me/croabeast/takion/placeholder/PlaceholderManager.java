@@ -87,6 +87,19 @@ public interface PlaceholderManager {
     String replace(Player player, String string, boolean sensitive);
 
     /**
+     * Resolves a single token to its value.
+     *
+     * <p>This is the lookup form of {@link #replace(Player, String)}. Replacing scans the whole
+     * message once per registered placeholder; resolving answers for one token that the parser
+     * already located, which is what lets a compiled message skip the scans entirely.
+     *
+     * @param player the player context
+     * @param token  the token with its delimiters, such as {@code {player}}
+     * @return the value, or {@code null} when no placeholder owns the token
+     */
+    String resolve(Player player, String token);
+
+    /**
      * Replaces all occurrences of loaded placeholder keys in the given string with their corresponding values
      * for the specified player.
      * <p>

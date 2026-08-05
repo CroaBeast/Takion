@@ -2,24 +2,22 @@ package me.croabeast.takion.logger;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.SneakyThrows;
 import lombok.experimental.Accessors;
 import me.croabeast.common.CollectionBuilder;
 import me.croabeast.common.applier.StringApplier;
 import me.croabeast.common.util.ArrayUtils;
 import me.croabeast.vnc.VNC;
 import me.croabeast.prismatic.PrismaticAPI;
-import me.croabeast.prismatic.chat.MultiComponent;
+import me.croabeast.prismatic.element.Element;
 import me.croabeast.takion.TakionLib;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginLogger;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Function;
@@ -81,8 +79,14 @@ public class TakionLogger {
      */
     static final class PaperLogger implements Loggable {
 
-        /** The underlying Adventure SLF4J component logger. */
-        private final ComponentLogger logger;
+        private final Object logger;
+        private final Object serializer;
+        private final Method deserialize;
+        private final Method debug;
+        private final Method trace;
+        private final Method warn;
+        private final Method error;
+        private final Method info;
 
         /**
          * Constructs a new {@code PaperLogger} instance that routes log output
@@ -90,19 +94,20 @@ public class TakionLogger {
          *
          * @param name the logger name (usually the plugin name)
          */
-        @SneakyThrows
-        PaperLogger(String name) {
-            logger = ComponentLogger.logger(name);
-        }
+        PaperLogger(String name) throws ReflectiveOperationException {
+            Class<?> component = Class.forName("net.kyori.adventure.text.Component");
+            Class<?> loggerType = Class.forName("net.kyori.adventure.text.logger.slf4j.ComponentLogger");
+            Class<?> serializerType = Class.forName("net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer");
 
-        /**
-         * Deserializes a legacy-formatted string into an Adventure {@link Component}.
-         *
-         * @param string the legacy-formatted string (using section signs)
-         * @return the parsed {@link Component}
-         */
-        Component deserialize(String string) {
-            return LegacyComponentSerializer.legacySection().deserialize(string);
+            logger = loggerType.getMethod("logger", String.class).invoke(null, name);
+            serializer = serializerType.getMethod("legacySection").invoke(null);
+            deserialize = serializerType.getMethod("deserialize", String.class);
+
+            debug = loggerType.getMethod("debug", component);
+            trace = loggerType.getMethod("trace", component);
+            warn = loggerType.getMethod("warn", component);
+            error = loggerType.getMethod("error", component);
+            info = loggerType.getMethod("info", component);
         }
 
         /**
@@ -114,24 +119,30 @@ public class TakionLogger {
         @Override
         public void log(LogLevel level, String string) {
             level = level != null ? level : LogLevel.INFO;
-            Component component = deserialize(string);
+            Object component;
 
-            switch (level) {
-                case DEBUG:
-                    logger.debug(component);
-                    break;
-                case TRACE:
-                    logger.trace(component);
-                    break;
-                case WARN:
-                    logger.warn(component);
-                    break;
-                case ERROR:
-                    logger.error(component);
-                    break;
-                case INFO: default:
-                    logger.info(component);
-                    break;
+            try {
+                component = deserialize.invoke(serializer, string);
+
+                switch (level) {
+                    case DEBUG:
+                        debug.invoke(logger, component);
+                        break;
+                    case TRACE:
+                        trace.invoke(logger, component);
+                        break;
+                    case WARN:
+                        warn.invoke(logger, component);
+                        break;
+                    case ERROR:
+                        error.invoke(logger, component);
+                        break;
+                    case INFO: default:
+                        info.invoke(logger, component);
+                        break;
+                }
+            } catch (ReflectiveOperationException e) {
+                throw new IllegalStateException("Could not write Adventure log message.", e);
             }
         }
     }
@@ -188,14 +199,12 @@ public class TakionLogger {
      */
     static final LibStringFunction FORMATTER =
             (message, l, st, b) -> StringApplier.simplified(message)
-                    .apply(s -> l.replacePrefixKey(s, st))
-                    .apply(s -> {
-                        String split = l.getLineSeparator();
-                        final String r = "\\\\[QE]";
-                        return s.replaceAll(split, "&f" + split.replaceAll(r, ""));
-                    })
+                    .apply(s -> l.applyMarker(
+                            "lang_prefix", null, s, Collections.singletonMap("remove", st)))
+                    .apply(s -> l.applyMarker(
+                            "line_separator", null, s, Collections.singletonMap("prefix", "&f")))
                     .apply(l.getCharacterManager()::align)
-                    .apply(MultiComponent.DEFAULT_FORMAT::removeFormat)
+                    .apply(Element::stripMarkup)
                     .apply(b ? PrismaticAPI::colorize : PrismaticAPI::stripAll)
                     .toString();
 
@@ -229,7 +238,7 @@ public class TakionLogger {
                             return prefix == null ? p.getName() : prefix;
                         }).apply(plugin) :
                         "");
-            } catch (Exception ignored) {}
+            } catch (Throwable ignored) {}
         }
     }
 

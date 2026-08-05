@@ -1,8 +1,9 @@
-package me.croabeast.takion.format;
+package me.croabeast.takion;
 
+import me.croabeast.takion.token.Token;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.UtilityClass;
+import me.croabeast.takion.tag.Tag;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -11,108 +12,93 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.regex.MatchResult;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@UtilityClass
-class PlayerHeadUtils {
+final class PlayerHeadTag implements Tag {
 
-    private final Pattern TOKEN_PATTERN = Pattern.compile("(?i)(?:\\{player_head(?::([^}]*))?}|<player_head(?::([^>]*))?>)");
-    private final String REGEX = TOKEN_PATTERN.pattern();
-    private final String DISPLAY_MARKER = "■";
-    private final String BASE64_PREFIX = "b64:";
+    private static final Pattern PATTERN =
+            Pattern.compile("(?i)(?:\\{player_head(?::([^}]*))?}|<player_head(?::([^>]*))?>)");
+    private static final String DISPLAY_MARKER = "\u25A0";
+    private static final String BASE64_PREFIX = "b64:";
 
-    final StringFormat FORMAT = new StringFormat() {
-        @NotNull
-        public String getRegex() {
-            return REGEX;
-        }
-
-        @NotNull
-        public String accept(String string) {
-            return accept(null, string);
-        }
-
-        @NotNull
-        public String accept(Player player, String string) {
-            return replace(player, string);
-        }
-
-        @Override
-        public String removeFormat(String string) {
-            return stripTokens(string);
-        }
-    };
-
-    String replace(Player parser, String input) {
-        return transform(parser, input, false);
+    @NotNull
+    public String getId() {
+        return "player_head";
     }
 
-    private String stripTokens(String input) {
-        return transform(null, input, true);
+    @NotNull
+    public Pattern getPattern() {
+        return PATTERN;
     }
 
-    private String transform(Player parser, String input, boolean stripTokens) {
-        if (StringUtils.isBlank(input)) return input;
+    @NotNull
+    public Token.Rendered resolve(@NotNull Token.Context context, @NotNull MatchResult match) {
+        HeadArguments args = parseArguments(rawArguments(match));
+        Player parser = context.getParser();
+        Map<String, Object> data = new HashMap<>();
+        data.put("hat", args.isHat());
 
-        Matcher matcher = TOKEN_PATTERN.matcher(input);
-        if (!matcher.find()) return input;
+        String legacy;
+        if (StringUtils.isBlank(args.getTarget())) {
+            if (parser == null) return unresolved(match);
 
-        StringBuilder result = new StringBuilder(input.length() + 32);
-        int lastEnd = 0;
+            data.put("name", parser.getName());
+            data.put("uuid", parser.getUniqueId());
+            legacy = buildLegacyMarker(parser.getName(), parser.getUniqueId(), null);
+        } else if (isTextureValue(args.getTarget())) {
+            data.put("texture", args.getTarget());
+            legacy = buildLegacyMarker(null, null, args.getTarget());
+        } else {
+            UUID uuid = tryParseUuid(args.getTarget());
+            if (uuid != null) {
+                String name = resolveName(uuid);
+                data.put("uuid", uuid);
+                if (StringUtils.isNotBlank(name)) data.put("name", name);
+                legacy = buildLegacyMarker(name, uuid, null);
+            } else {
+                Player online = findOnlinePlayer(args.getTarget());
+                if (online != null) {
+                    data.put("name", online.getName());
+                    data.put("uuid", online.getUniqueId());
+                    legacy = buildLegacyMarker(online.getName(), online.getUniqueId(), null);
+                } else {
+                    @SuppressWarnings("deprecation")
+                    OfflinePlayer offline = Bukkit.getOfflinePlayer(args.getTarget());
+                    UUID offlineUuid = offline.getUniqueId();
+                    String offlineName = offline.getName();
+                    boolean notBlank = StringUtils.isNotBlank(offlineName);
 
-        matcher.reset();
-        while (matcher.find()) {
-            result.append(input, lastEnd, matcher.start());
+                    data.put("name", notBlank ? offlineName : args.getTarget());
+                    if (notBlank) data.put("uuid", offlineUuid);
 
-            if (!stripTokens) {
-                String replacement = buildLegacyHeadComponent(parser, matcher);
-                if (replacement == null) result.append(matcher.group());
-                else result.append(replacement);
+                    legacy = buildLegacyMarker(
+                            notBlank ? offlineName : args.getTarget(),
+                            notBlank ? offlineUuid : null,
+                            null
+                    );
+                }
             }
-
-            lastEnd = matcher.end();
         }
 
-        result.append(input, lastEnd, input.length());
-        return result.toString();
+        return new Token.SimpleRendered()
+                .setLegacy(legacy)
+                .setMeasure(DISPLAY_MARKER)
+                .setData(data);
     }
 
-    private String buildLegacyHeadComponent(Player parser, MatchResult result) {
-        HeadArguments args = parseArguments(rawArguments(result));
-
-        if (StringUtils.isBlank(args.target))
-            return parser == null ?
-                    null :
-                    buildMarker(parser.getName(), parser.getUniqueId(), null);
-
-        if (isTextureValue(args.target))
-            return buildMarker(null, null, args.target);
-
-        UUID uuid = tryParseUuid(args.target);
-        if (uuid != null)
-            return buildMarker(resolveName(uuid), uuid, null);
-
-        Player online = findOnlinePlayer(args.target);
-        if (online != null)
-            return buildMarker(online.getName(), online.getUniqueId(), null);
-
-        @SuppressWarnings("deprecation")
-        OfflinePlayer offline = Bukkit.getOfflinePlayer(args.target);
-        UUID offlineUuid = offline.getUniqueId();
-        String offlineName = offline.getName();
-
-        boolean notBlank = StringUtils.isNotBlank(offlineName);
-        return buildMarker(
-                notBlank ? offlineName : args.target,
-                notBlank ? offlineUuid : null,
-                null
-        );
+    @NotNull
+    private Token.Rendered unresolved(@NotNull MatchResult match) {
+        String value = match.group();
+        return new Token.SimpleRendered()
+                .setLegacy(value)
+                .setMeasure(value);
     }
 
-    private String buildMarker(String name, UUID uuid, String textureValue) {
+    private String buildLegacyMarker(String name, UUID uuid, String textureValue) {
         StringBuilder json = new StringBuilder()
                 .append("{\"id\":\"minecraft:player_head\",\"Count\":1");
 
@@ -149,14 +135,6 @@ class PlayerHeadUtils {
                 + "\">"
                 + DISPLAY_MARKER
                 + "</text>";
-    }
-
-    private String serializeHoverItem(String itemJson) {
-        if (StringUtils.isBlank(itemJson)) return itemJson;
-
-        return BASE64_PREFIX + Base64.getUrlEncoder()
-                .withoutPadding()
-                .encodeToString(itemJson.getBytes(StandardCharsets.UTF_8));
     }
 
     private String rawArguments(MatchResult result) {
@@ -223,6 +201,14 @@ class PlayerHeadUtils {
 
     private String escapeJson(String value) {
         return StringUtils.isBlank(value) ? value : value.replace("\\", "\\\\").replace("\"", "\\\"");
+    }
+
+    private String serializeHoverItem(String itemJson) {
+        if (StringUtils.isBlank(itemJson)) return itemJson;
+
+        return BASE64_PREFIX + Base64.getUrlEncoder()
+                .withoutPadding()
+                .encodeToString(itemJson.getBytes(StandardCharsets.UTF_8));
     }
 
     @RequiredArgsConstructor

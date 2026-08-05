@@ -18,9 +18,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public final class TakionPlugin extends JavaPlugin {
 
-    static final TakionLib NO_PLUGIN_INSTANCE = new TakionLib(null);
-    static final Map<Plugin, TakionLib> LIBRARIES = new ConcurrentHashMap<>();
-
     @Getter(AccessLevel.NONE)
     private ChatProvider holder;
     TakionLib lib;
@@ -60,10 +57,10 @@ public final class TakionPlugin extends JavaPlugin {
                             "permissionPlugin", "Permission Plugin",
                             plugin != null ? plugin.getName() : "None"
                     )
-                    .addSingleLine("pluginsCount", LIBRARIES.size() - 1)
+                    .addSingleLine("pluginsCount", TakionRegistry.size() - 1)
                     .addDrillDownPie(
                             "usagePlugins", "Plugins Using Takion",
-                            CollectionBuilder.of(LIBRARIES.keySet())
+                            CollectionBuilder.of(TakionRegistry.getPlugins())
                                     .remove(this)
                                     .map(p -> {
                                         Reflector r = Reflector.of(p.getClass());

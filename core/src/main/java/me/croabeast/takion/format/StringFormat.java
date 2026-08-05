@@ -12,10 +12,4 @@ package me.croabeast.takion.format;
  * @see TextFormat
  */
 public interface StringFormat extends TextFormat<String> {
-
-    /**
-     * A built-in {@link StringFormat} that formats player head placeholders into
-     * their corresponding display strings using {@code PlayerHeadUtils}.
-     */
-    StringFormat PLAYER_HEAD_FORMAT = PlayerHeadUtils.FORMAT;
 }

@@ -1,15 +1,12 @@
 package me.croabeast.takion;
 
 import me.croabeast.takion.character.SmallCaps;
-import me.croabeast.takion.format.ContextualFormat;
 import me.croabeast.takion.format.Format;
 import me.croabeast.takion.format.FormatManager;
 import me.croabeast.takion.format.StringFormat;
 import org.apache.commons.lang.StringUtils;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -51,66 +48,6 @@ final class FormatManagerImpl implements FormatManager {
                 return string;
             }
         });
-        formats.put("CHARACTER", new StringFormat() {
-            @NotNull
-            public String getRegex() {
-                return "<[Uu]:([a-fA-F\\d]{4})>";
-            }
-
-            @NotNull
-            public String accept(String string) {
-                if (StringUtils.isBlank(string)) return string;
-
-                Matcher m = matcher(string);
-                while (m.find()) {
-                    char c = (char) Integer.parseInt(m.group(1), 16);
-                    string = string.replace(m.group(), c + "");
-                }
-
-                return string;
-            }
-
-            @Override
-            public String removeFormat(String string) {
-                return this.accept(string);
-            }
-        });
-        formats.put("BLANK_SPACES", new ContextualFormat<Boolean>() {
-            @NotNull
-            public String getRegex() {
-                return "(?i)<add_space:(\\d+)>";
-            }
-
-            @NotNull
-            public Boolean accept(Collection<? extends Player> players, String string) {
-                if ((players == null ||
-                        players.isEmpty()) || StringUtils.isBlank(string))
-                    return false;
-
-                Matcher matcher = matcher(string);
-                if (!matcher.find()) return false;
-
-                int count = 0;
-                try {
-                    count = Integer.parseInt(matcher.group(1));
-                } catch (Exception ignored) {}
-                if (count <= 0) return false;
-
-                boolean atLeastOneIsSent = false;
-                for (Player player : players) {
-                    if (player == null) continue;
-
-                    for (int i = 0; i < count; i++)
-                        player.sendMessage("");
-
-                    if (!atLeastOneIsSent)
-                        atLeastOneIsSent = true;
-                }
-
-                return atLeastOneIsSent;
-            }
-        });
-        formats.put("PLAYER_HEAD", StringFormat.PLAYER_HEAD_FORMAT);
     }
 
     @Override

@@ -10,7 +10,6 @@ import me.croabeast.common.util.ArrayUtils;
 import me.croabeast.common.util.ReplaceUtils;
 import me.croabeast.takion.TakionLib;
 import me.croabeast.takion.channel.Channel;
-import me.croabeast.takion.format.ContextualFormat;
 import me.croabeast.takion.placeholder.Placeholder;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.command.CommandSender;
@@ -49,7 +48,7 @@ import java.util.function.UnaryOperator;
  *       .addFunctions(s -&gt; s.toUpperCase())
  *       .setFlags(Channel.Flag.CHAT)
  *       .setLogger(true)
- *       .setErrorPrefix("&c[ERROR]&7 ");
+ *       .setErrorPrefix("&amp;c[ERROR]&amp;7 ");
  *
  * // Send a message to the player
  * sender.send("Hello, {player}! Welcome to the server.");
@@ -238,12 +237,11 @@ public class MessageSender implements Copyable<MessageSender> {
      */
     @SafeVarargs
     public final MessageSender addFunctions(UnaryOperator<String>... operators) {
-        try {
-            ArrayUtils.toList(operators).forEach(u -> {
-                if (u != null)
-                    functions.add((p, s) -> u.apply(s));
-            });
-        } catch (Exception ignored) {}
+        if (operators == null) return this;
+
+        for (UnaryOperator<String> operator : operators)
+            if (operator != null) functions.add((p, s) -> operator.apply(s));
+
         return this;
     }
 
@@ -314,18 +312,17 @@ public class MessageSender implements Copyable<MessageSender> {
      * @param values an array of placeholder values
      * @param <T>    the type of the placeholder values
      * @return this {@code MessageSender} instance for chaining
-     * @throws NullPointerException if keys and values are not applicable for replacement
+     * @throws IllegalArgumentException if keys and values are not applicable for replacement
      */
     @SafeVarargs
     public final <T> MessageSender addPlaceholders(String[] keys, T... values) {
-        if (ReplaceUtils.isApplicable(keys, values)) {
-            for (int i = 0; i < keys.length; i++)
-                try {
-                    addPlaceholder(keys[i], values[i]);
-                } catch (Exception ignored) {}
-            return this;
-        }
-        throw new NullPointerException("Keys/Values are not applicable for replacements.");
+        if (!ReplaceUtils.isApplicable(keys, values))
+            throw new IllegalArgumentException("Keys and values are not applicable for replacements.");
+
+        for (int i = 0; i < keys.length; i++)
+            addPlaceholder(keys[i], values[i]);
+
+        return this;
     }
 
     /**
@@ -374,8 +371,8 @@ public class MessageSender implements Copyable<MessageSender> {
                 continue;
             }
 
-            ContextualFormat<Boolean> format = lib.getFormatManager().get("BLANK_SPACES");
-            if (format.accept(targets, message.message) && !message.isAllowed())
+            String channelId = message.flag.name().toLowerCase(Locale.ENGLISH);
+            if (lib.executeActions(targets, parser, channelId, message.message) && !message.isAllowed())
                 continue;
 
             boolean wasSent = message.send(targets);
@@ -459,7 +456,7 @@ public class MessageSender implements Copyable<MessageSender> {
         String formatMessage() {
             if (formatted) return formattedMessage;
 
-            String temp = lib.replacePrefixKey(message, false);
+            String temp = lib.applyMarker("lang_prefix", parser, message);
             for (PlayerFormatter function : functions)
                 temp = function.apply(parser, temp);
             for (Placeholder<?> placeholder : placeholders)

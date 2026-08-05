@@ -2,12 +2,11 @@ package me.croabeast.takion;
 
 import me.croabeast.common.util.ArrayUtils;
 import me.croabeast.prismatic.PrismaticAPI;
-import me.croabeast.prismatic.chat.MultiComponent;
+import me.croabeast.prismatic.element.Element;
 import me.croabeast.takion.character.CharacterInfo;
 import me.croabeast.takion.character.CharacterManager;
 import me.croabeast.takion.character.DefaultCharacter;
 import me.croabeast.takion.character.SmallCaps;
-import me.croabeast.takion.format.StringFormat;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.LinkedHashMap;
@@ -48,16 +47,12 @@ final class CharacterManagerImpl implements CharacterManager {
     public String align(int limit, String string) {
         if (StringUtils.isBlank(string)) return string;
 
-        final String prefix = lib.getCenterPrefix();
-        if (StringUtils.isBlank(prefix) || !string.startsWith(prefix))
-            return string;
+        String before = lib.applyMarker("center_prefix", null, string);
+        if (before.equals(string)) return string;
 
-        String before = string.replace(prefix, "");
         String temp = PrismaticAPI.stripAll(before);
-        temp = MultiComponent.DEFAULT_FORMAT.removeFormat(temp);
-
-        StringFormat format = lib.getFormatManager().get("character");
-        temp = format.accept(temp);
+        temp = Element.stripMarkup(temp);
+        temp = lib.measureTags(null, null, temp);
 
         int size = 0;
         boolean previousCode = false;

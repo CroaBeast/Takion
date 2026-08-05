@@ -76,6 +76,18 @@ final class PlaceholderManagerImpl implements PlaceholderManager {
     }
 
     @Override
+    public String resolve(Player player, String token) {
+        if (player == null || StringUtils.isBlank(token)) return null;
+
+        for (Placeholder<?> placeholder : placeholders) {
+            if (!placeholder.getKey().equalsIgnoreCase(token)) continue;
+            return String.valueOf(placeholder.getFunction().apply(player));
+        }
+
+        return null;
+    }
+
+    @Override
     public String replace(Player player, String string, boolean sensitive) {
         if (player == null || StringUtils.isBlank(string) || placeholders.isEmpty())
             return string;
