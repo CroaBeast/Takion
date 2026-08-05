@@ -52,6 +52,14 @@ subprojects {
         options.compilerArgs.add("-Xlint:-options")
     }
 
+    tasks.withType<Test>().configureEach {
+        useJUnitPlatform()
+        systemProperty("snapshot.update", providers.systemProperty("snapshot.update").getOrElse("false"))
+        testLogging {
+            events("failed")
+        }
+    }
+
     dependencies {
         compileOnly("org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT")
 
@@ -85,5 +93,18 @@ subprojects {
         compileOnly("me.croabeast.vnc:VNC:1.2.1") {
             isTransitive = false
         }
+
+        testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
+        testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+        testImplementation("org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT")
+        testImplementation("me.croabeast:PrismaticAPI:2.0.0")
+        testImplementation("me.croabeast.vnc:VNC:1.2.1") {
+            isTransitive = false
+        }
+        testImplementation("me.croabeast:GlobalScheduler:1.1")
+        testImplementation("net.kyori:adventure-api:4.26.1")
+        testImplementation("net.kyori:adventure-text-minimessage:4.26.1")
+        testImplementation("net.kyori:adventure-text-serializer-legacy:4.26.1")
     }
 }

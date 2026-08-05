@@ -1,0 +1,48 @@
+input   : 
+align   : 
+
+input   : texto plano
+align   : texto plano
+
+input   : &7con color
+align   : &7con color
+
+input   : <small_caps>small caps</small_caps>
+align   : <small_caps>small caps</small_caps>
+
+input   : <sc>alias corto</sc>
+align   : <sc>alias corto</sc>
+
+input   : <u:2764>char tag
+align   : <u:2764>char tag
+
+input   : [C]centrado
+align   :                                  centrado
+
+input   : <P>prefijo de lang
+align   : <P>prefijo de lang
+
+input   : linea uno<n>linea dos
+align   : linea uno<n>linea dos
+
+input   : &7mezcla <sc>todo</sc> <u:2764> junto
+align   : &7mezcla <sc>todo</sc> <u:2764> junto
+
+input   : <g:ff0000>degradado</g:00ff00>
+align   : <g:ff0000>degradado</g:00ff00>
+
+input   : &7hola {player}
+align   : &7hola {player}
+
+input   : &7saldo %vault_eco_balance%
+align   : &7saldo %vault_eco_balance%
+
+input   : <run:"/spawn">&aboton</text>
+align   : <run:"/spawn">&aboton</text>
+
+input   : <run:"/spawn"|hover:"&7pista<n>&8/spawn">&aboton</text>
+align   : <run:"/spawn"|hover:"&7pista<n>&8/spawn">&aboton</text>
+
+input   : texto con https://example.com dentro
+align   : texto con https://example.com dentro
+

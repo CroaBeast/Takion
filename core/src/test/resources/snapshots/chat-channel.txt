@@ -1,0 +1,65 @@
+input   : texto plano
+plain   : 1
+  texto plano
+compiled: 0
+
+input   : &7con color
+plain   : 1
+  [S]7con color
+compiled: 0
+
+input   : <g:ff0000>degradado</g:00ff00>
+plain   : 1
+  [S]x[S]f[S]f[S]0[S]0[S]0[S]0d[S]x[S]e[S]0[S]1[S]f[S]0[S]0e[S]x[S]c[S]1[S]3[S]e[S]0[S]0g[S]x[S]a[S]2[S]5[S]d[S]0[S]0r[S]x[S]8[S]3[S]7[S]c[S]0[S]0a[S]x[S]6[S]4[S]9[S]b[S]0[S]0d[S]x[S]4[S]5[S]b[S]a[S]0[S]0a[S]x[S]2[S]6[S]d[S]9[S]0[S]0d[S]x[S]0[S]7[S]f[S]8[S]0[S]0o
+compiled: 0
+
+input   : <run:"/spawn">&aboton</text>
+plain   : 0
+compiled: 1
+  parts : 1
+    [0] text : [S]f[S]aboton
+    [0] click: RUN_COMMAND /spawn
+
+input   : <run:"/spawn"|hover:"&7pista<n>&8/spawn">&aboton</text>
+plain   : 0
+compiled: 1
+  parts : 1
+    [0] text : [S]f[S]aboton
+    [0] click: RUN_COMMAND /spawn
+    [0] hover: SHOW_TEXT [S]f[S]7pista[NL][S]f[S]8/spawn
+
+input   : &aInicio <run:"/a">&bmedio</text> &cfinal
+plain   : 0
+compiled: 1
+  parts : 3
+    [0] text : [S]f[S]aInicio 
+    [1] text : [S]f[S]bmedio
+    [1] click: RUN_COMMAND /a
+    [2] text : [S]f[S]b [S]cfinal
+
+input   : &7visita https://example.com ahora
+plain   : 0
+compiled: 1
+  parts : 3
+    [0] text : [S]f[S]7visita 
+    [1] text : [S]f[S]7https://example.com[S]7
+    [1] click: OPEN_URL https://example.com
+    [2] text : [S]f[S]7 ahora
+
+input   : <sc>small caps</sc> y <u:2764>
+plain   : 1
+  sᴍᴀʟʟ ᴄᴀᴘs y ❤
+compiled: 0
+
+input   : &7hola {player}
+plain   : 1
+  [S]7hola Steve
+compiled: 0
+
+input   : <run:"/cmd {player}">&aplaceholder {player}</text>
+plain   : 0
+compiled: 1
+  parts : 1
+    [0] text : [S]f[S]aplaceholder Steve
+    [0] click: RUN_COMMAND /cmd Steve
+

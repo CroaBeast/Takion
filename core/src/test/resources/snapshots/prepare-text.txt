@@ -1,0 +1,48 @@
+input   : 
+prepare : 
+
+input   : texto plano
+prepare : texto plano
+
+input   : &7con color
+prepare : &7con color
+
+input   : <small_caps>small caps</small_caps>
+prepare : sᴍᴀʟʟ ᴄᴀᴘs
+
+input   : <sc>alias corto</sc>
+prepare : ᴀʟɪᴀs ᴄᴏʀᴛᴏ
+
+input   : <u:2764>char tag
+prepare : ❤char tag
+
+input   : [C]centrado
+prepare : [C]centrado
+
+input   : <P>prefijo de lang
+prepare : <P>prefijo de lang
+
+input   : linea uno<n>linea dos
+prepare : linea uno<n>linea dos
+
+input   : &7mezcla <sc>todo</sc> <u:2764> junto
+prepare : &7mezcla ᴛᴏᴅᴏ ❤ junto
+
+input   : <g:ff0000>degradado</g:00ff00>
+prepare : <g:ff0000>degradado</g:00ff00>
+
+input   : &7hola {player}
+prepare : &7hola {player}
+
+input   : &7saldo %vault_eco_balance%
+prepare : &7saldo %vault_eco_balance%
+
+input   : <run:"/spawn">&aboton</text>
+prepare : <run:"/spawn">&aboton</text>
+
+input   : <run:"/spawn"|hover:"&7pista<n>&8/spawn">&aboton</text>
+prepare : <run:"/spawn"|hover:"&7pista<n>&8/spawn">&aboton</text>
+
+input   : texto con https://example.com dentro
+prepare : texto con https://example.com dentro
+

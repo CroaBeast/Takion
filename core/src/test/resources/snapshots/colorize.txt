@@ -1,0 +1,48 @@
+input   : 
+colorize: 
+
+input   : texto plano
+colorize: texto plano
+
+input   : &7con color
+colorize: [S]7con color
+
+input   : <small_caps>small caps</small_caps>
+colorize: sᴍᴀʟʟ ᴄᴀᴘs
+
+input   : <sc>alias corto</sc>
+colorize: ᴀʟɪᴀs ᴄᴏʀᴛᴏ
+
+input   : <u:2764>char tag
+colorize: ❤char tag
+
+input   : [C]centrado
+colorize: [C]centrado
+
+input   : <P>prefijo de lang
+colorize: <P>prefijo de lang
+
+input   : linea uno<n>linea dos
+colorize: linea uno<n>linea dos
+
+input   : &7mezcla <sc>todo</sc> <u:2764> junto
+colorize: [S]7mezcla ᴛᴏᴅᴏ ❤ junto
+
+input   : <g:ff0000>degradado</g:00ff00>
+colorize: [S]x[S]f[S]f[S]0[S]0[S]0[S]0d[S]x[S]e[S]0[S]1[S]f[S]0[S]0e[S]x[S]c[S]1[S]3[S]e[S]0[S]0g[S]x[S]a[S]2[S]5[S]d[S]0[S]0r[S]x[S]8[S]3[S]7[S]c[S]0[S]0a[S]x[S]6[S]4[S]9[S]b[S]0[S]0d[S]x[S]4[S]5[S]b[S]a[S]0[S]0a[S]x[S]2[S]6[S]d[S]9[S]0[S]0d[S]x[S]0[S]7[S]f[S]8[S]0[S]0o
+
+input   : &7hola {player}
+colorize: [S]7hola {player}
+
+input   : &7saldo %vault_eco_balance%
+colorize: [S]7saldo %vault_eco_balance%
+
+input   : <run:"/spawn">&aboton</text>
+colorize: <run:"/spawn">[S]aboton</text>
+
+input   : <run:"/spawn"|hover:"&7pista<n>&8/spawn">&aboton</text>
+colorize: <run:"/spawn"|hover:"<gray>pista<n><dark_gray>/spawn">[S]aboton</text>
+
+input   : texto con https://example.com dentro
+colorize: texto con https://example.com dentro
+

@@ -1,0 +1,6 @@
+tags    :
+  character -> (?i)<u:([a-fA-F\d]{4})>
+markers :
+  lang_prefix -> \Q<P>\E
+  line_separator -> \Q<n>\E
+  center_prefix -> ^\Q[C]\E

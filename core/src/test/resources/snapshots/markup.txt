@@ -1,0 +1,101 @@
+input   : 
+isMarkup: false
+strip   : 
+parts   : 0
+
+input   : texto plano
+isMarkup: false
+strip   : texto plano
+parts   : 1
+  [0] text : [S]f[S]ftexto plano
+
+input   : &7con color
+isMarkup: false
+strip   : &7con color
+parts   : 1
+  [0] text : [S]f[S]7con color
+
+input   : <small_caps>small caps</small_caps>
+isMarkup: false
+strip   : <small_caps>small caps</small_caps>
+parts   : 1
+  [0] text : [S]f[S]fsᴍᴀʟʟ ᴄᴀᴘs
+
+input   : <sc>alias corto</sc>
+isMarkup: false
+strip   : <sc>alias corto</sc>
+parts   : 1
+  [0] text : [S]f[S]fᴀʟɪᴀs ᴄᴏʀᴛᴏ
+
+input   : <u:2764>char tag
+isMarkup: false
+strip   : <u:2764>char tag
+parts   : 1
+  [0] text : [S]f[S]f❤char tag
+
+input   : [C]centrado
+isMarkup: false
+strip   : [C]centrado
+parts   : 1
+  [0] text : [S]f[S]f                                 centrado
+
+input   : <P>prefijo de lang
+isMarkup: false
+strip   : <P>prefijo de lang
+parts   : 1
+  [0] text : [S]f[S]f<P>prefijo de lang
+
+input   : linea uno<n>linea dos
+isMarkup: false
+strip   : linea uno<n>linea dos
+parts   : 1
+  [0] text : [S]f[S]flinea uno<n>linea dos
+
+input   : &7mezcla <sc>todo</sc> <u:2764> junto
+isMarkup: false
+strip   : &7mezcla <sc>todo</sc> <u:2764> junto
+parts   : 1
+  [0] text : [S]f[S]7mezcla ᴛᴏᴅᴏ ❤ junto
+
+input   : <g:ff0000>degradado</g:00ff00>
+isMarkup: false
+strip   : <g:ff0000>degradado</g:00ff00>
+parts   : 1
+  [0] text : [S]f[S]x[S]f[S]f[S]0[S]0[S]0[S]0d[S]x[S]e[S]0[S]1[S]f[S]0[S]0e[S]x[S]c[S]1[S]3[S]e[S]0[S]0g[S]x[S]a[S]2[S]5[S]d[S]0[S]0r[S]x[S]8[S]3[S]7[S]c[S]0[S]0a[S]x[S]6[S]4[S]9[S]b[S]0[S]0d[S]x[S]4[S]5[S]b[S]a[S]0[S]0a[S]x[S]2[S]6[S]d[S]9[S]0[S]0d[S]x[S]0[S]7[S]f[S]8[S]0[S]0o
+
+input   : &7hola {player}
+isMarkup: false
+strip   : &7hola {player}
+parts   : 1
+  [0] text : [S]f[S]7hola {player}
+
+input   : &7saldo %vault_eco_balance%
+isMarkup: false
+strip   : &7saldo %vault_eco_balance%
+parts   : 1
+  [0] text : [S]f[S]7saldo %vault_eco_balance%
+
+input   : <run:"/spawn">&aboton</text>
+isMarkup: true
+strip   : &aboton
+parts   : 1
+  [0] text : [S]f[S]aboton
+  [0] click: RUN_COMMAND /spawn
+
+input   : <run:"/spawn"|hover:"&7pista<n>&8/spawn">&aboton</text>
+isMarkup: true
+strip   : &aboton
+parts   : 1
+  [0] text : [S]f[S]aboton
+  [0] click: RUN_COMMAND /spawn
+  [0] hover: SHOW_TEXT [S]f[S]7pista[NL][S]f[S]8/spawn
+
+input   : texto con https://example.com dentro
+isMarkup: false
+strip   : texto con https://example.com dentro
+parts   : 3
+  [0] text : [S]f[S]ftexto con 
+  [1] text : [S]f[S]fhttps://example.com[S]f
+  [1] click: OPEN_URL https://example.com
+  [2] text : [S]f[S]f dentro
+
