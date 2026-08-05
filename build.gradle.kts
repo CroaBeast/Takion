@@ -78,6 +78,12 @@ subprojects {
         
         compileOnly("me.croabeast:YAML-API:1.1")
         compileOnly("me.croabeast:GlobalScheduler:1.1")
-        compileOnly("me.croabeast:PrismaticAPI:1.5.2")
+        compileOnly("me.croabeast:PrismaticAPI:2.0.0")
+
+        // Used directly by common/reflect/Craft and common/util/ServerInfoUtils. It used to arrive
+        // shaded inside the PrismaticAPI jar, which stops being true when Prismatic is built from source.
+        compileOnly("me.croabeast.vnc:VNC:1.2.1") {
+            isTransitive = false
+        }
     }
 }
