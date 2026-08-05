@@ -21,7 +21,7 @@ import java.util.Objects;
  * <p>
  * Example usage:
  * <pre><code>
- * ChestBuilder chest = new ChestBuilder(4, "&aMy Chest GUI");
+ * ChestBuilder chest = new ChestBuilder(4, "&amp;aMy Chest GUI");
  * chest.setDisplayedPage(2).showGui(player);
  * </code></pre>
  * </p>

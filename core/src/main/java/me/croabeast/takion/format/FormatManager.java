@@ -16,7 +16,7 @@ package me.croabeast.takion.format;
  *
  * Example Usage:
  * <pre><code>
- * // Create and register a custom format that parses "<uppercase:...>" blocks
+ * // Create and register a custom format that parses "&lt;uppercase:...&gt;" blocks
  * FormatManager manager = new MyFormatManagerImplementation();
  * manager.load("upper", new Format&lt;String&gt;() {
  *     public @Regex String getRegex() {
@@ -30,7 +30,7 @@ package me.croabeast.takion.format;
  * });
  *
  * // Apply the format
- * String result = manager.get("upper").apply("Hello <uppercase:world>!");
+ * String result = manager.get("upper").apply("Hello &lt;uppercase:world&gt;!");
  * // "Hello WORLD!"
  * </code></pre>
  *

@@ -28,8 +28,8 @@ import java.util.function.Consumer;
  * <pre><code>
  * // Create an item with a custom name and lore, and set a click action
  * GuiItem guiItem = ItemCreator.of(Material.DIAMOND)
- *     .modifyName("&bShiny Diamond")
- *     .modifyLore("&7This is a very shiny diamond.", "&eRight-click to use!")
+ *     .modifyName("&amp;bShiny Diamond")
+ *     .modifyLore("&amp;7This is a very shiny diamond.", "&amp;eRight-click to use!")
  *     .setAction(event -&gt; {
  *         event.setCancelled(true);
  *         // Additional click handling code...
