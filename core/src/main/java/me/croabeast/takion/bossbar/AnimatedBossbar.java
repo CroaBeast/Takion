@@ -280,7 +280,7 @@ public class AnimatedBossbar {
             BarColor color = BarColor.WHITE;
             try {
                 color = BarColor.valueOf(c);
-            } catch (Exception ignored) {}
+            } catch (IllegalArgumentException ignored) {}
             this.colors.add(color);
         }
         return this;

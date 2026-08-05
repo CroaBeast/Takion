@@ -10,6 +10,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * Represents a collection of string formats for different time units.
@@ -257,38 +258,26 @@ public class TimeValues {
         TimeValues values = new TimeValues(DEFAULT_KEYS);
         values.toggleModification();
 
-        try {
-            values.setSplitter(section.getString("splitter"));
-        } catch (Exception ignored) {}
-
-        try {
-            values.setSecondsFormat(section.getString("seconds"));
-        } catch (Exception ignored) {}
-
-        try {
-            values.setMinutesFormat(section.getString("minutes"));
-        } catch (Exception ignored) {}
-
-        try {
-            values.setHoursFormat(section.getString("hours"));
-        } catch (Exception ignored) {}
-
-        try {
-            values.setDaysFormat(section.getString("days"));
-        } catch (Exception ignored) {}
-
-        try {
-            values.setWeeksFormat(section.getString("weeks"));
-        } catch (Exception ignored) {}
-
-        try {
-            values.setMonthsFormat(section.getString("months"));
-        } catch (Exception ignored) {}
-
-        try {
-            values.setYearsFormat(section.getString("years"));
-        } catch (Exception ignored) {}
+        applyIfPresent(section, "splitter", values::setSplitter);
+        applyIfPresent(section, "seconds", values::setSecondsFormat);
+        applyIfPresent(section, "minutes", values::setMinutesFormat);
+        applyIfPresent(section, "hours", values::setHoursFormat);
+        applyIfPresent(section, "days", values::setDaysFormat);
+        applyIfPresent(section, "weeks", values::setWeeksFormat);
+        applyIfPresent(section, "months", values::setMonthsFormat);
+        applyIfPresent(section, "years", values::setYearsFormat);
 
         return values;
+    }
+
+    /**
+     * Applies a configured value, leaving the default in place when the key is absent or blank.
+     *
+     * <p>The setters reject a blank value by throwing, which the loader used to express by
+     * wrapping every call in an empty catch.
+     */
+    private static void applyIfPresent(ConfigurationSection section, String key, Consumer<String> setter) {
+        String value = section.getString(key);
+        if (StringUtils.isNotBlank(value)) setter.accept(value);
     }
 }

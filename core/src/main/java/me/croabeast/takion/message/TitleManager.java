@@ -1,5 +1,7 @@
 package me.croabeast.takion.message;
 
+import java.util.logging.Level;
+import org.bukkit.Bukkit;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import me.croabeast.common.util.Exceptions;
@@ -75,15 +77,11 @@ public interface TitleManager {
      * @param fadeOut the fade-out ticks
      */
     default void setTicks(int fadeIn, int stay, int fadeOut) {
-        try {
-            setFadeInTicks(Exceptions.validate(fadeIn, i -> i >= 0));
-        } catch (Exception ignored) {}
-        try {
-            setStayTicks(Exceptions.validate(stay, i -> i > 0));
-        } catch (Exception ignored) {}
-        try {
-            setFadeOutTicks(Exceptions.validate(fadeOut, i -> i >= 0));
-        } catch (Exception ignored) {}
+        // An out of range value leaves the current one alone, which used to be expressed by
+        // throwing and swallowing.
+        if (fadeIn >= 0) setFadeInTicks(fadeIn);
+        if (stay > 0) setStayTicks(stay);
+        if (fadeOut >= 0) setFadeOutTicks(fadeOut);
     }
 
     /**
@@ -158,15 +156,9 @@ public interface TitleManager {
          * @return this builder instance for method chaining
          */
         public Builder setTicks(int fadeIn, int stay, int fadeOut) {
-            try {
-                this.fadeIn = Exceptions.validate(fadeIn, i -> i >= 0);
-            } catch (Exception ignored) {}
-            try {
-                this.stay = Exceptions.validate(stay, i -> i > 0);
-            } catch (Exception ignored) {}
-            try {
-                this.fadeOut = Exceptions.validate(fadeOut, i -> i >= 0);
-            } catch (Exception ignored) {}
+            if (fadeIn >= 0) this.fadeIn = fadeIn;
+            if (stay > 0) this.stay = stay;
+            if (fadeOut >= 0) this.fadeOut = fadeOut;
             return this;
         }
 
@@ -194,7 +186,7 @@ public interface TitleManager {
                 ReflectUtils.sendPacket(player, ReflectUtils.LEGACY_PACKET_INSTANCE.apply(false, subtitle));
                 return true;
             } catch (Exception e) {
-                e.printStackTrace();
+                Bukkit.getLogger().log(Level.WARNING, "Could not send the legacy title packets", e);
                 return false;
             }
         }
