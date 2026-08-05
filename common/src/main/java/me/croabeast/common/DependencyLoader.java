@@ -145,7 +145,7 @@ public class DependencyLoader {
             }
         } catch (Exception e) {
             log(Log.ERROR, "URL not reachable: " + urlString);
-            e.printStackTrace();
+            Bukkit.getLogger().log(Level.WARNING, "URL not reachable: " + urlString, e);
             return false;
         }
 
@@ -216,7 +216,7 @@ public class DependencyLoader {
             return true;
         } catch (Exception e) {
             log(Log.ERROR, "Error loading dependency: " + artifact + " v" + version);
-            e.printStackTrace();
+            Bukkit.getLogger().log(Level.WARNING, "Could not load dependency " + artifact, e);
             return false;
         }
     }

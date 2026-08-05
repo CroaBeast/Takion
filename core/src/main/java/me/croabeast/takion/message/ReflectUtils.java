@@ -1,5 +1,6 @@
 package me.croabeast.takion.message;
 
+import java.util.logging.Level;
 import lombok.experimental.UtilityClass;
 import me.croabeast.common.function.TriFunction;
 import me.croabeast.vnc.VNC;
@@ -28,7 +29,7 @@ class ReflectUtils {
     final Class<?> BASE_COMP_CLASS = from(
             IS_LEGACY ? null : "network.chat.", "IChatBaseComponent");
 
-    private Class<?> firstNonNull(Class<?>... classes) {
+    private Class<?> firstNotNull(Class<?>... classes) {
         if (classes == null) return null;
 
         for (Class<?> clazz : classes)
@@ -57,7 +58,7 @@ class ReflectUtils {
 
     final Function<String, Object> COMPONENT_SERIALIZER = message -> {
         try {
-            Class<?> serializer = firstNonNull(
+            Class<?> serializer = firstNotNull(
                     from(
                             IS_LEGACY ? "IChatBaseComponent$" : "network.chat.IChatBaseComponent$",
                             "ChatSerializer"
@@ -71,7 +72,7 @@ class ReflectUtils {
                     .invoke(null, "{\"text\":\"" + message + "\"}");
         }
         catch (Exception e) {
-            e.printStackTrace();
+            Bukkit.getLogger().log(Level.WARNING, "Reflective call failed", e);
             return null;
         }
     };
@@ -158,7 +159,7 @@ class ReflectUtils {
                     .newInstance(round(in), round(stay), round(out));
         }
         catch (Exception e) {
-            e.printStackTrace();
+            Bukkit.getLogger().log(Level.WARNING, "Reflective call failed", e);
             return null;
         }
     };
@@ -168,7 +169,7 @@ class ReflectUtils {
         Object component = COMPONENT_SERIALIZER.apply(s);
 
         try {
-            Class<?> oldEnum = firstNonNull(
+            Class<?> oldEnum = firstNotNull(
                     from("PacketPlayOutTitle$", "EnumTitleAction"),
                     from(null, "EnumTitleAction")
             );
@@ -186,7 +187,7 @@ class ReflectUtils {
                     );
         }
         catch (Exception e) {
-            e.printStackTrace();
+            Bukkit.getLogger().log(Level.WARNING, "Reflective call failed", e);
             return null;
         }
     };

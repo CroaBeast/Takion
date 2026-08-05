@@ -1,5 +1,7 @@
 package me.croabeast.common.discord;
 
+import java.util.logging.Level;
+import org.bukkit.Bukkit;
 import lombok.AccessLevel;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -166,7 +168,7 @@ public final class Webhook {
 
             return connection.getResponseCode() / 100 == 2;
         } catch (Exception e) {
-            e.printStackTrace();
+            Bukkit.getLogger().log(Level.WARNING, "Could not deliver the webhook", e);
             return false;
         }
     }

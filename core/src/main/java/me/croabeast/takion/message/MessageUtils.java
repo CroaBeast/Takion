@@ -1,5 +1,7 @@
 package me.croabeast.takion.message;
 
+import java.util.logging.Level;
+import org.bukkit.Bukkit;
 import lombok.experimental.UtilityClass;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -39,7 +41,7 @@ public class MessageUtils {
                 return true;
             }
             catch (Exception e) {
-                e.printStackTrace();
+                Bukkit.getLogger().log(Level.WARNING, "Could not send the action bar packet", e);
                 return false;
             }
         }
