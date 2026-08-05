@@ -16,17 +16,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # settings.gradle.kts picks this checkout up as an included build. Keep the path in sync
+      # with the candidates listed there, otherwise the substitution silently stops applying.
       - name: Checkout PrismaticAPI dependency
         uses: actions/checkout@v4
         with:
           repository: CroaBeast/PrismaticAPI
           path: PrismaticAPI
-
-      - name: Checkout VNC dependency
-        uses: actions/checkout@v4
-        with:
-          repository: CroaBeast/VNC
-          path: VNC
 
       - name: Set up JDK (Temurin 21)
         uses: actions/setup-java@v4
@@ -38,7 +34,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Make gradlew executable
-        run: chmod +x gradlew PrismaticAPI/gradlew VNC/gradlew
+        run: chmod +x gradlew PrismaticAPI/gradlew
 
       - name: Build with Gradle
         run: |
@@ -50,26 +46,6 @@ jobs:
           VER=$(./gradlew -q properties | awk -F': ' '/^version:/ {print $2; exit}')
           echo "VERSION=$VER" >> $GITHUB_ENV
           echo "version=$VER" >> $GITHUB_OUTPUT
-
-      - name: Upload all module artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: Takion-artifacts-${{ env.VERSION }}
-          path: |
-            core/build/libs/*-${{ env.VERSION }}.jar
-            core/build/libs/*-${{ env.VERSION }}-sources.jar
-            core/build/libs/*-${{ env.VERSION }}-javadoc.jar
-            common/build/libs/*-${{ env.VERSION }}.jar
-            common/build/libs/*-${{ env.VERSION }}-sources.jar
-            common/build/libs/*-${{ env.VERSION }}-javadoc.jar
-            shaded/build/libs/*-${{ env.VERSION }}.jar
-            shaded/build/libs/*-${{ env.VERSION }}-all.jar
-            shaded/build/libs/*-${{ env.VERSION }}-sources.jar
-            shaded/build/libs/*-${{ env.VERSION }}-javadoc.jar
-            plugin/build/libs/*-${{ env.VERSION }}.jar
-            plugin/build/libs/*-${{ env.VERSION }}-sources.jar
-            plugin/build/libs/*-${{ env.VERSION }}-javadoc.jar
-          if-no-files-found: ignore
 
       - name: Delete existing GitHub release (if exists)
         run: |
