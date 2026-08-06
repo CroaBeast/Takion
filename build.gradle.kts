@@ -90,18 +90,16 @@ subprojects {
 
         // Used directly by common/reflect/Craft and common/util/ServerInfoUtils. It used to arrive
         // shaded inside the PrismaticAPI jar, which stops being true when Prismatic is built from source.
-        compileOnly("me.croabeast.vnc:VNC:1.2.1") {
-            isTransitive = false
-        }
+        // Transitive on purpose: the published jar is a fat jar with an empty pom, but when the
+        // composite substitutes it for the local build the classes live in :core, :bukkit and friends.
+        compileOnly("me.croabeast.vnc:VNC:1.2.1")
 
         testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
         testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
         testImplementation("org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT")
         testImplementation("me.croabeast:PrismaticAPI:2.0.0")
-        testImplementation("me.croabeast.vnc:VNC:1.2.1") {
-            isTransitive = false
-        }
+        testImplementation("me.croabeast.vnc:VNC:1.2.1")
         testImplementation("me.croabeast:GlobalScheduler:1.1")
         testImplementation("net.kyori:adventure-api:4.26.1")
         testImplementation("net.kyori:adventure-text-minimessage:4.26.1")
