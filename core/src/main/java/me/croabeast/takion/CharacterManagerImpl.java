@@ -52,7 +52,7 @@ final class CharacterManagerImpl implements CharacterManager {
 
         String temp = PrismaticAPI.stripAll(before);
         temp = Element.stripMarkup(temp);
-        temp = lib.measureTags(null, null, temp);
+        temp = lib.measureTags(temp);
 
         int size = 0;
         boolean previousCode = false;

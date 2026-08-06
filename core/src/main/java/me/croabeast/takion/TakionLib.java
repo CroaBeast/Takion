@@ -231,7 +231,7 @@ public class TakionLib implements Colorizer {
             @Override
             public Builder builder(String message) {
                 Exceptions.validate(message, StringUtils::isNotBlank);
-                String[] array = splitByMarker("line_separator", message, 2, Pattern.quote("<n>"));
+                String[] array = splitByMarker(message, 2, Pattern.quote("<n>"));
                 return builder(array[0], array.length == 2 ? array[1] : null);
             }
         };
@@ -252,7 +252,7 @@ public class TakionLib implements Colorizer {
     }
 
     private static String getDefaultLangPrefix(Plugin plugin) {
-        return "&e " + (plugin != null ? plugin.getName() : "Plugin") + " &8\u00BB&7";
+        return "&e " + (plugin != null ? plugin.getName() : "Plugin") + " &8»&7";
     }
 
     /**
@@ -359,7 +359,7 @@ public class TakionLib implements Colorizer {
      * @return an array of substrings
      */
     public String[] splitString(String string, int limit) {
-        return splitByMarker("line_separator", string, limit, Pattern.quote("<n>"));
+        return splitByMarker(string, limit, Pattern.quote("<n>"));
     }
 
     /**
@@ -410,7 +410,7 @@ public class TakionLib implements Colorizer {
         String value = placeholderManager.resolve(parser, token);
         if (value == null) {
             String papi = PlainFormat.PLACEHOLDER_API.accept(parser, token);
-            if (papi == null || papi.equals(token)) return null;
+            if (papi.equals(token)) return null;
             value = papi;
         }
 
@@ -560,8 +560,8 @@ public class TakionLib implements Colorizer {
     /**
      * Renders the tags of a string to their measurement form, used by the alignment pass.
      */
-    String measureTags(Player receiver, Player parser, String string) {
-        return legacyTagRenderer.renderMeasure(receiver, parser, string);
+    String measureTags(String string) {
+        return legacyTagRenderer.renderMeasure(null, null, string);
     }
 
     public String applyMarker(String id, Player parser, String string) {
@@ -583,8 +583,8 @@ public class TakionLib implements Colorizer {
                 .setOptions(values);
     }
 
-    private String[] splitByMarker(String markerId, String string, int limit, String fallbackRegex) {
-        Marker marker = markerManager.getMarker(markerId);
+    private String[] splitByMarker(String string, int limit, String fallbackRegex) {
+        Marker marker = markerManager.getMarker("line_separator");
         return marker == null ? string.split(fallbackRegex, limit) : marker.getPattern().split(string, limit);
     }
 
