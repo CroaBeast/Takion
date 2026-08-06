@@ -59,6 +59,14 @@ val allShadowJar = tasks.register<ShadowJar>("allShadowJar") {
     configureAllShadow()
 }
 
+// Declares the all jar as an outgoing artifact so composite builds that substitute
+// me.croabeast.takion:shaded:<version>:all for this project (CyberCore does) can resolve the
+// classifier. Without it the substitution fails with "Could not find shaded-all.jar".
+artifacts {
+    add("apiElements", allShadowJar)
+    add("runtimeElements", allShadowJar)
+}
+
 publishing {
     publications {
         create<MavenPublication>("shaded") {
