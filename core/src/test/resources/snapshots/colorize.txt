@@ -41,7 +41,7 @@ input   : <run:"/spawn">&aboton</text>
 colorize: <run:"/spawn">[S]aboton</text>
 
 input   : <run:"/spawn"|hover:"&7pista<n>&8/spawn">&aboton</text>
-colorize: <run:"/spawn"|hover:"<gray>pista<n><dark_gray>/spawn">[S]aboton</text>
+colorize: <run:"/spawn"|hover:"[S]7pista<n>[S]8/spawn">[S]aboton</text>
 
 input   : texto con https://example.com dentro
 colorize: texto con https://example.com dentro
