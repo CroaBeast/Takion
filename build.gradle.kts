@@ -83,10 +83,10 @@ subprojects {
 
         compileOnly("org.bstats:bstats-bukkit:3.2.1")
         compileOnly("com.github.stefvanschie.inventoryframework:IF:0.12.0")
-        
+
         compileOnly("me.croabeast:YAML-API:1.1")
         compileOnly("me.croabeast:GlobalScheduler:1.1")
-        compileOnly("me.croabeast:PrismaticAPI:2.0.0")
+        compileOnly("me.croabeast:PrismaticAPI:2.0.1")
 
         // Used directly by common/reflect/Craft and common/util/ServerInfoUtils. It used to arrive
         // shaded inside the PrismaticAPI jar, which stops being true when Prismatic is built from source.
@@ -98,7 +98,7 @@ subprojects {
         testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
         testImplementation("org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT")
-        testImplementation("me.croabeast:PrismaticAPI:2.0.0")
+        testImplementation("me.croabeast:PrismaticAPI:2.0.1")
         testImplementation("me.croabeast.vnc:VNC:1.2.1")
         testImplementation("me.croabeast:GlobalScheduler:1.1")
         testImplementation("net.kyori:adventure-api:4.26.1")
