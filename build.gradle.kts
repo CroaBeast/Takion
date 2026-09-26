@@ -82,7 +82,7 @@ subprojects {
         }
 
         compileOnly("org.bstats:bstats-bukkit:3.2.1")
-        compileOnly("com.github.stefvanschie.inventoryframework:IF:0.12.0")
+        compileOnly("com.github.stefvanschie.inventoryframework:IF:0.12.1")
 
         compileOnly("me.croabeast:YAML-API:1.1")
         compileOnly("me.croabeast:GlobalScheduler:1.1")
