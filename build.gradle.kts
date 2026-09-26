@@ -92,7 +92,7 @@ subprojects {
         // shaded inside the PrismaticAPI jar, which stops being true when Prismatic is built from source.
         // Transitive on purpose: the published jar is a fat jar with an empty pom, but when the
         // composite substitutes it for the local build the classes live in :core, :bukkit and friends.
-        compileOnly("me.croabeast.vnc:VNC:1.2.1")
+        compileOnly("me.croabeast.vnc:VNC:1.3.1")
 
         testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
         testRuntimeOnly("org.junit.platform:junit-platform-launcher")
