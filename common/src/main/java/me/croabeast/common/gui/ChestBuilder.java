@@ -4,6 +4,7 @@ import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
 import com.github.stefvanschie.inventoryframework.pane.PaginatedPane;
 import me.croabeast.common.CommonServices;
 import me.croabeast.prismatic.PrismaticAPI;
+import me.croabeast.vnc.VNC;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
@@ -31,10 +32,20 @@ import java.util.Objects;
  */
 public final class ChestBuilder extends GuiBuilder<ChestGui, ChestBuilder> {
 
+    /**
+     * Whether menus can be created on this server. InventoryFramework's {@code Gui} constructor
+     * throws on versions it has no NMS for, so no {@link ChestGui} is created before 1.16.
+     */
+    public static final boolean SUPPORTED = VNC.SERVER_VERSION >= 16;
+
+    private static boolean warned = false;
+
+    private final Plugin plugin;
     private boolean loaded = false;
 
     ChestBuilder(Plugin plugin, int rows, String name) {
-        super(new PaginatedPane(9, rows), new ChestGui(rows, PrismaticAPI.colorize(name), plugin));
+        super(new PaginatedPane(9, rows), SUPPORTED ? new ChestGui(rows, PrismaticAPI.colorize(name), plugin) : null);
+        this.plugin = plugin;
     }
 
     /**
@@ -49,10 +60,13 @@ public final class ChestBuilder extends GuiBuilder<ChestGui, ChestBuilder> {
      */
     @Override
     public void setDisplayedPage(int rows, int index) {
+        if (!SUPPORTED) return;
+
         if (rows > 0) {
             pane.setHeight(rows);
             value.setRows(rows);
         }
+
         pane.setPage(index);
         value.update();
     }
@@ -68,6 +82,14 @@ public final class ChestBuilder extends GuiBuilder<ChestGui, ChestBuilder> {
      */
     @Override
     public void showGui(HumanEntity entity) {
+        if (!SUPPORTED) {
+            if (!warned) {
+                plugin.getLogger().warning("Menus are not available on this server version: they require Minecraft 1.16 or newer.");
+                warned = true;
+            }
+            entity.sendMessage("Menus require Minecraft 1.16 or newer.");
+            return;
+        }
         if (!loaded) {
             value.addPane(com.github.stefvanschie.inventoryframework.pane.util.Slot.fromXY(0, 0), pane);
             loaded = true;
