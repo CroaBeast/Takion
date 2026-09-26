@@ -60,20 +60,31 @@ subprojects {
         }
     }
 
+    val spigotVersion: String by project
+    val annotationsVersion: String by project
+    val lombokVersion: String by project
+    val adventureVersion: String by project
+    val inventoryFrameworkVersion: String by project
+    val bstatsVersion: String by project
+    val yamlApiVersion: String by project
+    val globalSchedulerVersion: String by project
+    val prismaticVersion: String by project
+    val vncVersion: String by project
+
     dependencies {
-        compileOnly("org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT")
+        compileOnly("org.spigotmc:spigot-api:$spigotVersion")
 
-        compileOnly("org.jetbrains:annotations:26.1.0")
-        annotationProcessor("org.jetbrains:annotations:26.1.0")
+        compileOnly("org.jetbrains:annotations:$annotationsVersion")
+        annotationProcessor("org.jetbrains:annotations:$annotationsVersion")
 
-        compileOnly("org.projectlombok:lombok:1.18.46")
-        annotationProcessor("org.projectlombok:lombok:1.18.46")
+        compileOnly("org.projectlombok:lombok:$lombokVersion")
+        annotationProcessor("org.projectlombok:lombok:$lombokVersion")
 
         compileOnly("me.clip:placeholderapi:2.12.2")
 
-        compileOnly("net.kyori:adventure-text-minimessage:4.26.1")
-        compileOnly("net.kyori:adventure-text-serializer-legacy:4.26.1")
-        compileOnly("net.kyori:adventure-text-logger-slf4j:4.26.1")
+        compileOnly("net.kyori:adventure-text-minimessage:$adventureVersion")
+        compileOnly("net.kyori:adventure-text-serializer-legacy:$adventureVersion")
+        compileOnly("net.kyori:adventure-text-logger-slf4j:$adventureVersion")
 
         compileOnly("com.github.MilkBowl:VaultAPI:1.7")
         compileOnly("net.luckperms:api:5.5")
@@ -81,28 +92,28 @@ subprojects {
             isTransitive = false
         }
 
-        compileOnly("org.bstats:bstats-bukkit:3.2.1")
-        compileOnly("com.github.stefvanschie.inventoryframework:IF:0.12.1")
+        compileOnly("org.bstats:bstats-bukkit:$bstatsVersion")
+        compileOnly("com.github.stefvanschie.inventoryframework:IF:$inventoryFrameworkVersion")
 
-        compileOnly("me.croabeast:YAML-API:1.1")
-        compileOnly("me.croabeast:GlobalScheduler:1.1")
-        compileOnly("me.croabeast:PrismaticAPI:2.0.1")
+        compileOnly("me.croabeast:YAML-API:$yamlApiVersion")
+        compileOnly("me.croabeast:GlobalScheduler:$globalSchedulerVersion")
+        compileOnly("me.croabeast:PrismaticAPI:$prismaticVersion")
 
         // Used directly by common/reflect/Craft and common/util/ServerInfoUtils. It used to arrive
         // shaded inside the PrismaticAPI jar, which stops being true when Prismatic is built from source.
         // Transitive on purpose: the published jar is a fat jar with an empty pom, but when the
         // composite substitutes it for the local build the classes live in :core, :bukkit and friends.
-        compileOnly("me.croabeast.vnc:VNC:1.3.1")
+        compileOnly("me.croabeast.vnc:VNC:$vncVersion")
 
         testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
         testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-        testImplementation("org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT")
-        testImplementation("me.croabeast:PrismaticAPI:2.0.1")
-        testImplementation("me.croabeast.vnc:VNC:1.2.1")
-        testImplementation("me.croabeast:GlobalScheduler:1.1")
-        testImplementation("net.kyori:adventure-api:4.26.1")
-        testImplementation("net.kyori:adventure-text-minimessage:4.26.1")
-        testImplementation("net.kyori:adventure-text-serializer-legacy:4.26.1")
+        testImplementation("org.spigotmc:spigot-api:$spigotVersion")
+        testImplementation("me.croabeast:PrismaticAPI:$prismaticVersion")
+        testImplementation("me.croabeast.vnc:VNC:$vncVersion")
+        testImplementation("me.croabeast:GlobalScheduler:$globalSchedulerVersion")
+        testImplementation("net.kyori:adventure-api:$adventureVersion")
+        testImplementation("net.kyori:adventure-text-minimessage:$adventureVersion")
+        testImplementation("net.kyori:adventure-text-serializer-legacy:$adventureVersion")
     }
 }

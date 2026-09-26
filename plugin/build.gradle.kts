@@ -1,13 +1,18 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
+val updateCheckerVersion: String by project
+val vaultAdapterVersion: String by project
+val commandFrameworkVersion: String by project
+val advancementInfoVersion: String by project
+
 dependencies {
     implementation(project(":common"))
     implementation(project(":core"))
 
-    compileOnly("me.croabeast:UpdateChecker:1.0")
-    compileOnly("me.croabeast:VaultAdapter:1.2")
-    compileOnly("me.croabeast:CommandFramework:1.2.1")
-    compileOnly("me.croabeast:AdvancementInfo:1.0")
+    compileOnly("me.croabeast:UpdateChecker:$updateCheckerVersion")
+    compileOnly("me.croabeast:VaultAdapter:$vaultAdapterVersion")
+    compileOnly("me.croabeast:CommandFramework:$commandFrameworkVersion")
+    compileOnly("me.croabeast:AdvancementInfo:$advancementInfoVersion")
 }
 
 tasks.processResources {

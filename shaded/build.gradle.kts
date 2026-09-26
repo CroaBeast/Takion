@@ -11,20 +11,30 @@ val allBundle by configurations.creating {
     isCanBeResolved = true
 }
 
+val yamlApiVersion: String by project
+val globalSchedulerVersion: String by project
+val prismaticVersion: String by project
+val inventoryFrameworkVersion: String by project
+val bstatsVersion: String by project
+val updateCheckerVersion: String by project
+val vaultAdapterVersion: String by project
+val commandFrameworkVersion: String by project
+val advancementInfoVersion: String by project
+
 dependencies {
     implementation(project(":common"))
     implementation(project(":core"))
 
-    implementation("me.croabeast:YAML-API:1.1")
-    implementation("me.croabeast:GlobalScheduler:1.1")
-    implementation("me.croabeast:PrismaticAPI:2.0.1")
+    implementation("me.croabeast:YAML-API:$yamlApiVersion")
+    implementation("me.croabeast:GlobalScheduler:$globalSchedulerVersion")
+    implementation("me.croabeast:PrismaticAPI:$prismaticVersion")
 
-    allBundle("com.github.stefvanschie.inventoryframework:IF:0.12.0")
-    allBundle("org.bstats:bstats-bukkit:3.2.1")
-    allBundle("me.croabeast:UpdateChecker:1.0")
-    allBundle("me.croabeast:VaultAdapter:1.2")
-    allBundle("me.croabeast:CommandFramework:1.2.1")
-    allBundle("me.croabeast:AdvancementInfo:1.0")
+    allBundle("com.github.stefvanschie.inventoryframework:IF:$inventoryFrameworkVersion")
+    allBundle("org.bstats:bstats-bukkit:$bstatsVersion")
+    allBundle("me.croabeast:UpdateChecker:$updateCheckerVersion")
+    allBundle("me.croabeast:VaultAdapter:$vaultAdapterVersion")
+    allBundle("me.croabeast:CommandFramework:$commandFrameworkVersion")
+    allBundle("me.croabeast:AdvancementInfo:$advancementInfoVersion")
 }
 
 fun ShadowJar.configureBaseShadow() {
