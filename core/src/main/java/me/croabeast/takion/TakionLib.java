@@ -87,6 +87,14 @@ public class TakionLib implements Colorizer {
 
     private static final Map<String, TakionLib> CALLER_CACHE = new ConcurrentHashMap<>();
 
+    // Class availability and the server version never change at runtime, so they are checked once.
+    private static final boolean ADVENTURE_CLASSES = isClassAvailable("net.kyori.adventure.text.Component")
+            && isClassAvailable("net.kyori.adventure.text.minimessage.MiniMessage");
+
+    // Player heads and sprites became native Adventure object components in 1.21.9.
+    private static final boolean OBJECT_TAG_SUPPORT = isClassAvailable("net.kyori.adventure.text.object.ObjectContents")
+            && me.croabeast.vnc.VNC.SERVER != null && me.croabeast.vnc.VNC.SERVER.isAtLeast("1.21.9");
+
     /**
      * The plugin instance associated with this TakionLib.
      */
@@ -464,9 +472,7 @@ public class TakionLib implements Colorizer {
      * @since 2.0.0
      */
     public boolean isAdventureAvailable() {
-        return isClassAvailable("net.kyori.adventure.text.Component")
-                && isClassAvailable("net.kyori.adventure.text.minimessage.MiniMessage")
-                && PrismaticAPI.isAdventureAvailable();
+        return ADVENTURE_CLASSES && PrismaticAPI.isAdventureAvailable();
     }
 
     /**
@@ -478,9 +484,7 @@ public class TakionLib implements Colorizer {
      * @since 2.0.0
      */
     public boolean supportsObjectTags() {
-        return isAdventureAvailable()
-                && isClassAvailable("net.kyori.adventure.text.object.ObjectContents")
-                && me.croabeast.vnc.VNC.SERVER != null && me.croabeast.vnc.VNC.SERVER.isAtLeast("1.21.9");
+        return OBJECT_TAG_SUPPORT && isAdventureAvailable();
     }
 
     /**
