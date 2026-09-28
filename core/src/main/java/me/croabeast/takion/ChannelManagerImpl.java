@@ -1,5 +1,6 @@
 package me.croabeast.takion;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import me.croabeast.common.Regex;
@@ -337,6 +338,9 @@ final class ChannelManagerImpl implements ChannelManager {
 
         boolean caseSensitive = true;
 
+        @Getter(AccessLevel.NONE) @Setter(AccessLevel.NONE)
+        private Pattern compiled;
+
         ChannelImpl(String prefix, @Regex String pattern) {
             prefixes.add(prefix);
             this.name = prefix;
@@ -360,7 +364,13 @@ final class ChannelManagerImpl implements ChannelManager {
             String sensitive = caseSensitive ? "(?i)" : "";
             String start = getStartDelimiter(), end = getEndDelimiter();
 
-            Pattern pattern = Pattern.compile(sensitive + start + prefixes + regex + end);
+            // Prefixes, delimiters and flags can change at any time, so the regex text itself is the
+            // cache key; the pattern is only recompiled when that text differs.
+            String full = sensitive + start + prefixes + regex + end;
+            Pattern pattern = compiled;
+            if (pattern == null || !pattern.pattern().equals(full))
+                compiled = pattern = Pattern.compile(full);
+
             return pattern.matcher(string);
         }
     }
