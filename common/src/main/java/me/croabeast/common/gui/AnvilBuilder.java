@@ -43,6 +43,8 @@ import java.util.function.Consumer;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class AnvilBuilder {
 
+    private static final String EMPTY_INPUT = "<empty>";
+
     private final Plugin plugin;
     private final String title;
 
@@ -76,10 +78,14 @@ public final class AnvilBuilder {
         try {
             AnvilGui gui = new AnvilGui(PrismaticAPI.colorize(title), plugin);
             gui.setCost((short) 0);
+            // InventoryFramework does not cancel clicks by itself; without this the input
+            // paper can be taken and items can be placed into the anvil.
+            gui.setOnGlobalClick(event -> event.setCancelled(true));
+            gui.setOnGlobalDrag(event -> event.setCancelled(true));
 
             OutlinePane inputPane = new OutlinePane(1, 1);
             inputPane.addItem(ItemCreator.of(Material.PAPER)
-                    .modifyName("&f" + (StringUtils.isBlank(input) ? "<empty>" : input))
+                    .modifyName("&f" + (StringUtils.isBlank(input) ? EMPTY_INPUT : input))
                     .create(plugin));
             gui.getFirstItemComponent().addPane(Slot.fromXY(0, 0), inputPane);
 
@@ -89,7 +95,12 @@ public final class AnvilBuilder {
                     .modifyLore("&7Click to save the value.")
                     .setAction(click -> {
                         click.setCancelled(true);
-                        if (onConfirm != null) onConfirm.accept(player, gui.getRenameText());
+                        if (onConfirm == null) return;
+
+                        // The rename field starts with the input item's name, so an untouched
+                        // blank value would come back as the placeholder text.
+                        String text = gui.getRenameText();
+                        onConfirm.accept(player, text != null && EMPTY_INPUT.equals(PrismaticAPI.stripAll(text)) ? "" : text);
                     })
                     .create(plugin));
             gui.getResultComponent().addPane(Slot.fromXY(0, 0), resultPane);
