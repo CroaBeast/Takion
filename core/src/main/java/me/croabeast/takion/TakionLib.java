@@ -87,9 +87,6 @@ public class TakionLib implements Colorizer {
 
     private static final Map<String, TakionLib> CALLER_CACHE = new ConcurrentHashMap<>();
 
-    /** Version where player heads and sprites became native Adventure object components. */
-    private static final double OBJECT_TAG_VERSION = 21.9;
-
     /**
      * The plugin instance associated with this TakionLib.
      */
@@ -483,7 +480,7 @@ public class TakionLib implements Colorizer {
     public boolean supportsObjectTags() {
         return isAdventureAvailable()
                 && isClassAvailable("net.kyori.adventure.text.object.ObjectContents")
-                && me.croabeast.vnc.VNC.SERVER_VERSION >= OBJECT_TAG_VERSION;
+                && me.croabeast.vnc.VNC.SERVER != null && me.croabeast.vnc.VNC.SERVER.isAtLeast("1.21.9");
     }
 
     /**

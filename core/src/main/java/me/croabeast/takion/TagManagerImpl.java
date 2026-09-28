@@ -6,12 +6,10 @@ import me.croabeast.vnc.VNC;
 
 final class TagManagerImpl extends TokenRegistryImpl<Tag> implements TagManager {
 
-    private static final double OBJECT_TAG_VERSION = 21.9;
-
     {
         load(new CharacterTag());
 
-        if (VNC.SERVER_VERSION >= OBJECT_TAG_VERSION) {
+        if (VNC.SERVER != null && VNC.SERVER.isAtLeast("1.21.9")) {
             load(new PlayerHeadTag());
             load(new SpriteTag());
         }
