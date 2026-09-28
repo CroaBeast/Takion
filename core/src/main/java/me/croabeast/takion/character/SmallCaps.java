@@ -100,15 +100,9 @@ public enum SmallCaps implements CharacterInfo {
         length = i;
     }
 
-    /**
-     * Compares the provided character to this constant's default value, ignoring case.
-     *
-     * @param c the character to compare.
-     * @return {@code true} if the character matches (ignoring case); {@code false} otherwise.
-     */
-    private boolean equalsIgnoreCase(char c) {
-        return (defaultValue + "").matches("(?i)" + Pattern.quote(String.valueOf(c)));
-    }
+    // Constants are declared A to Z, so a letter's offset from 'a' is its index here.
+    private static final SmallCaps[] BY_LETTER = values();
+    private static final Pattern MARKS = Pattern.compile("\\p{M}");
 
     /**
      * Returns the bold length of this character.
@@ -142,7 +136,7 @@ public enum SmallCaps implements CharacterInfo {
     public static String stripAccents(String string) {
         if (StringUtils.isBlank(string)) return string;
         Normalizer.Form form = Normalizer.Form.NFKD;
-        return Normalizer.normalize(string, form).replaceAll("\\p{M}", "");
+        return MARKS.matcher(Normalizer.normalize(string, form)).replaceAll("");
     }
 
     /**
@@ -167,9 +161,8 @@ public enum SmallCaps implements CharacterInfo {
      */
     private static SmallCaps valueOf(char character, boolean strip) {
         char c = strip ? stripAccent(character) : character;
-        for (SmallCaps caps : values())
-            if (caps.equalsIgnoreCase(c)) return caps;
-        return null;
+        if (c >= 'A' && c <= 'Z') c += 'a' - 'A';
+        return c >= 'a' && c <= 'z' ? BY_LETTER[c - 'a'] : null;
     }
 
     /**
