@@ -40,7 +40,7 @@ dependencies {
 fun ShadowJar.configureBaseShadow() {
     exclude(
         "META-INF/**", "org/apache/commons/**", "org/intellij/**", "org/jetbrains/**",
-        "me/croabeast/file/plugin/YAMLPlugin.*", "plugin.yml"
+        "me/croabeast/file/plugin/YAMLPlugin.*", "plugin.yml", "kotlin/**"
     )
 }
 
@@ -48,7 +48,7 @@ fun ShadowJar.configureAllShadow() {
     exclude(
         "META-INF/**", "org/apache/commons/**", "org/intellij/**", "org/jetbrains/**",
         "com/google/**", "javax/**", "org/apache/logging/**", "**/**.xsd", "**/**.dtd",
-        "fonts/**", "**/**.der", "me/croabeast/*/plugin/**", "plugin.yml"
+        "fonts/**", "**/**.der", "me/croabeast/*/plugin/**", "plugin.yml", "kotlin/**"
     )
 }
 
