@@ -5,7 +5,7 @@ input   : &7con color
   typed : ACTION_BAR [S]7con color
 
 input   : <g:ff0000>degradado</g:00ff00>
-  typed : ACTION_BAR [S]x[S]f[S]f[S]0[S]0[S]0[S]0d[S]x[S]e[S]0[S]1[S]f[S]0[S]0e[S]x[S]c[S]1[S]3[S]e[S]0[S]0g[S]x[S]a[S]2[S]5[S]d[S]0[S]0r[S]x[S]8[S]3[S]7[S]c[S]0[S]0a[S]x[S]6[S]4[S]9[S]b[S]0[S]0d[S]x[S]4[S]5[S]b[S]a[S]0[S]0a[S]x[S]2[S]6[S]d[S]9[S]0[S]0d[S]x[S]0[S]7[S]f[S]8[S]0[S]0o
+  typed : ACTION_BAR [S]x[S]f[S]f[S]0[S]0[S]0[S]0d[S]x[S]d[S]f[S]2[S]0[S]0[S]0e[S]x[S]b[S]f[S]4[S]0[S]0[S]0g[S]x[S]9[S]f[S]6[S]0[S]0[S]0r[S]x[S]8[S]0[S]8[S]0[S]0[S]0a[S]x[S]6[S]0[S]9[S]f[S]0[S]0d[S]x[S]4[S]0[S]b[S]f[S]0[S]0a[S]x[S]2[S]0[S]d[S]f[S]0[S]0d[S]x[S]0[S]0[S]f[S]f[S]0[S]0o
 
 input   : <sc>small caps</sc> y <u:2764>
   typed : ACTION_BAR [S]fsᴍᴀʟʟ ᴄᴀᴘs y ❤

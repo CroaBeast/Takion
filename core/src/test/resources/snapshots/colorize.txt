@@ -29,7 +29,7 @@ input   : &7mezcla <sc>todo</sc> <u:2764> junto
 colorize: [S]7mezcla ᴛᴏᴅᴏ ❤ junto
 
 input   : <g:ff0000>degradado</g:00ff00>
-colorize: [S]x[S]f[S]f[S]0[S]0[S]0[S]0d[S]x[S]e[S]0[S]1[S]f[S]0[S]0e[S]x[S]c[S]1[S]3[S]e[S]0[S]0g[S]x[S]a[S]2[S]5[S]d[S]0[S]0r[S]x[S]8[S]3[S]7[S]c[S]0[S]0a[S]x[S]6[S]4[S]9[S]b[S]0[S]0d[S]x[S]4[S]5[S]b[S]a[S]0[S]0a[S]x[S]2[S]6[S]d[S]9[S]0[S]0d[S]x[S]0[S]7[S]f[S]8[S]0[S]0o
+colorize: [S]x[S]f[S]f[S]0[S]0[S]0[S]0d[S]x[S]d[S]f[S]2[S]0[S]0[S]0e[S]x[S]b[S]f[S]4[S]0[S]0[S]0g[S]x[S]9[S]f[S]6[S]0[S]0[S]0r[S]x[S]8[S]0[S]8[S]0[S]0[S]0a[S]x[S]6[S]0[S]9[S]f[S]0[S]0d[S]x[S]4[S]0[S]b[S]f[S]0[S]0a[S]x[S]2[S]0[S]d[S]f[S]0[S]0d[S]x[S]0[S]0[S]f[S]f[S]0[S]0o
 
 input   : &7hola {player}
 colorize: [S]7hola {player}
