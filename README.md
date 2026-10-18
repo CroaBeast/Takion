@@ -40,12 +40,12 @@ Takion is an all-in-one toolkit for building premium chat and text experiences o
 
 Takion is a multi-module Gradle project. Pick the artifact that matches your distribution strategy:
 
-| Module   | Description                                                                                                                                                                 | Ideal For                                                                            |
-|----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|
-| `common` | Shared utilities under `me.croabeast.common`, including builders, reflection helpers, time utilities, dependency loading, and GUI helpers.                    | Reusing utility APIs independently from the main Takion API.                          |
-| `core`   | The primary Takion API containing `TakionLib` and managers. Optional when you only need to compile against the exposed API or validate the core sources.       | Compiling against Takion's main API or shading it yourself.                           |
+| Module   | Description                                                                                                                                                                    | Ideal For                                                                            |
+|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|
+| `common` | Shared utilities under `me.croabeast.common`, including builders, reflection helpers, time utilities, and dependency loading.                                                  | Reusing utility APIs independently from the main Takion API.                         |
+| `core`   | The primary Takion API containing `TakionLib` and managers. Optional when you only need to compile against the exposed API or validate the core sources.                       | Compiling against Takion's main API or shading it yourself.                          |
 | `shaded` | Repackages `common` and `core` together with required libraries (PrismaticAPI, GlobalScheduler, YAML-API) and also publishes an `all` classifier with extra bundled libraries. | Shipping a single jar without configuring repositories in your consumer.             |
-| `plugin` | Example/production-ready plugin bundle that brings in optional adapters (Vault, bStats) and relocates packages using Shadow.                                                | Deploying Takion directly on a server or as a base plugin for further customization. |
+| `plugin` | Example/production-ready plugin bundle that brings in optional adapters (Vault, bStats) and relocates packages using Shadow.                                                   | Deploying Takion directly on a server or as a base plugin for further customization. |
 
 All modules target **Java 8** using Gradle toolchains, so you can build and run on modern JDKs while remaining compatible with legacy Minecraft hosts.
 
