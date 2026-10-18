@@ -154,6 +154,9 @@ public class TakionLogger {
     @Getter
     private final Loggable bukkit;
 
+    /** The Java logger behind {@link #bukkit}, used when a stack trace must be attached. */
+    private final Logger javaLogger;
+
     /** Optional Paper logger for enhanced output on supported servers. */
     private Loggable paper;
 
@@ -228,6 +231,7 @@ public class TakionLogger {
 
         usePlugin = usePlugin && plugin != null;
         Logger logger = usePlugin ? plugin.getLogger() : Bukkit.getLogger();
+        javaLogger = logger;
         bukkit = (level, msg) -> logger.log(level.toJava(), msg);
 
         if (VNC.SERVER != null && VNC.SERVER.isAtLeast("1.18.2")) {
@@ -238,7 +242,9 @@ public class TakionLogger {
                             return prefix == null ? p.getName() : prefix;
                         }).apply(plugin) :
                         "");
-            } catch (Throwable ignored) {}
+            } catch (Throwable e) {
+                logger.log(java.util.logging.Level.FINE, "Adventure logger unavailable, using the Bukkit logger.", e);
+            }
         }
     }
 
@@ -310,6 +316,23 @@ public class TakionLogger {
      */
     public void log(String... messages) {
         log(null, messages);
+    }
+
+    /**
+     * Logs a message together with the stack trace of the given throwable.
+     *
+     * @param level     the {@link LogLevel} to use (INFO if {@code null})
+     * @param message   the message to log
+     * @param throwable the throwable whose stack trace is attached, or {@code null} for none
+     */
+    public void log(LogLevel level, String message, Throwable throwable) {
+        if (throwable == null) {
+            log(level, message);
+            return;
+        }
+
+        String formatted = FORMATTER.get(message == null ? "" : message, lib, isStripPrefix(), isColored());
+        javaLogger.log((level == null ? LogLevel.INFO : level).toJava(), formatted, throwable);
     }
 
     /**
