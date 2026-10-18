@@ -63,7 +63,6 @@ subprojects {
     val annotationsVersion: String by project
     val lombokVersion: String by project
     val adventureVersion: String by project
-    val inventoryFrameworkVersion: String by project
     val bstatsVersion: String by project
     val yamlApiVersion: String by project
     val globalSchedulerVersion: String by project
@@ -92,7 +91,6 @@ subprojects {
         }
 
         compileOnly("org.bstats:bstats-bukkit:$bstatsVersion")
-        compileOnly("com.github.stefvanschie.inventoryframework:IF:$inventoryFrameworkVersion")
 
         compileOnly("me.croabeast:YAML-API:$yamlApiVersion")
         compileOnly("me.croabeast:GlobalScheduler:$globalSchedulerVersion")

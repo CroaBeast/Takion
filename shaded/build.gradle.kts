@@ -14,7 +14,6 @@ val allBundle by configurations.creating {
 val yamlApiVersion: String by project
 val globalSchedulerVersion: String by project
 val prismaticVersion: String by project
-val inventoryFrameworkVersion: String by project
 val bstatsVersion: String by project
 val updateCheckerVersion: String by project
 val vaultAdapterVersion: String by project
@@ -29,7 +28,6 @@ dependencies {
     implementation("me.croabeast:GlobalScheduler:$globalSchedulerVersion")
     implementation("me.croabeast:PrismaticAPI:$prismaticVersion")
 
-    allBundle("com.github.stefvanschie.inventoryframework:IF:$inventoryFrameworkVersion")
     allBundle("org.bstats:bstats-bukkit:$bstatsVersion")
     allBundle("me.croabeast:UpdateChecker:$updateCheckerVersion")
     allBundle("me.croabeast:VaultAdapter:$vaultAdapterVersion")

@@ -4,7 +4,6 @@ val updateCheckerVersion: String by project
 val vaultAdapterVersion: String by project
 val commandFrameworkVersion: String by project
 val advancementInfoVersion: String by project
-val inventoryFrameworkVersion: String by project
 
 dependencies {
     implementation(project(":common"))
@@ -17,7 +16,7 @@ dependencies {
 }
 
 tasks.processResources {
-    val props = mapOf("version" to version, "inventoryFrameworkVersion" to inventoryFrameworkVersion)
+    val props = mapOf("version" to version)
     inputs.properties(props)
     filteringCharset = "UTF-8"
     filesMatching("plugin.yml") {
