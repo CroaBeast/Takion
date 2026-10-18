@@ -1,5 +1,4 @@
 plugins {
-    kotlin("jvm") version "2.4.0-Beta2"
     id("java-library")
     id("io.freefair.lombok") version "9.5.0"
     id("com.gradleup.shadow") version "9.4.1"
