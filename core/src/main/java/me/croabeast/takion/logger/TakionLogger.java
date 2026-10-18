@@ -230,7 +230,7 @@ public class TakionLogger {
         Logger logger = usePlugin ? plugin.getLogger() : Bukkit.getLogger();
         bukkit = (level, msg) -> logger.log(level.toJava(), msg);
 
-        if (VNC.SERVER_VERSION >= 18.2) {
+        if (VNC.SERVER != null && VNC.SERVER.isAtLeast("1.18.2")) {
             try {
                 paper = new PaperLogger(usePlugin ?
                         ((Function<Plugin, String>) p -> {

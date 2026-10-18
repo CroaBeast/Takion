@@ -23,7 +23,6 @@ import java.util.Objects;
 class RuleUtils {
 
     final Map<String, GameRule<?>> RULE_MAP = new LinkedHashMap<>();
-    private final double VERSION = VNC.SERVER_VERSION;
 
     private interface RuntimeGameRule {
 
@@ -85,8 +84,13 @@ class RuleUtils {
             return def;
         }
 
+        // min and last use the legacy double shape (21.9 = 1.21.9), which cannot tell 1.21.1
+        // from 1.21.10, so the check runs on the classic version text instead.
         final boolean isSupported() {
-            return VERSION >= min && (last == 0 || VERSION <= last);
+            if (VNC.SERVER == null) return false;
+
+            String from = "1." + min;
+            return last == 0 ? VNC.SERVER.isAtLeast(from) : VNC.SERVER.isBetween(from, "1." + last);
         }
 
         @Override
