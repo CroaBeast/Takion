@@ -143,10 +143,11 @@ public enum SmallCaps implements CharacterInfo {
      * Removes accents from the given character.
      *
      * @param character the character to process.
-     * @return the character without accent marks.
+     * @return the character without accent marks, or the same character when it is a mark itself.
      */
     public static char stripAccent(char character) {
-        return stripAccents(String.valueOf(character)).toCharArray()[0];
+        String stripped = stripAccents(String.valueOf(character));
+        return stripped.isEmpty() ? character : stripped.charAt(0);
     }
 
     /**
