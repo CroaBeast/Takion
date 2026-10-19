@@ -90,6 +90,12 @@ public final class TestPlayer {
                 case "sendMessage":
                     capture(args);
                     return null;
+                case "setPlayerListHeader":
+                    typed.add("TAB_HEADER " + args[0]);
+                    return null;
+                case "setPlayerListFooter":
+                    typed.add("TAB_FOOTER " + args[0]);
+                    return null;
                 case "toString":
                     return "TestPlayer(" + name + ")";
                 case "hashCode":

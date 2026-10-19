@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 /**
  * Covers the channels other than chat, which share the same per-target loop and prefix stripping.
@@ -53,6 +54,28 @@ class OtherChannelsTest {
         assertEquals("action_bar", lib.getChannelManager().identify("[action_bar]x").getName());
         assertEquals("title", lib.getChannelManager().identify("[title]x").getName());
         assertEquals("bossbar", lib.getChannelManager().identify("[bossbar]x").getName());
+        assertEquals("tab_header", lib.getChannelManager().identify("[tab_header]x").getName());
+        assertEquals("tab_footer", lib.getChannelManager().identify("[tab_footer]x").getName());
+        assertEquals("toast", lib.getChannelManager().identify("[toast:minecraft:iron_ingot:challenge]x").getName());
+        assertEquals("brand", lib.getChannelManager().identify("[brand]x").getName());
+        assertEquals(Channel.Flag.TOAST, lib.getChannelManager().identify("[toast]x").getFlag());
+    }
+
+    @Test
+    void tabListChannelsSetTheirOwnPart() {
+        TestPlayer player = new TestPlayer("Steve");
+        lib.getChannelManager().identify("[tab_header]x").send(Arrays.asList(player.handle()), null, "[tab_header]&7Top");
+        lib.getChannelManager().identify("[tab_footer]x").send(Arrays.asList(player.handle()), null, "[tab_footer]Bottom");
+
+        assertEquals(Arrays.asList("TAB_HEADER §7Top", "TAB_FOOTER Bottom"), player.typed());
+    }
+
+    @Test
+    void toastNeedsPacketEvents() {
+        TestPlayer player = new TestPlayer("Steve");
+        String raw = "[toast:iron_ingot:goal]Hi";
+
+        assertFalse(lib.getChannelManager().identify(raw).send(Arrays.asList(player.handle()), null, raw));
     }
 
     /**
