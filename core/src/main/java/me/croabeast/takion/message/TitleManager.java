@@ -175,7 +175,7 @@ public interface TitleManager {
         public boolean send(Player player) {
             if (player == null) return false;
 
-            if (ReflectUtils.VERSION >= 11.0) {
+            if (!ReflectUtils.BEFORE_1_11) {
                 player.sendTitle(title, subtitle, fadeIn, stay, fadeOut);
                 return true;
             }

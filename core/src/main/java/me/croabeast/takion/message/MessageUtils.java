@@ -13,7 +13,7 @@ public class MessageUtils {
     public boolean sendActionBar(Player player, String message) {
         if (player == null) return false;
 
-        if (ReflectUtils.VERSION < 11.0) {
+        if (ReflectUtils.BEFORE_1_11) {
             try {
                 Object component = ReflectUtils.COMPONENT_SERIALIZER.apply(message);
                 Class<?> baseComponent = ReflectUtils.BASE_COMP_CLASS;

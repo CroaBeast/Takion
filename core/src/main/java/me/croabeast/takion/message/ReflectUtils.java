@@ -23,7 +23,11 @@ class ReflectUtils {
         BUKKIT_API_VERSION = ver.matches("v\\d+_\\d+_R\\d+") ? ver : "";
     }
 
-    final double VERSION = VNC.SERVER_VERSION;
+    // Parsed once: VNC reads the version string on every call.
+    final boolean BEFORE_1_11 = VNC.isBefore("1.11");
+    final boolean BEFORE_1_12 = VNC.isBefore("1.12");
+    final boolean BEFORE_1_13 = VNC.isBefore("1.13");
+    final boolean BEFORE_1_18 = VNC.isBefore("1.18");
     final boolean IS_LEGACY = VNC.isBefore("1.17");
 
     final Class<?> BASE_COMP_CLASS = from(
@@ -95,7 +99,7 @@ class ReflectUtils {
         Method method = getFirstMethod(
                 connect.getClass(),
                 clazz,
-                VERSION < 18.0 ? new String[] {"sendPacket", "a"} : new String[] {"a", "sendPacket"}
+                BEFORE_1_18 ? new String[] {"sendPacket", "a"} : new String[] {"a", "sendPacket"}
         );
 
         if (method == null)
