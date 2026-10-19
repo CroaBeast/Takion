@@ -251,6 +251,22 @@ public interface Channel {
         /**
          * A message sent via a webhook.
          */
-        WEBHOOK
+        WEBHOOK,
+        /**
+         * The header of the player list (TAB).
+         */
+        TAB_HEADER,
+        /**
+         * The footer of the player list (TAB).
+         */
+        TAB_FOOTER,
+        /**
+         * An advancement popup in the corner of the screen. Needs PacketEvents and 1.12+.
+         */
+        TOAST,
+        /**
+         * The server brand shown on the F3 screen.
+         */
+        BRAND
     }
 }

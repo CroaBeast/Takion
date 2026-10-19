@@ -21,6 +21,7 @@ import org.bukkit.boss.BarStyle;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -279,6 +280,48 @@ final class ChannelManagerImpl implements ChannelManager {
             }
         });
 
+        channels.put("tab_header", new TextChannel(lib, "tab_header", null) {
+            @Override
+            boolean send(Player target, String text, String arguments) {
+                return MessageUtils.sendTabList(target, text, true);
+            }
+        });
+
+        channels.put("tab_footer", new TextChannel(lib, "tab_footer", null) {
+            @Override
+            boolean send(Player target, String text, String arguments) {
+                return MessageUtils.sendTabList(target, text, false);
+            }
+        });
+
+        // [toast], [toast:<icon>], [toast:<style>] or [toast:<icon>:<style>], the style being TASK, GOAL or CHALLENGE.
+        channels.put("toast", new TextChannel(lib, "toast", "(:[^\\]]+)?") {
+            @Override
+            boolean send(Player target, String text, String arguments) {
+                String icon = "diamond", style = "TASK";
+
+                if (arguments != null) {
+                    int last = arguments.lastIndexOf(':');
+                    String end = arguments.substring(last + 1).toUpperCase(Locale.ENGLISH);
+
+                    if (end.matches("TASK|GOAL|CHALLENGE")) {
+                        style = end;
+                        if (last > 0) icon = arguments.substring(0, last);
+                    }
+                    else icon = arguments;
+                }
+
+                return MessageUtils.sendToast(target, text, icon, style);
+            }
+        });
+
+        channels.put("brand", new TextChannel(lib, "brand", null) {
+            @Override
+            boolean send(Player target, String text, String arguments) {
+                return MessageUtils.sendBrand(lib.getPlugin(), target, text);
+            }
+        });
+
         channels.put("webhook", new ChannelImpl("webhook", "(:.+)?") {
             @Override
             public String formatString(Player target, Player parser, String string) {
@@ -310,6 +353,49 @@ final class ChannelManagerImpl implements ChannelManager {
                 return id != null && Webhook.fromConfig(id).send(message);
             }
         });
+    }
+
+    // Strips the channel prefix and colors the text for each target, as the action bar does.
+    private abstract class TextChannel extends ChannelImpl {
+
+        private final TakionLib lib;
+
+        TextChannel(TakionLib lib, String prefix, String pattern) {
+            super(prefix, pattern);
+            this.lib = lib;
+        }
+
+        abstract boolean send(Player target, String text, @Nullable String arguments);
+
+        @Override
+        public String formatString(Player target, Player parser, String string) {
+            return lib.colorize(target, parser, string);
+        }
+
+        @Override
+        public boolean send(Collection<? extends Player> targets, Player parser, String message) {
+            if (message == null || targets == null || targets.isEmpty()) return false;
+
+            String arguments = null;
+            Matcher matcher = matcher(message);
+            if (matcher.find()) {
+                if (matcher.groupCount() > 1 && matcher.group(2) != null) arguments = matcher.group(2).substring(1);
+                message = message.replace(matcher.group(), "");
+            }
+
+            Element element = Element.parse(PlainFormat.PLACEHOLDER_API.accept(parser, message), lib.getMarkup());
+            boolean atLeastOneIsSent = false;
+
+            for (final Player p : targets) {
+                if (p == null) continue;
+
+                final Player ps = parser == null ? p : parser;
+                String text = element.legacy(RenderContext.of(p, token -> lib.resolvePlaceholder(ps, token)));
+                if (send(p, text, arguments)) atLeastOneIsSent = true;
+            }
+
+            return atLeastOneIsSent;
+        }
     }
 
     @NotNull
