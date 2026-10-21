@@ -28,6 +28,8 @@ subprojects {
     java {
         withSourcesJar()
         withJavadocJar()
+        // Adventure 5 declares Java 21; it is only compiled against (compileOnly), never shipped
+        disableAutoTargetJvm()
     }
 
     tasks.withType<Javadoc>().configureEach {
