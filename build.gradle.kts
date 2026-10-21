@@ -32,8 +32,17 @@ subprojects {
         disableAutoTargetJvm()
     }
 
+    // Adventure 5 is Java 21 class files, so every tool that reads it runs on JDK 21 when Gradle runs on less
+    val jdk21: JavaToolchainSpec.() -> Unit = { languageVersion.set(JavaLanguageVersion.of(21)) }
+    val needsJdk21 = !JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_21)
+
+    tasks.withType<io.freefair.gradle.plugins.lombok.tasks.Delombok>().configureEach {
+        if (needsJdk21) launcher.set(javaToolchains.launcherFor(jdk21))
+    }
+
     tasks.withType<Javadoc>().configureEach {
         isFailOnError = false
+        if (needsJdk21) javadocTool.set(javaToolchains.javadocToolFor(jdk21))
 
         (options as StandardJavadocDocletOptions).apply {
             addStringOption("Xdoclint:none", "-quiet")
@@ -51,11 +60,14 @@ subprojects {
         sourceCompatibility = "1.8"
         targetCompatibility = "1.8"
         options.compilerArgs.add("-Xlint:-options")
+
+        if (needsJdk21) javaCompiler.set(javaToolchains.compilerFor(jdk21))
     }
 
     tasks.withType<Test>().configureEach {
         useJUnitPlatform()
         systemProperty("snapshot.update", providers.systemProperty("snapshot.update").getOrElse("false"))
+        if (needsJdk21) javaLauncher.set(javaToolchains.launcherFor(jdk21))
         testLogging {
             events("failed")
         }
