@@ -361,7 +361,7 @@ final class ChannelManagerImpl implements ChannelManager {
 
         private final TakionLib lib;
 
-        TextChannel(TakionLib lib, String prefix, String pattern) {
+        TextChannel(TakionLib lib, String prefix, @Regex String pattern) {
             super(prefix, pattern);
             this.lib = lib;
         }
