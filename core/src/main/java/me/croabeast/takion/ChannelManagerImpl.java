@@ -318,7 +318,8 @@ final class ChannelManagerImpl implements ChannelManager {
         channels.put("brand", new TextChannel(lib, "brand", null) {
             @Override
             boolean send(Player target, String text, String arguments) {
-                return MessageUtils.sendBrand(lib.getPlugin(), target, text);
+                // An empty brand would blank the F3 line, so it keeps the current one.
+                return StringUtils.isNotBlank(text) && MessageUtils.sendBrand(lib.getPlugin(), target, text);
             }
         });
 
