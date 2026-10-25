@@ -15,10 +15,8 @@ val yamlApiVersion: String by project
 val globalSchedulerVersion: String by project
 val prismaticVersion: String by project
 val bstatsVersion: String by project
-val updateCheckerVersion: String by project
 val vaultAdapterVersion: String by project
 val commandFrameworkVersion: String by project
-val advancementInfoVersion: String by project
 
 dependencies {
     implementation(project(":common"))
@@ -29,10 +27,8 @@ dependencies {
     implementation("me.croabeast:PrismaticAPI:$prismaticVersion")
 
     allBundle("org.bstats:bstats-bukkit:$bstatsVersion")
-    allBundle("me.croabeast:UpdateChecker:$updateCheckerVersion")
     allBundle("me.croabeast:VaultAdapter:$vaultAdapterVersion")
     allBundle("me.croabeast:CommandFramework:$commandFrameworkVersion")
-    allBundle("me.croabeast:AdvancementInfo:$advancementInfoVersion")
 }
 
 fun ShadowJar.configureBaseShadow() {
