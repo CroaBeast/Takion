@@ -59,7 +59,8 @@ Takion leans on several battle-tested libraries created by the same author:
 - [**YAML-API**](https://github.com/CroaBeast/YAML-API) – lightweight YAML configuration helpers and file management.
 - [**GlobalScheduler**](https://github.com/CroaBeast/GlobalScheduler) – abstraction for Paper/Spigot task scheduling.
 - [**VaultAdapter**](https://github.com/CroaBeast/VaultAdapter) *(plugin module)* – bridges Vault chat/permissions into Takion placeholders.
-- [**CommandFramework**](https://github.com/CroaBeast/CommandFramework) and [**AdvancementInfo**](https://github.com/CroaBeast/AdvancementInfo)** (via the `shaded:all` classifier) – extendable command and advancement utilities.
+- [**CommandFramework**](https://github.com/CroaBeast/CommandFramework) *(via the `shaded:all` classifier)* – extendable command utilities.
+- [**AdvancementInfo**](https://github.com/CroaBeast/AdvancementInfo) and [**UpdateChecker**](https://github.com/CroaBeast/UpdateChecker) *(plugin module)* – advancement and update utilities; plugins that shade `shaded:all` declare them on their own.
 - [**bStats**](https://bstats.org/) *(plugin module)* – anonymous usage metrics (relocated to avoid conflicts).
 
 Optional integrations such as **InteractiveChat** or **Vault** can be toggled inside the plugin module without affecting the core API.
