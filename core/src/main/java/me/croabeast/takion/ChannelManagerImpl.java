@@ -29,6 +29,9 @@ import java.util.regex.Pattern;
 
 final class ChannelManagerImpl implements ChannelManager {
 
+    // an inline [bossbar] without seconds; 0 would keep it forever
+    private static final double DEFAULT_BOSSBAR_SECONDS = 5.0;
+
     private final Map<String, Channel> channels = new LinkedHashMap<>();
 
     @Getter @Setter
@@ -209,7 +212,7 @@ final class ChannelManagerImpl implements ChannelManager {
 
                     if (c == null && !(array.length == 1 && (c = bossbars.get(array[0])) == null))
                     {
-                        bossbar = new AnimatedBossbar(lib.getPlugin(), message);
+                        bossbar = new AnimatedBossbar(lib.getPlugin(), message).setDuration(DEFAULT_BOSSBAR_SECONDS);
 
                         for (String arg : array) {
                             try {
@@ -229,7 +232,7 @@ final class ChannelManagerImpl implements ChannelManager {
                     }
                     else bossbar = new AnimatedBossbar(lib.getPlugin(), c);
                 }
-                else bossbar = new AnimatedBossbar(lib.getPlugin(), message);
+                else bossbar = new AnimatedBossbar(lib.getPlugin(), message).setDuration(DEFAULT_BOSSBAR_SECONDS);
 
                 try {
                     bossbar.addViewers(targets).startAnimation();
