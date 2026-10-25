@@ -4,7 +4,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import lombok.experimental.UtilityClass;
 import me.croabeast.common.util.ArrayUtils;
 import me.croabeast.file.Configurable;
 import me.croabeast.scheduler.GlobalTask;
@@ -19,6 +18,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiFunction;
+import java.util.function.ToDoubleFunction;
 
 /**
  * Provides a dynamic, animated BossBar display for players.
@@ -29,9 +31,16 @@ import java.util.*;
  * decrease, or remain static) and use both random and synchronized selections for messages, colors, and styles.
  * </p>
  * <p>
- * This class is designed to integrate with Bukkit/Spigot plugins, and it utilizes configuration sections
- * for initializing values. BossBars are cached for efficient management and can be assigned to individual
- * players or groups.
+ * A bar with a positive {@link #setDuration(double) duration} is deleted when it runs out and then runs
+ * its {@link #setOnFinish(Runnable) finish callback}; a duration of 0 or less keeps it until it is stopped
+ * or deleted, looping its animation every {@value #LOOP_TICKS} ticks. A bar with nothing to animate (one
+ * message, color and style and a static or provided progress) runs no repeating task at all. Call
+ * {@link #update()} to show changed messages, colors, styles or progress right away.
+ * </p>
+ * <p>
+ * Titles and progress can differ per viewer through {@link #setTitleFormatter(BiFunction)} and
+ * {@link #setProgressProvider(ToDoubleFunction)}. Viewers that quit are dropped on the next frame or
+ * update; a bar that runs no task keeps them until {@link #removeViewer(Player)} or {@link #unregister(Player)}.
  * </p>
  * <p>
  * <strong>Example usage:</strong>
@@ -60,9 +69,14 @@ import java.util.*;
 public class AnimatedBossbar {
 
     /**
+     * Ticks one loop of the animation lasts when the bar has no duration.
+     */
+    public static final int LOOP_TICKS = 100;
+
+    /**
      * A cache that holds all active AnimatedBossbar instances, keyed by their unique UUID.
      */
-    private static final Map<UUID, AnimatedBossbar> CACHE = new HashMap<>();
+    private static final Map<UUID, AnimatedBossbar> CACHE = new ConcurrentHashMap<>();
 
     /**
      * A random number generator used for selecting random messages, colors, or styles.
@@ -84,12 +98,12 @@ public class AnimatedBossbar {
     private final TakionLib lib;
 
     /**
-     * A mapping between players and their associated BossBar objects.
+     * The BossBar shown to each viewer, keyed by the viewer's UUID.
      */
-    private final Map<Player, BossBar> bossbars;
+    private final Map<UUID, BossBar> bossbars = new ConcurrentHashMap<>();
 
     /**
-     * The task ID of the currently running animation scheduler, or -1 if no animation is active.
+     * The task driving the animation or the end of the duration, or {@code null} when none is needed.
      */
     private GlobalTask task = null;
 
@@ -128,12 +142,48 @@ public class AnimatedBossbar {
     private final EnumMap<Element, Boolean> elements = new EnumMap<>(Element.class);
 
     /**
-     * The duration (in seconds) for the animation.
-     * This can be set externally to control the speed of the BossBar's progress update.
+     * The duration (in seconds) for the animation. 0 or less keeps the bar until it is stopped or deleted.
      */
     @Accessors(chain = true)
     @Setter
     private double duration = 0.0;
+
+    /**
+     * Ticks between two frames of an animated bar. Higher values send fewer packets.
+     */
+    @Accessors(chain = true)
+    @Setter
+    private int updateInterval = 1;
+
+    /**
+     * Builds the title each viewer sees from the current message, before it is colorized.
+     */
+    @Accessors(chain = true)
+    @Setter
+    private BiFunction<Player, String, String> titleFormatter = (player, message) -> message;
+
+    /**
+     * When set, gives each viewer's progress in place of the progress type.
+     */
+    @Accessors(chain = true)
+    @Setter
+    private ToDoubleFunction<Player> progressProvider = null;
+
+    /**
+     * Runs after the bar is deleted because its duration ran out.
+     */
+    @Accessors(chain = true)
+    @Setter
+    private Runnable onFinish = null;
+
+    @Getter(AccessLevel.NONE)
+    private boolean running = false;
+    @Getter(AccessLevel.NONE)
+    private int tick = 0;
+    @Getter(AccessLevel.NONE)
+    private final int[] segments = new int[Element.values().length], indices = new int[Element.values().length];
+    @Getter(AccessLevel.NONE)
+    private String lastMessage = null;
 
     /**
      * Constructs a new AnimatedBossbar with the specified plugin, messages, colors, and styles.
@@ -147,10 +197,9 @@ public class AnimatedBossbar {
         this.plugin = Objects.requireNonNull(plugin);
         this.lib = TakionLib.fromPlugin(plugin);
 
-        this.messages = messages;
-        this.colors = colors;
-        this.styles = styles;
-        bossbars = new HashMap<>();
+        this.messages = new ArrayList<>(messages);
+        this.colors = new ArrayList<>(colors);
+        this.styles = new ArrayList<>(styles);
 
         for (Element element : Element.values())
             elements.put(element, false);
@@ -211,23 +260,24 @@ public class AnimatedBossbar {
         setProgressType(section.getString("progress-type", ""));
         setStaleProgress(section.getDouble("stale-progress"));
         setDuration(section.getDouble("duration"));
+        setUpdateInterval(section.getInt("update-interval", 1));
     }
 
     /**
      * Updates the messages used by this AnimatedBossbar.
      * <p>
      * The provided list of messages will replace any existing messages.
-     * Leading spaces are stripped from each message.
+     * Leading spaces are stripped from each message; the given list is left untouched.
      * </p>
      *
      * @param messages a list of new messages
      * @return this AnimatedBossbar instance (for chaining)
      */
     public AnimatedBossbar setMessages(List<String> messages) {
-        Objects.requireNonNull(messages);
-        messages.replaceAll(PlainFormat.TRIM_START_SPACES::accept);
+        List<String> copy = new ArrayList<>(Objects.requireNonNull(messages));
+        copy.replaceAll(PlainFormat.TRIM_START_SPACES::accept);
         this.messages.clear();
-        this.messages.addAll(messages);
+        this.messages.addAll(copy);
         return this;
     }
 
@@ -248,9 +298,9 @@ public class AnimatedBossbar {
      * @return this AnimatedBossbar instance (for chaining)
      */
     public AnimatedBossbar setColors(Collection<BarColor> colors) {
-        Objects.requireNonNull(colors);
+        List<BarColor> copy = new ArrayList<>(Objects.requireNonNull(colors));
         this.colors.clear();
-        this.colors.addAll(colors);
+        this.colors.addAll(copy);
         return this;
     }
 
@@ -267,7 +317,7 @@ public class AnimatedBossbar {
     /**
      * Sets the BossBar colors using a list of strings.
      * <p>
-     * Each string is parsed into a {@link BarColor}. If parsing fails, {@link BarColor#WHITE} is used.
+     * Each string is parsed, ignoring case, into a {@link BarColor}. If parsing fails, {@link BarColor#WHITE} is used.
      * </p>
      *
      * @param colors a list of strings representing colors
@@ -279,8 +329,8 @@ public class AnimatedBossbar {
         for (String c : colors) {
             BarColor color = BarColor.WHITE;
             try {
-                color = BarColor.valueOf(c);
-            } catch (IllegalArgumentException ignored) {}
+                color = BarColor.valueOf(c.trim().toUpperCase(Locale.ENGLISH));
+            } catch (Exception ignored) {}
             this.colors.add(color);
         }
         return this;
@@ -303,9 +353,9 @@ public class AnimatedBossbar {
      * @return this AnimatedBossbar instance (for chaining)
      */
     public AnimatedBossbar setStyles(Collection<BarStyle> styles) {
-        Objects.requireNonNull(styles);
+        List<BarStyle> copy = new ArrayList<>(Objects.requireNonNull(styles));
         this.styles.clear();
-        this.styles.addAll(styles);
+        this.styles.addAll(copy);
         return this;
     }
 
@@ -322,7 +372,7 @@ public class AnimatedBossbar {
     /**
      * Sets the BossBar styles using a list of strings.
      * <p>
-     * Each string is converted to a {@link BarStyle} using the {@link Holder#styleOf(String)} method.
+     * Each string is parsed, ignoring case, into a {@link BarStyle}. If parsing fails, {@link BarStyle#SOLID} is used.
      * </p>
      *
      * @param styles a list of strings representing styles
@@ -331,8 +381,13 @@ public class AnimatedBossbar {
     public AnimatedBossbar setStyles(List<String> styles) {
         Objects.requireNonNull(styles);
         this.styles.clear();
-        for (String s : styles)
-            this.styles.add(Holder.styleOf(s));
+        for (String s : styles) {
+            BarStyle style = BarStyle.SOLID;
+            try {
+                style = BarStyle.valueOf(s.trim().toUpperCase(Locale.ENGLISH));
+            } catch (Exception ignored) {}
+            this.styles.add(style);
+        }
         return this;
     }
 
@@ -400,26 +455,35 @@ public class AnimatedBossbar {
      * @return this AnimatedBossbar instance (for chaining)
      */
     public AnimatedBossbar setStaleProgress(double progress) {
-        this.staleProgress = Math.max(0.0, Math.min(progress, 1.0));
+        this.staleProgress = clamp(progress);
         return this;
     }
 
     /**
      * Adds a viewer (player) to this AnimatedBossbar.
      * <p>
-     * A new BossBar is created for the player if one does not already exist.
+     * A new BossBar is created for the player if one does not already exist. When the animation is
+     * running, the player sees the current frame right away.
      * </p>
      *
      * @param player the player to add
      * @return this AnimatedBossbar instance (for chaining)
      */
     public AnimatedBossbar addViewer(Player player) {
-        if (bossbars.containsKey(player))
+        CACHE.putIfAbsent(uuid, this);
+        if (bossbars.containsKey(player.getUniqueId()))
             return this;
 
-        BossBar bossBar = Holder.emptyBossbar();
+        BossBar bossBar = Bukkit.createBossBar("", BarColor.WHITE, BarStyle.SOLID);
+        if (running) {
+            int period = period();
+            apply(player, bossBar, pick(messages, Element.MESSAGES, period),
+                    pick(colors, Element.COLORS, period),
+                    pick(styles, Element.STYLES, period), step(period), true);
+        }
+
         bossBar.addPlayer(player);
-        bossbars.put(player, bossBar);
+        bossbars.put(player.getUniqueId(), bossBar);
         return this;
     }
 
@@ -441,9 +505,9 @@ public class AnimatedBossbar {
      * @return this AnimatedBossbar instance (for chaining)
      */
     public AnimatedBossbar removeViewer(Player player) {
-        BossBar bossBar = bossbars.remove(player);
+        BossBar bossBar = bossbars.remove(player.getUniqueId());
         if (bossBar != null)
-            bossBar.removePlayer(player);
+            bossBar.removeAll();
         return this;
     }
 
@@ -459,6 +523,16 @@ public class AnimatedBossbar {
     }
 
     /**
+     * Checks if a player is one of this bar's viewers.
+     *
+     * @param player the player to check
+     * @return {@code true} if the player sees this bar
+     */
+    public boolean hasViewer(Player player) {
+        return bossbars.containsKey(player.getUniqueId());
+    }
+
+    /**
      * Checks if a given element identifier is set to be randomized.
      *
      * @param element the element identifier (e.g., "messages")
@@ -469,124 +543,77 @@ public class AnimatedBossbar {
     }
 
     /**
-     * Checks if the animation is currently running.
+     * Checks if the animation is currently running, from {@link #startAnimation()} until it is
+     * stopped, deleted or its duration runs out.
      *
      * @return {@code true} if the animation is running; {@code false} otherwise
      */
     public boolean isRunning() {
-        return task != null && task.isRunning();
+        return running;
     }
 
     /**
-     * Starts the animation of the BossBar.
+     * Checks if the bar changes on its own over time, so it needs a task for every frame.
+     *
+     * @return {@code true} if there is more than one message, color or style, or a moving progress
+     */
+    public boolean isAnimated() {
+        return messages.size() > 1 || colors.size() > 1 || styles.size() > 1 ||
+                (progressProvider == null && type != Progress.STATIC);
+    }
+
+    /**
+     * Starts the animation of the BossBar, restarting it from its first frame if it is already running.
      * <p>
-     * This method schedules a repeating task that updates the BossBar's title, color, style, and progress
-     * according to the configured messages, colors, and styles. The progress of the BossBar can increase,
-     * decrease, or remain static depending on the {@link Progress} setting.
+     * The first frame is shown right away. An animated bar then updates every {@link #getUpdateInterval()}
+     * ticks; a bar with nothing to animate only waits for its duration to run out, or for nothing at all
+     * when it has no duration.
      * </p>
      */
     public void startAnimation() {
-        if (isRunning())
-            throw new IllegalStateException("Animation is already running. Please stop it before starting a new one.");
+        stopAnimation();
 
-        if (duration < 0.0) return;
+        tick = 0;
+        lastMessage = null;
+        Arrays.fill(segments, -1);
+        running = true;
+        render(true);
 
-        if (type == Progress.STATIC)
-            bossbars.values().forEach(b -> b.setProgress(staleProgress));
-
-        task = lib.getScheduler().runTaskTimer(plugin, new Runnable() {
-
-            private int tick = 0;
-            private final int totalTicks = (int) (duration * 20);
-
-            @Override
-            public void run() {
-                if (tick >= totalTicks) {
-                    deleteBossbar();
+        int total = totalTicks();
+        if (isAnimated()) {
+            int interval = Math.max(1, updateInterval);
+            task = lib.getScheduler().runTaskTimer(plugin, () -> {
+                tick += interval;
+                if (total > 0 && tick >= total) {
+                    finish();
                     return;
                 }
 
-                bossbars.entrySet().removeIf(entry -> {
-                    if (entry.getKey().isOnline())
-                        return false;
-
-                    entry.getValue().removeAll();
-                    return true;
-                });
-
-                if (bossbars.isEmpty()) {
-                    deleteBossbar();
-                    return;
-                }
-
-                int tickPerMessage = interval(totalTicks, messages.size());
-                int tickPerColor = interval(totalTicks, colors.size());
-                int tickPerStyle = interval(totalTicks, styles.size());
-
-                Progress progressType = type;
-                boolean updateProgress = progressType != Progress.STATIC;
-                double currentProgressValue = 0.0;
-                if (updateProgress) {
-                    double step = tick * (1.0 / totalTicks);
-                    currentProgressValue = progressType == Progress.INCREASE ?
-                            Math.min(1.0, step) :
-                            Math.max(0.0, 1.0 - step);
-                }
-                final double progressValue = currentProgressValue;
-
-                boolean updateMessage = !messages.isEmpty() && tick % tickPerMessage == 0;
-                int messageIndex = updateMessage ?
-                        (isRandom(Element.MESSAGES) ?
-                                random.nextInt(messages.size()) :
-                                (tick / tickPerMessage) % messages.size()) :
-                        -1;
-                String rawMessage = updateMessage ? messages.get(messageIndex) : null;
-
-                boolean updateColor = !colors.isEmpty() && tick % tickPerColor == 0;
-                BarColor color = updateColor ?
-                        colors.get(
-                                isRandom(Element.COLORS) ?
-                                        random.nextInt(colors.size()) :
-                                        (tick / tickPerColor) % colors.size()
-                        ) :
-                        null;
-
-                boolean updateStyle = !styles.isEmpty() && tick % tickPerStyle == 0;
-                BarStyle style = updateStyle ?
-                        styles.get(
-                                isRandom(Element.STYLES) ?
-                                        random.nextInt(styles.size()) :
-                                        (tick / tickPerStyle) % styles.size()
-                        ) :
-                        null;
-
-                bossbars.forEach((player, bossBar) -> {
-                    if (updateProgress)
-                        bossBar.setProgress(progressValue);
-
-                    if (updateMessage)
-                        bossBar.setTitle(lib.colorize(player, rawMessage));
-
-                    if (updateColor)
-                        bossBar.setColor(color);
-
-                    if (updateStyle)
-                        bossBar.setStyle(style);
-                });
-
-                tick++;
-            }
-        }, 0L, 1L);
+                render(false);
+                if (bossbars.isEmpty()) deleteBossbar();
+            }, interval, interval);
+        }
+        else if (total > 0)
+            task = lib.getScheduler().runTaskLater(plugin, this::finish, total);
     }
 
     /**
-     * Stops the current animation if it is running.
-     * <p>
-     * Cancels the scheduled task and resets the task ID to -1.
-     * </p>
+     * Shows the current messages, colors, styles and progress to every viewer right away, without
+     * restarting the animation. Titles and provided progress are evaluated again.
+     *
+     * @return this AnimatedBossbar instance (for chaining)
+     */
+    public AnimatedBossbar update() {
+        if (running) render(true);
+        return this;
+    }
+
+    /**
+     * Stops the current animation if it is running. The viewers keep seeing the last frame.
      */
     public void stopAnimation() {
-        if (isRunning()) {
+        running = false;
+        if (task != null) {
             task.cancel();
             task = null;
         }
@@ -607,12 +634,92 @@ public class AnimatedBossbar {
     /**
      * Deletes this AnimatedBossbar, stopping any active animations and removing all BossBars.
      * <p>
-     * The AnimatedBossbar instance is also removed from the global cache.
+     * The AnimatedBossbar instance is also removed from the global cache. Adding a viewer again
+     * registers it back.
      * </p>
      */
     public void deleteBossbar() {
         clearBossbar();
         CACHE.remove(uuid, this);
+    }
+
+    private void finish() {
+        Runnable callback = onFinish;
+        deleteBossbar();
+        if (callback != null) callback.run();
+    }
+
+    private int totalTicks() {
+        return duration > 0 ? (int) Math.min(Integer.MAX_VALUE, duration * 20) : 0;
+    }
+
+    private int period() {
+        int total = totalTicks();
+        return total > 0 ? total : LOOP_TICKS;
+    }
+
+    private double step(int period) {
+        return (double) (tick % period) / period;
+    }
+
+    private <T> T pick(List<T> list, Element element, int period) {
+        if (list.isEmpty()) return null;
+
+        int size = list.size(), e = element.ordinal();
+        int segment = (tick % period) / Math.max(1, period / size);
+
+        if (segment != segments[e] || indices[e] >= size) {
+            segments[e] = segment;
+            indices[e] = isRandom(element) ? random.nextInt(size) : segment % size;
+        }
+
+        return list.get(indices[e]);
+    }
+
+    private void render(boolean force) {
+        int period = period();
+        double step = step(period);
+
+        String message = pick(messages, Element.MESSAGES, period);
+        BarColor color = pick(colors, Element.COLORS, period);
+        BarStyle style = pick(styles, Element.STYLES, period);
+
+        boolean retitle = force || !Objects.equals(message, lastMessage);
+        lastMessage = message;
+
+        bossbars.entrySet().removeIf(entry -> {
+            Player player = Bukkit.getPlayer(entry.getKey());
+            if (player == null) {
+                entry.getValue().removeAll();
+                return true;
+            }
+
+            apply(player, entry.getValue(), message, color, style, step, retitle);
+            return false;
+        });
+    }
+
+    private void apply(Player player, BossBar bossBar, String message, BarColor color, BarStyle style,
+                       double step, boolean retitle)
+    {
+        double progress = progressProvider != null ?
+                clamp(progressProvider.applyAsDouble(player)) :
+                type == Progress.INCREASE ? step :
+                        type == Progress.DECREASE ? 1.0 - step : staleProgress;
+
+        if (bossBar.getProgress() != progress) bossBar.setProgress(progress);
+
+        if (retitle && message != null) {
+            String title = lib.colorize(player, titleFormatter.apply(player, message));
+            if (!title.equals(bossBar.getTitle())) bossBar.setTitle(title);
+        }
+
+        if (color != null && bossBar.getColor() != color) bossBar.setColor(color);
+        if (style != null && bossBar.getStyle() != style) bossBar.setStyle(style);
+    }
+
+    private static double clamp(double progress) {
+        return Math.max(0.0, Math.min(progress, 1.0));
     }
 
     /**
@@ -627,7 +734,7 @@ public class AnimatedBossbar {
     public static void unregister(Player player) {
         CACHE.values().removeIf(b -> {
             b.removeViewer(player);
-            
+
             if (!b.bossbars.isEmpty())
                 return false;
 
@@ -663,25 +770,5 @@ public class AnimatedBossbar {
     public static void unregisterAll() {
         CACHE.values().forEach(AnimatedBossbar::clearBossbar);
         CACHE.clear();
-    }
-
-    @UtilityClass
-    private static class Holder {
-
-        BossBar emptyBossbar() {
-            return Bukkit.createBossBar("", BarColor.WHITE, BarStyle.SOLID);
-        }
-
-        BarStyle styleOf(String string) {
-            try {
-                return Objects.requireNonNull(BarStyle.valueOf(string));
-            } catch (Exception e) {
-                return BarStyle.SOLID;
-            }
-        }
-    }
-
-    private static int interval(int totalTicks, int size) {
-        return size <= 0 ? 1 : Math.max(1, totalTicks / size);
     }
 }
